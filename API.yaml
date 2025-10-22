@@ -4,6 +4,12 @@ info:
   version: 1.0.0
   description: >
     Backend API for managing authentication, payments, discounts, tax, giftcards, appointments, and services.
+components:
+   securitySchemes:
+      bearerAuth:
+         type: http
+         scheme: bearer
+         bearerFormat: JWT
 servers:
 - url: https://api.example.com
   description: Production server
@@ -66,6 +72,17 @@ paths:
         "201": { description: User registered successfully }
         "400": { description: Missing or invalid fields }
         "409": { description: Email already exists }
+        
+  /auth/logout:
+      post:
+         summary: Log out a user
+         tags: [ Authentication ]
+         security:
+            - bearerAuth: []
+         responses:
+            "200": { description: User logged out successfully }
+            "401": { description: Unauthorized – invalid or expired token }
+            "500": { description: Internal server error }
 
   ##############################################################
   # PAYMENT SYSTEM
@@ -476,185 +493,191 @@ paths:
   ##############################################################
 
   /services:
-    get:
-      summary: Retrieve all services by business ID
-      tags: [ Services ]
-      parameters:
-        - in: query
-          name: business_id
-          required: true
-          schema:
-            type: integer
-            example: 5
-          description: The ID of the business whose services to retrieve
-        - in: query
-          name: page
-          required: false
-          schema:
-            type: integer
-            example: 1
-          description: Page number for pagination
-        - in: query
-          name: per_page
-          required: false
-          schema:
-            type: integer
-            example: 10
-          description: Number of services per page
-      responses:
-        "200":
-          description: Services retrieved successfully
-          content:
-            application/json:
+      get:
+         summary: Retrieve all services by business ID
+         tags: [ Services ]
+         parameters:
+            - in: query
+              name: business_id
+              required: true
               schema:
-                type: object
-                properties:
-                  page:
-                    type: integer
-                    example: 1
-                  per_page:
-                    type: integer
-                    example: 10
-                  total:
-                    type: integer
-                    example: 25
-                  services:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        nid:
-                          type: integer
-                          example: 7
-                        name:
-                          type: string
-                          example: "Haircut"
-                        price:
-                          type: number
-                          example: 25.00
-                        time_min:
-                          type: integer
-                          example: 45
-                        discount:
-                          type: number
-                          example: 10.0
-                        vat_id:
-                          type: integer
-                          example: 2
-                        business_id:
-                          type: integer
-                          example: 5
-        "404":
-          description: No services found for this business
-        "400":
-          description: Invalid business ID format
-        "500":
-          description: Internal server error
+                 type: integer
+                 example: 5
+              description: The ID of the business whose services to retrieve
+            - in: query
+              name: page
+              required: false
+              schema:
+                 type: integer
+                 example: 1
+              description: Page number for pagination
+            - in: query
+              name: per_page
+              required: false
+              schema:
+                 type: integer
+                 example: 10
+              description: Number of services per page
+         responses:
+            "200":
+               description: Services retrieved successfully
+               content:
+                  application/json:
+                     schema:
+                        type: object
+                        properties:
+                           page:
+                              type: integer
+                              example: 1
+                           per_page:
+                              type: integer
+                              example: 10
+                           total:
+                              type: integer
+                              example: 25
+                           services:
+                              type: array
+                              items:
+                                 type: object
+                                 properties:
+                                    nid:
+                                       type: integer
+                                       example: 7
+                                    name:
+                                       type: string
+                                       example: "Haircut"
+                                    price:
+                                       type: number
+                                       example: 25.00
+                                    time_min:
+                                       type: integer
+                                       example: 45
+                                    discount:
+                                       type: number
+                                       example: 10.0
+                                    vat_id:
+                                       type: integer
+                                       example: 2
+                                    business_id:
+                                       type: integer
+                                       example: 5
+            "404":
+               description: No services found for this business
+            "400":
+               description: Invalid business ID format
+            "500":
+               description: Internal server error
+
+      post:
+         summary: Create a new service
+         tags: [ Services ]
+         requestBody:
+            required: true
+            content:
+               application/json:
+                  schema:
+                     type: object
+                     required: [ name, price, time_min, discount, vat_id, business_id ]
+                     properties:
+                        name: { type: string }
+                        price: { type: number }
+                        time_min: { type: number, description: "Duration in minutes" }
+                        discount: { type: number }
+                        vat_id: { type: number }
+                        business_id: { type: number }
+         responses:
+            "201": { description: Service created successfully }
+            "400": { description: Invalid service data }
+            "409": { description: Service already exists }
+            "500": { description: Internal server error }
+
+      put:
+         summary: Update service details
+         tags: [ Services ]
+         parameters:
+            - in: query
+              name: id
+              required: true
+              schema: { type: number }
+              description: The ID of the service to update
+         requestBody:
+            content:
+               application/json:
+                  schema:
+                     type: object
+                     properties:
+                        name: { type: string }
+                        price: { type: number }
+                        time_min: { type: number }
+                        discount: { type: number }
+                        vat_id: { type: number }
+         responses:
+            "200": { description: Service updated successfully }
+            "400": { description: Invalid data }
+            "404": { description: Service not found }
+            "500": { description: Internal server error }
+
+      delete:
+         summary: Delete a service
+         tags: [ Services ]
+         parameters:
+            - in: query
+              name: id
+              required: true
+              schema: { type: number }
+              description: The ID of the service to delete
+         responses:
+            "200": { description: Service deleted successfully }
+            "404": { description: Service not found }
+            "500": { description: Internal server error }
 
   /services/{id}:
-    get:
-      summary: Retrieve a specific service by ID
-      tags: [ Services ]
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-          description: The ID of the service to retrieve
-      responses:
-        "200":
-          description: Service retrieved successfully
-          content:
-            application/json:
+      get:
+         summary: Retrieve a specific service by ID
+         tags: [ Services ]
+         parameters:
+            - in: path
+              name: id
+              required: true
               schema:
-                type: object
-                properties:
-                  nid:
-                    type: integer
-                    example: 7
-                  name:
-                    type: string
-                    example: "Haircut"
-                  price:
-                    type: number
-                    example: 25.00
-                  time_min:
-                    type: integer
-                    example: 45
-                  discount:
-                    type: number
-                    example: 10.0
-                  vat_id:
-                    type: integer
-                    example: 2
-                  business_id:
-                    type: integer
-                    example: 5
-        "404":
-          description: Service not found
-        "400":
-          description: Invalid service ID format
-        "500":
-          description: Internal server error
+                 type: integer
+              description: The ID of the service to retrieve
+         responses:
+            "200":
+               description: Service retrieved successfully
+               content:
+                  application/json:
+                     schema:
+                        type: object
+                        properties:
+                           nid:
+                              type: integer
+                              example: 7
+                           name:
+                              type: string
+                              example: "Haircut"
+                           price:
+                              type: number
+                              example: 25.00
+                           time_min:
+                              type: integer
+                              example: 45
+                           discount:
+                              type: number
+                              example: 10.0
+                           vat_id:
+                              type: integer
+                              example: 2
+                           business_id:
+                              type: integer
+                              example: 5
+            "404":
+               description: Service not found
+            "400":
+               description: Invalid service ID format
+            "500":
+               description: Internal server error
 
-    post:
-      summary: Create a new service
-      tags: [ Services ]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [ name, price, time_min, discount, vat_id ]
-              properties:
-                name: { type: string }
-                price: { type: number }
-                time_min: { type: number, description: "Duration in minutes" }
-                discount: { type: number }
-                vat_id: { type: number }
-      responses:
-        "201": { description: Service created successfully }
-        "400": { description: Invalid service data }
-        "409": { description: Service already exists }
-        "500": { description: Internal server error }
-    put:
-      summary: Update service details
-      tags: [ Services ]
-      parameters:
-      - in: query
-        name: id
-        required: true
-        schema: { type: number }
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name: { type: string }
-                price: { type: number }
-                time_min: { type: number }
-                discount: { type: number }
-                vat_id: { type: number }
-      responses:
-        "200": { description: Service updated successfully }
-        "400": { description: Invalid data }
-        "404": { description: Service not found }
-        "500": { description: Internal server error }
-    delete:
-      summary: Delete a service
-      tags: [ Services ]
-      parameters:
-      - in: query
-        name: id
-        required: true
-        schema: { type: number }
-      responses:
-        "200": { description: Service deleted successfully }
-        "404": { description: Service not found }
-        "500": { description: Internal server error }
 
   ##############################################################
 
