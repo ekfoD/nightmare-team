@@ -1,0 +1,6 @@
+@Point_of_Sale_System.Server_HostAddress = http://localhost:5098
+
+GET {{Point_of_Sale_System.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
