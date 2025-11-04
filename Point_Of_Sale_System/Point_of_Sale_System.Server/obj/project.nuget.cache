@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "l3SO0vNEltM=",
+  "dgSpecHash": "WzGONX6ggmo=",
   "success": true,
-  "projectFilePath": "C:\\HomeWork\\burah\\nightmare-team\\Point_of_Sale_System.Server\\Point_of_Sale_System.Server.csproj",
+  "projectFilePath": "C:\\HomeWork\\burah\\nightmare-team\\Point_of_Sale_System\\Point_of_Sale_System.Server\\Point_of_Sale_System.Server.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Ruslanas\\.nuget\\packages\\microsoft.aspnetcore.spaproxy\\8.0.21\\microsoft.aspnetcore.spaproxy.8.0.21.nupkg.sha512",
     "C:\\Users\\Ruslanas\\.nuget\\packages\\microsoft.extensions.apidescription.server\\6.0.5\\microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",

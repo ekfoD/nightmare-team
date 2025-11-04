@@ -1,0 +1,2 @@
+C:\HomeWork\burah\nightmare-team\point_of_sale_system.client\obj\Debug\point_of_sale_system.client.esproj.CoreCompileInputs.cache
+C:\HomeWork\burah\nightmare-team\Point_of_Sale_system\point_of_sale_system.client\obj\Debug\point_of_sale_system.client.esproj.CoreCompileInputs.cache

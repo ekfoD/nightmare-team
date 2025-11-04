@@ -3,7 +3,7 @@
 "ServerUrl": "https://localhost:56689",
 "RedirectUrl": "",
 "LaunchCommand": "npm run dev",
-"WorkingDirectory": "C:\\HomeWork\\burah\\nightmare-team\\Point_of_Sale_System.Server\\..\\point_of_sale_system.client",
+"WorkingDirectory": "C:\\HomeWork\\burah\\nightmare-team\\Point_of_Sale_System\\Point_of_Sale_System.Server\\..\\point_of_sale_system.client",
 "MaxTimeoutInSeconds": "120",
 "KeepRunning": "false"
 }

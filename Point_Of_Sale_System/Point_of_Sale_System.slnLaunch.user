@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "point_of_sale_system.client\\point_of_sale_system.client.esproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Point_of_Sale_System.Server\\Point_of_Sale_System.Server.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
