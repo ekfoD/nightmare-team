@@ -4,7 +4,8 @@
     "Projects": [
       {
         "Path": "point_of_sale_system.client\\point_of_sale_system.client.esproj",
-        "Action": "Start"
+        "Action": "Start",
+        "DebugTarget": "localhost (Edge)"
       },
       {
         "Path": "Point_of_Sale_System.Server\\Point_of_Sale_System.Server.csproj",
