@@ -1,0 +1,9 @@
+﻿- Removed Service table cause its useless
+- OrderItem takes in MenuItem because if it didn't it would need to have a variation always or the Variation table would be the same as MenuItem, but extra.
+- OrderItem table will be pointing to itself cause if you have two same MenuItems with different Variations it would be impossible to tell which one had it
+- Employee table and Organization table now is All to All because the Owner is in the Employee table
+- One Dicount can be applied to a lot of Menu items
+- One Dicount can be applied to a lot of Menu services
+- One Tax can be applied to a lot of Menu items
+- One Tax can be applied to a lot of Menu services
+- TAXES ARE MENDATORY, I'LL REPORT THE GUYS WHO TRY TO AVOID IT (-1 million social points)
