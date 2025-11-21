@@ -5,9 +5,9 @@ import {
     RouterProvider,
 } from "react-router-dom";
 import './index.css';
-import BasicNavbar from './BasicNavbar.jsx';
+import BasicNavbar from './nav_bars/BasicNavbar.jsx';
 import App from './App.jsx';
-
+import AppLayoutBase from './app_layout/AppLayoutBase.jsx';
 
 const router = createBrowserRouter([
     {
@@ -23,8 +23,10 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')).render(
     <StrictMode>
         <div className="bottomElement ">
-            <BasicNavbar/>
-            <RouterProvider router={router} />
+            <AppLayoutBase>
+                <RouterProvider router={router} />
+            </AppLayoutBase>
+            
         </div>
     </StrictMode>
 );

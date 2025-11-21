@@ -3,9 +3,11 @@ nav {
     display: flex;
     justify-content: center;
     flex-direction: column;
-    height: 100vh;
+    height: 100%;
     font-weight: bold;
     font-size: 24px;
+    width: 250px;
+    flex-shrink: 0;
 }
 
 ul {

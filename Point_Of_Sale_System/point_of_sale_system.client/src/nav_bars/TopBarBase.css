@@ -1,0 +1,32 @@
+.TopBar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between; 
+    align-items: center;  
+    height: 100px;          
+    width: 100%;
+    background-color: #f1f5f9;
+}
+
+.HomeButton{
+    height: 100%;
+    width: 250px;
+    border-radius: 0;
+    border: 2px solid transparent;
+    padding: 10px;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    font-size: 24px;
+    font-weight: bold;
+    font-family: inherit;
+    background-color: #a02727;
+    cursor: pointer;
+    transition: border-color 0.25s;
+}
+
+.settings_icon {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    filter: invert(0.8);    
+}
