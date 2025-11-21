@@ -1,0 +1,16 @@
+.container {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+}
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+img {
+    width: 20px;
+}
+.hide{
+    display: none;
+}

@@ -10,6 +10,18 @@ nav {
     flex-shrink: 0;
 }
 
+
+a {
+    color: inherit;
+    background-color: #171717;
+    padding: 2em;
+    border: 2px solid transparent;
+}
+    a:hover {
+        border-radius: 0;
+        border-color: #646cff;
+    }
+
 ul {
     list-style-type: none;
     margin: auto;

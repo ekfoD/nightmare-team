@@ -1,32 +1,19 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import {
-    createBrowserRouter,
-    RouterProvider,
-} from "react-router-dom";
-import './index.css';
-import BasicNavbar from './nav_bars/BasicNavbar.jsx';
-import App from './App.jsx';
-import AppLayoutBase from './app_layout/AppLayoutBase.jsx';
 
-const router = createBrowserRouter([
-    {
-        path: "/",
-        element: <App />,
-    },
-    {
-        path: "/*",
-        element: <h1>Error 404</h1>,
-    }
-]);
+import './index.css';
+import App from './App.jsx';
+import { AuthProvider } from './context/AuthProvider';
+import { Route, BrowserRouter, Routes } from 'react-router-dom';
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>
-        <div className="bottomElement ">
-            <AppLayoutBase>
-                <RouterProvider router={router} />
-            </AppLayoutBase>
-            
-        </div>
+        <BrowserRouter>
+            <AuthProvider>
+                    <Routes>
+                        <Route path="/*" element={<App />} />
+                        </Routes>
+                    </AuthProvider>
+            </BrowserRouter>
     </StrictMode>
 );
