@@ -3,12 +3,12 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import './App.css';
 import AuthProvider from './context/AuthProvider';
-import BasicNavbar from './BasicNavbar.jsx';
+import BasicNavbar from './nav_bars/BasicNavbar.jsx';
 import WeatherForecast from './WeatherForecast.jsx';
-import Register from './Register.jsx';
-import Login from './Login.jsx';
+import Register from './login/Register.jsx';
+import Login from './login/Login.jsx';
 import Layout from './Layout.jsx';
-import PageWithNavbar from './PageWithNavbar';
+import PageWithNavbar from './nav_bars/PageWithNavbar.jsx';
 import RequireAuth from './RequireAuth.jsx';
 
 const BASE_URL = "http://localhost:5098"

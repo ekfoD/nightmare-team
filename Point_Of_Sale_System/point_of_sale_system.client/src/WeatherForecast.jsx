@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import './App.css';
-import BasicNavbar from './BasicNavbar';
+import BasicNavbar from './nav_bars/BasicNavbar';
 
 function WeatherForecast() {
     const [forecasts, setForecasts] = useState();
