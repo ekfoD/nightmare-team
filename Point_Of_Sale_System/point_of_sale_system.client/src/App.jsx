@@ -3,14 +3,15 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import AppLayoutBase from './app_layout/AppLayoutBase.jsx'
 import './App.css';
-import AuthProvider from './context/AuthProvider';
-import BasicNavbar from './nav_bars/BasicNavbar.jsx';
 import WeatherForecast from './WeatherForecast.jsx';
-import Register from './login/Register.jsx';
-import Login from './login/Login.jsx';
-import Layout from './Layout.jsx';
-import PageWithNavbar from './nav_bars/PageWithNavbar.jsx';
+import Register from './pages/login/Register.jsx';
+import Login from './pages/login/Login.jsx';
+import Layout from './app_layout/Layout.jsx';
 import RequireAuth from './RequireAuth.jsx';
+
+import Orders from './pages/orders/orders.jsx';
+import Inventory from './pages/inventory/inventory.jsx';
+import Employees from './pages/employees/employees.jsx';
 
 const BASE_URL = "http://localhost:5098"
 
@@ -22,11 +23,11 @@ function App() {
                 <Route path="/register" element={<Register />} />
 
                 <Route element={<RequireAuth />}>
-                    <Route element={<AppLayoutBase /> }>
-                        <Route path="/" element={<WeatherForecast />} />
-                        <Route path="/orders" element={<WeatherForecast />} />
-                        <Route path="/inventory" element={<WeatherForecast />} />
-                        <Route path="/employees" element={<WeatherForecast />} />
+                    <Route element={<AppLayoutBase />}> {/* Route kad atsirastu navbar, jo nereikia login ir register page'ui*/}
+                        <Route path="/" element={<WeatherForecast />} /> {/* Placeholder Weather forecast vietoj actual home page'o, tsg nzn kas jame turi buti */}
+                        <Route path="/orders" element={<Orders />} />
+                        <Route path="/inventory" element={<Inventory />} />
+                        <Route path="/employees" element={<Employees />} />
                     </Route>
                 </Route>
 

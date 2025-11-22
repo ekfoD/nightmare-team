@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useContext } from 'react';
-import useAuth from "../hooks/useAuth.jsx"
-import AuthContext from "../context/AuthProvider.jsx"
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import useAuth from "../../hooks/useAuth.jsx"
+import AuthContext from "../../context/AuthProvider.jsx"
+import { Link, useNavigate, useLocation, NavLink } from 'react-router-dom';
 import "./register.css";
 
 const LOGIN_URL = '/login';
@@ -98,8 +98,9 @@ function Login() {
                 <button>Sign In</button>
             </form>
             <p>
-                Register Here:
-                
+                <span>Or <NavLink to="/register" end>
+                    register
+                </NavLink> here!</span>
             </p>
         </section>
     );

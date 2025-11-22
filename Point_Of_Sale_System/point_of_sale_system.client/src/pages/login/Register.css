@@ -1,8 +1,13 @@
 .container {
     margin: auto;
-    display: flex;
-    flex-direction: column;
+    width: 350px;
 }
+
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}
+
 form {
     display: flex;
     flex-direction: column;
