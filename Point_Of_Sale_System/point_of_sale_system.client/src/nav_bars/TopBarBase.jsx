@@ -1,12 +1,14 @@
 import './TopBarBase.css'
 import settingsIcon from "../assets/setting_icon.svg";
+import { useNavigate, NavLink } from "react-router-dom";
+
 function TopBarBase() {
     return (
         <div className="TopBar">
             <button className='HomeButton'>POS application</button>
-            <a href="https://www.youtube.com/watch?v=Ml58rcf7jH8&list=RDMl58rcf7jH8&start_radio=1" className="SettingsButton">
+            <NavLink className="settingsIconHolder" to="https://www.youtube.com/watch?v=CcCw1ggftuQ" end>
                 <img src={settingsIcon} alt="SETTINGS" className="settings_icon" />
-            </a>
+            </NavLink>
         </div>
     );
 }

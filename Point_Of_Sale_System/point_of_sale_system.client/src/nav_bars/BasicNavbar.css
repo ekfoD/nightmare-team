@@ -5,11 +5,7 @@ nav {
     display: flex;
     justify-content: center;
     flex-direction: column;
-
-
-    font-weight: bold;
-    font-size: 24px;
-    width: 250px;
+       
     flex-shrink: 0;
 }
 
@@ -17,6 +13,7 @@ nav {
     background-color: #222222;
     display: flex;
     flex-direction: column;
+    width: 250px;
 }
 
 h2 {
@@ -27,6 +24,7 @@ h2 {
 a {
     color: inherit;
     background-color: #171717;
+    font-size: 24px;
     padding: 2em;
     border: 2px solid transparent;
 }
@@ -37,10 +35,9 @@ a {
 
 ul {
     list-style-type: none;
-    margin: auto;
+/*    margin: auto;*/
     padding: 0;
 }
-
 
 li {
     padding: 10px;
@@ -49,27 +46,10 @@ li {
 
 }
 
-button {
-    height: 5em;
-    width: 100%;
-    border-radius: 0;
-    border: 2px solid transparent;
-    padding: 10px;
-    padding-top: 1em;
-    padding-bottom: 1em;
-    font-size: 24px;
-    font-weight: bold;
-    font-family: inherit;
-    background-color: #1a1a1a;
-    cursor: pointer;
-    transition: border-color 0.25s;
+.logOutButton {
+    padding: 0.5em;
 }
-button:hover {
-    border-radius: 0;
-    border-color: #646cff;
+
+.logOutImage {
+    width: 10%;
 }
-    button:focus,
-    button:focus-visible {
-        border-radius: 0;
-        outline: 4px auto -webkit-focus-ring-color;
-    }

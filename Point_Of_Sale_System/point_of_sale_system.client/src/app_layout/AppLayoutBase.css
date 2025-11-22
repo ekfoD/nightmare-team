@@ -16,7 +16,5 @@
 
 .MainArea {
     flex: 1;                 /* Fills the rest of the space */
-    overflow-y: auto;        /* Scroll only inside main content */
-    background: white;       
 }
 

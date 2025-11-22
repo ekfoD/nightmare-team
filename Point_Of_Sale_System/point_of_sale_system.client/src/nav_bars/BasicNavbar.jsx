@@ -5,7 +5,7 @@ function BasicNavbar() {
 
     return (
         <div className={"navContainer"}>
-            <h2>POS Application</h2>
+            {/*<h2>POS Application</h2>*/}
             <nav>
                 <NavLink to="/" end>
                     Home
@@ -23,8 +23,8 @@ function BasicNavbar() {
                     Employees
                 </NavLink>
             </nav>
-            <NavLink to="/logout" end>
-                <img src="../../public/logout.png" width="20px"></img>
+            <NavLink className="logOutButton" to="/logout" end>
+                <img className="logOutImage" src="../../public/logout.png" width="20px"></img>
             </NavLink>
         </div>
     );

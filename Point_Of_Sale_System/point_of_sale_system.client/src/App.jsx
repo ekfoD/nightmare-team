@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
+import AppLayoutBase from './app_layout/AppLayoutBase.jsx'
 import './App.css';
 import AuthProvider from './context/AuthProvider';
 import BasicNavbar from './nav_bars/BasicNavbar.jsx';
@@ -21,7 +22,7 @@ function App() {
                 <Route path="/register" element={<Register />} />
 
                 <Route element={<RequireAuth />}>
-                    <Route element={<PageWithNavbar />}>
+                    <Route element={<AppLayoutBase /> }>
                         <Route path="/" element={<WeatherForecast />} />
                         <Route path="/orders" element={<WeatherForecast />} />
                         <Route path="/inventory" element={<WeatherForecast />} />

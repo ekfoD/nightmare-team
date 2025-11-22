@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import './App.css';
+import './WeatherForecast.css';
 import BasicNavbar from './nav_bars/BasicNavbar';
 
 function WeatherForecast() {
