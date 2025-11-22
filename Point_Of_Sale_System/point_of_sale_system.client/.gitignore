@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# I believe obj and bin files are auto-generated so I'll put them in gitignore
+obj/

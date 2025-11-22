@@ -17,12 +17,15 @@ function App() {
     return (
         <Routes>
             <Route path="/" element={<Layout />} >
-                <Route path="/Login" element={<Login /> } />
-                <Route path="/Register" element={<Register />} />
+                <Route path="/login" element={<Login /> } />
+                <Route path="/register" element={<Register />} />
 
                 <Route element={<RequireAuth />}>
                     <Route element={<PageWithNavbar />}>
                         <Route path="/" element={<WeatherForecast />} />
+                        <Route path="/orders" element={<WeatherForecast />} />
+                        <Route path="/inventory" element={<WeatherForecast />} />
+                        <Route path="/employees" element={<WeatherForecast />} />
                     </Route>
                 </Route>
 
