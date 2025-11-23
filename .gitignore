@@ -1,2 +1,5 @@
 .vs/
 .vscode/
+Debug/
+
+.fake

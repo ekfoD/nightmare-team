@@ -1,0 +1,20 @@
+.LayoutContainer {
+    width: 100vw;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;  /* TopBar on top, rest below */
+    overflow: hidden;
+}
+
+.ContentArea {
+    flex: 1;                 /* Fill everything below the top bar */
+    display: flex;           /* Side-by-side layout */
+    flex-direction: row;
+    overflow: hidden;
+}
+
+.MainArea {
+    flex: 1;                 /* Fills the rest of the space */
+}
+
