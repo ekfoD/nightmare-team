@@ -1,8 +1,7 @@
 import { useRef, useState, useEffect, useContext } from 'react';
 import useAuth from "../../hooks/useAuth.jsx"
-import AuthContext from "../../context/AuthProvider.jsx"
 import { Link, useNavigate, useLocation, NavLink } from 'react-router-dom';
-import "./register.css";
+import "../../styles/Register.css";
 
 const LOGIN_URL = '/login';
 function Login() {
