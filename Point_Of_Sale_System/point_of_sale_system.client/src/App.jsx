@@ -9,9 +9,9 @@ import Login from './pages/login/Login.jsx';
 import Layout from './app_layout/Layout.jsx';
 import RequireAuth from './RequireAuth.jsx';
 
-import Orders from './pages/orders/orders.jsx';
-import Inventory from './pages/inventory/inventory.jsx';
-import Employees from './pages/employees/employees.jsx';
+import Orders from './pages/orders/Orders.jsx';
+import Inventory from './pages/inventory/Inventory.jsx';
+import Employees from './pages/employees/Employees.jsx';
 
 const BASE_URL = "http://localhost:5098"
 

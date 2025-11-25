@@ -11,15 +11,15 @@ function BasicNavbar() {
                     Home
                 </NavLink>
 
-                <NavLink to="/Orders" end>
+                <NavLink to="/orders" end>
                     Orders
                 </NavLink>
 
-                <NavLink to="/Inventory" end>
+                <NavLink to="/inventory" end>
                     Inventory
                 </NavLink>
 
-                <NavLink to="/Employees" end>
+                <NavLink to="/employees" end>
                     Employees
                 </NavLink>
             </nav>

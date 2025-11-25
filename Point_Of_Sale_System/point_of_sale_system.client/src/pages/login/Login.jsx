@@ -4,7 +4,7 @@ import AuthContext from "../../context/AuthProvider.jsx"
 import { Link, useNavigate, useLocation, NavLink } from 'react-router-dom';
 import "./register.css";
 
-const LOGIN_URL = '/login';
+const LOGIN_URL = '/api/login';
 function Login() {
     const { setAuth } = useAuth();
 

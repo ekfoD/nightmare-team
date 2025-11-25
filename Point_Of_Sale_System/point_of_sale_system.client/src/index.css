@@ -23,6 +23,9 @@ a:hover {
 }
 
 body {
+    background-color: #242424;
+    color:aliceblue;
+    
     margin: 0;
     display: flex;
     place-items: center;

@@ -22,7 +22,7 @@ h2 {
 }
 
 nav a {
-    color: inherit;
+    color: whitesmoke;
     background-color: #171717;
     font-size: 24px;
     padding: 2em;
@@ -32,6 +32,8 @@ nav a {
         border-radius: 0;
         border-color: #646cff;
     }
+
+
 
 ul {
     list-style-type: none;
@@ -48,8 +50,11 @@ li {
 
 .logOutButton {
     padding: 0.5em;
+    background-color: #171717;
+    padding: 1em;
+    border: 2px solid transparent;
 }
 
 .logOutImage {
-    width: 10%;
+    width: 15%;
 }

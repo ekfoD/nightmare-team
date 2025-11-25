@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Point_of_Sale_System.Server.Models
 {
-    public class Emploee
+    public class Employee
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();

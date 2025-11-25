@@ -1,5 +1,7 @@
 .vs/
 .vscode/
 Debug/
+obj/
+node_modules/
 
 .fake
