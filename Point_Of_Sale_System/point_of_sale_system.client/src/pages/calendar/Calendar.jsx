@@ -31,7 +31,7 @@ export default function Calendar() {
           <Col key={i} className="p-1">
             <Button
               variant="outline-primary"
-              style={{ width: buttonSize, height: buttonSize, fontSize: fontSize }}
+              style={{ width: buttonSize, height: buttonSize, fontSize: fontSize, backgroundColor: "#efefffff" }}
               onClick={() => console.log(`Clicked day ${dayNumber}`)}
             >
               {dayNumber}
@@ -97,7 +97,7 @@ export default function Calendar() {
           {/* Weekday headers */}
           <Row className="mb-2 text-center">
             {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d, idx) => (
-              <Col key={idx} style={{ width: "100%" }}>{d}</Col>
+              <Col key={idx} style={{ width: "100%", fontSize: fontSize }}>{d}</Col>
             ))}
           </Row>
 

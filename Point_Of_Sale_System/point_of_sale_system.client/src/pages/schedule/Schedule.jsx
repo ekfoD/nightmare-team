@@ -1,7 +1,227 @@
-function Schedule() {
-  return (
-    <p>Page with a schedule!</p>
-  );
+// App.js
+import React, { useState } from 'react';
+import { Container, Card, Image, Button, Form } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+const allWorkers = [
+  { name: 'Alice', photo: 'https://via.placeholder.com/50' },
+  { name: 'Bob', photo: 'https://via.placeholder.com/50' },
+  { name: 'Charlie', photo: 'https://via.placeholder.com/50' },
+  { name: 'Diana', photo: 'https://via.placeholder.com/50' },
+  { name: 'Eve', photo: 'https://via.placeholder.com/50' },
+  { name: 'Frank', photo: 'https://via.placeholder.com/50' },
+  { name: 'Grace', photo: 'https://via.placeholder.com/50' },
+  { name: 'Hank', photo: 'https://via.placeholder.com/50' },
+  { name: 'Ivy', photo: 'https://via.placeholder.com/50' },
+];
+
+const appointments = [
+  { worker: 'Alice', time: '8:30' },
+  { worker: 'Bob', time: '9:00' },
+  { worker: 'Charlie', time: '10:00' },
+  { worker: 'Alice', time: '11:00' },
+  { worker: 'Diana', time: '12:30' },
+  { worker: 'Eve', time: '12:30' },
+  { worker: 'Frank', time: '14:00' },
+];
+
+const times = [];
+for (let hour = 8; hour <= 21; hour++) {
+  times.push(`${hour}:00`);
+  times.push(`${hour}:30`);
 }
+
+// Scaling factors
+const SCALE = 1.3;
+const HEADER_HEIGHT = 70 * SCALE; // taller header
+const COLUMN_WIDTH = 180 * SCALE; // wider columns
+const ROW_HEIGHT = 30 * SCALE; // taller rows
+
+const getAppointmentTop = (time) => {
+  const [hour, minute] = time.split(':').map(Number);
+  return (hour - 8) * 2 * ROW_HEIGHT + (minute / 30) * ROW_HEIGHT;
+};
+
+const Schedule = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Filter workers based on search term
+  const workers = allWorkers.filter((worker) =>
+    worker.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Fixed date for now
+  const fixedDate = new Date('2025-11-28');
+
+  return (
+    <Container
+      fluid
+      style={{ height: 'calc(100vh - 16px)', padding: '16px', overflow: 'auto' }}
+    >
+      <div style={{ display: 'flex', gap: '16px', height: '100%' }}>
+        {/* Schedule */}
+        <Card
+          style={{
+            backgroundColor: '#f0f4f7',
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            height: 'calc(100% - 45px)', // 20px shorter at bottom
+          }}
+        >
+          <div style={{ display: 'flex', overflowX: 'auto', flex: 1 }}>
+            {/* Time column (sticky) */}
+            <div
+              style={{
+                flex: '0 0 60px',
+                position: 'sticky',
+                left: 0,
+                backgroundColor: '#f0f4f7',
+                zIndex: 2,
+                borderRight: '1px solid #ccc',
+                paddingTop: `${HEADER_HEIGHT}px`,
+              }}
+            >
+              {times.map((time, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    height: `${ROW_HEIGHT}px`,
+                    borderBottom: '1px dashed #ccc',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 'bold',
+                    fontSize: '1rem',
+                  }}
+                >
+                  {time}
+                </div>
+              ))}
+            </div>
+
+            {/* Employees + appointments */}
+            <div style={{ display: 'flex', minWidth: `${workers.length * COLUMN_WIDTH}px` }}>
+              {workers.map((worker, wIdx) => (
+                <div
+                  key={wIdx}
+                  style={{
+                    width: `${COLUMN_WIDTH}px`,
+                    borderLeft: '1px solid #ccc',
+                    position: 'relative',
+                    minHeight: `${times.length * ROW_HEIGHT + HEADER_HEIGHT}px`,
+                  }}
+                >
+                  {/* Header part */}
+                  <div
+                    style={{
+                      height: `${HEADER_HEIGHT}px`,
+                      textAlign: 'center',
+                      borderBottom: '1px solid #ccc',
+                      backgroundColor: '#f0f4f7',
+                      position: 'sticky',
+                      top: 0,
+                      zIndex: 3, // on top
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Image
+                      src={worker.photo}
+                      roundedCircle
+                      width={50 * SCALE}
+                      height={50 * SCALE}
+                    />
+                    <div>{worker.name}</div>
+                  </div>
+
+                  {/* Time slots */}
+                  {times.map((_, idx) => (
+                    <div
+                      key={idx}
+                      style={{ height: `${ROW_HEIGHT}px`, borderBottom: '1px dashed #ccc' }}
+                    ></div>
+                  ))}
+
+                  {/* Appointments */}
+                  {appointments
+                    .filter((a) => a.worker === worker.name)
+                    .map((app, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          position: 'absolute',
+                          top: HEADER_HEIGHT + getAppointmentTop(app.time),
+                          left: '5px',
+                          right: '5px',
+                          height: `${ROW_HEIGHT}px`,
+                          backgroundColor: '#d3d3d3',
+                          borderRadius: '6px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          zIndex: 1,
+                        }}
+                      >
+                        <span
+                          style={{
+                            color: '#0d6efd',
+                            cursor: 'pointer',
+                            userSelect: 'none',
+                          }}
+                          onClick={() => {
+                            /* TODO: implement edit appointment functionality */
+                          }}
+                        >
+                          Edit
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+
+        {/* Sidebar for date, search + add appointment */}
+        <div
+          style={{
+            width: '250px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            flexShrink: 0,
+          }}
+        >
+          {/* Fixed date display */}
+          <div
+            style={{
+              textAlign: 'center',
+              fontWeight: 'bold',
+              marginBottom: '8px',
+            }}
+          >
+            <div style={{ fontSize: '3rem' }}>{fixedDate.getFullYear()}</div>
+            <div style={{ fontSize: '3rem' }}>{fixedDate.toLocaleString('default', { month: 'long' })}</div>
+            <div style={{ fontSize: '3rem' }}>{fixedDate.getDate()}</div>
+          </div>
+
+          {/* Search bar */}
+          <Form.Control
+            type="text"
+            placeholder="Search employees..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+
+          {/* Add appointment button */}
+          <Button variant="primary">Add new appointment</Button>
+        </div>
+      </div>
+    </Container>
+  );
+};
 
 export default Schedule;
