@@ -16,8 +16,8 @@ const allWorkers = [
 ];
 
 const appointments = [
-  { worker: 'Alice', time: '8:30' },
-  { worker: 'Bob', time: '9:00' },
+  { worker: 'Alice', time: '08:30' },
+  { worker: 'Bob', time: '09:00' },
   { worker: 'Charlie', time: '10:00' },
   { worker: 'Alice', time: '11:00' },
   { worker: 'Diana', time: '12:30' },
@@ -25,25 +25,46 @@ const appointments = [
   { worker: 'Frank', time: '14:00' },
 ];
 
-const times = [];
-for (let hour = 8; hour <= 21; hour++) {
-  times.push(`${hour}:00`);
-  times.push(`${hour}:30`);
-}
-
 // Scaling factors
 const SCALE = 1.3;
-const HEADER_HEIGHT = 70 * SCALE; // taller header
-const COLUMN_WIDTH = 180 * SCALE; // wider columns
-const ROW_HEIGHT = 30 * SCALE; // taller rows
+const HEADER_HEIGHT = 70 * SCALE; 
+const COLUMN_WIDTH = 180 * SCALE; 
+const ROW_HEIGHT = 30 * SCALE; 
 
-const getAppointmentTop = (time) => {
-  const [hour, minute] = time.split(':').map(Number);
-  return (hour - 8) * 2 * ROW_HEIGHT + (minute / 30) * ROW_HEIGHT;
+// Generate dynamic time slots
+const generateTimes = (workStart, workEnd, intervalMinutes) => {
+  const times = [];
+  const [startHour, startMin] = workStart.split(':').map(Number);
+  const [endHour, endMin] = workEnd.split(':').map(Number);
+  let current = new Date();
+  current.setHours(startHour, startMin, 0, 0);
+  const end = new Date();
+  end.setHours(endHour, endMin, 0, 0);
+
+  while (current <= end) {
+    const hh = String(current.getHours()).padStart(2, '0');
+    const mm = String(current.getMinutes()).padStart(2, '0');
+    times.push(`${hh}:${mm}`);
+    current.setMinutes(current.getMinutes() + intervalMinutes);
+  }
+  return times;
+};
+
+// Calculate appointment top offset based on times array
+const getAppointmentTop = (time, times) => {
+  const index = times.indexOf(time);
+  return index >= 0 ? index * ROW_HEIGHT : 0;
 };
 
 const Schedule = () => {
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Work schedule settings
+  const workStart = '07:00';
+  const workEnd = '21:00';
+  const intervalMinutes = 30;
+
+  const times = generateTimes(workStart, workEnd, intervalMinutes);
 
   // Filter workers based on search term
   const workers = allWorkers.filter((worker) =>
@@ -66,7 +87,7 @@ const Schedule = () => {
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            height: 'calc(100% - 45px)', // 20px shorter at bottom
+            height: 'calc(100% - 45px)',
           }}
         >
           <div style={{ display: 'flex', overflowX: 'auto', flex: 1 }}>
@@ -153,7 +174,7 @@ const Schedule = () => {
                         key={idx}
                         style={{
                           position: 'absolute',
-                          top: HEADER_HEIGHT + getAppointmentTop(app.time),
+                          top: HEADER_HEIGHT + getAppointmentTop(app.time, times),
                           left: '5px',
                           right: '5px',
                           height: `${ROW_HEIGHT}px`,
@@ -204,7 +225,9 @@ const Schedule = () => {
             }}
           >
             <div style={{ fontSize: '3rem' }}>{fixedDate.getFullYear()}</div>
-            <div style={{ fontSize: '3rem' }}>{fixedDate.toLocaleString('default', { month: 'long' })}</div>
+            <div style={{ fontSize: '3rem' }}>
+              {fixedDate.toLocaleString('default', { month: 'long' })}
+            </div>
             <div style={{ fontSize: '3rem' }}>{fixedDate.getDate()}</div>
           </div>
 
