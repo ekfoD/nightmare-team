@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Container, Card, Image, Button, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import NewAppointmentPopup from './NewAppointmentPopup';
 
 const allWorkers = [
   { name: 'Alice', photo: 'https://via.placeholder.com/50' },
@@ -24,6 +25,8 @@ const appointments = [
   { worker: 'Eve', time: '12:30' },
   { worker: 'Frank', time: '14:00' },
 ];
+
+const services = ["Haircut", "Nails", "Massage", "Makeup", "Coloring"];
 
 // Scaling factors
 const SCALE = 1.3;
@@ -65,6 +68,13 @@ const Schedule = () => {
   const intervalMinutes = 30;
 
   const times = generateTimes(workStart, workEnd, intervalMinutes);
+
+  const [showPopup, setShowPopup] = useState(false);
+
+  const openPopup = () => setShowPopup(true);
+  const closePopup = () => setShowPopup(false);
+
+  const timeSlots = times;
 
   // Filter workers based on search term
   const workers = allWorkers.filter((worker) =>
@@ -240,9 +250,18 @@ const Schedule = () => {
           />
 
           {/* Add appointment button */}
-          <Button variant="primary">Add new appointment</Button>
+          <Button variant="primary" onClick={openPopup}>
+            Add new appointment
+          </Button>
         </div>
       </div>
+      <NewAppointmentPopup
+        show={showPopup}
+        handleClose={closePopup}
+        workers={allWorkers}
+        services={services}
+        timeSlots={timeSlots}
+      />
     </Container>
   );
 };
