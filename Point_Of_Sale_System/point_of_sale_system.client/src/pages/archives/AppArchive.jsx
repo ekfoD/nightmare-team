@@ -1,7 +1,7 @@
-function Services() {
+function AppArchive() {
   return (
     <p>Page with services!</p>
   );
 }
 
-export default Services;
+export default AppArchive;

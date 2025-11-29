@@ -11,28 +11,45 @@ export default function Calendar() {
     "July","August","September","October","November","December"
   ];
 
-  const buttonSize = 80; // Smaller buttons
-  const fontSize = 20;   // Bigger numbers inside buttons
+  const buttonSize = 80;
+  const fontSize = 20;
 
   const daysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
-  const firstDayOfMonth = (month, year) => new Date(year, month, 1).getDay();
+
+  // Adjust first day: Monday = 0
+  const firstDayOfMonth = (month, year) => {
+    const day = new Date(year, month, 1).getDay(); // 0 = Sunday
+    return day === 0 ? 6 : day - 1; // Shift Sunday to end, Monday = 0
+  };
 
   const generateCalendar = () => {
     const numDays = daysInMonth(currentMonth, currentYear);
     const startDay = firstDayOfMonth(currentMonth, currentYear);
 
-    const totalCells = 5 * 7; // 5 rows x 7 days
+    const totalCells = 5 * 7;
     const cells = [];
 
     for (let i = 0; i < totalCells; i++) {
       const dayNumber = i - startDay + 1;
+      const isWeekend = i % 7 === 5 || i % 7 === 6; // Saturday=5, Sunday=6
+
       if (i >= startDay && dayNumber <= numDays) {
         cells.push(
-          <Col key={i} className="p-1">
+          <Col key={i} className="p-1 d-flex justify-content-center">
             <Button
-              variant="outline-primary"
-              style={{ width: buttonSize, height: buttonSize, fontSize: fontSize, backgroundColor: "#efefffff" }}
-              onClick={() => console.log(`Clicked day ${dayNumber}`)}
+              variant="light"
+              style={{
+                width: buttonSize,
+                height: buttonSize,
+                fontSize: fontSize,
+                backgroundColor: "var(--calendar-day-bg)",
+                borderColor: "var(--calendar-border)",
+                color: isWeekend ? "var(--calendar-weekend-text)" : "black",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+                transition: "0.2s ease",
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = "var(--calendar-day-hover)"}
+              onMouseLeave={(e) => e.target.style.backgroundColor = "var(--calendar-day-bg)"}
             >
               {dayNumber}
             </Button>
@@ -40,14 +57,13 @@ export default function Calendar() {
         );
       } else {
         cells.push(
-          <Col key={i} className="p-1">
+          <Col key={i} className="p-1 d-flex justify-content-center">
             <div style={{ width: buttonSize, height: buttonSize }}></div>
           </Col>
         );
       }
     }
 
-    // Split into 5 rows
     const weeks = [];
     for (let i = 0; i < 5; i++) {
       weeks.push(
@@ -78,30 +94,62 @@ export default function Calendar() {
     }
   };
 
+  const weekDays = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]; // Monday first
+
   return (
     <Container className="mt-4">
-      <Card style={{ width: "max-content", margin: "0 auto" }}>
+      <style>{`
+        :root {
+          --calendar-bg: #f6f7f9;
+          --calendar-day-bg: #ffffff;
+          --calendar-day-hover: #eef4ff;
+          --calendar-border: #d7d7d7;
+          --calendar-weekend-text: #a84646;
+        }
+      `}</style>
+
+      <Card
+        style={{
+          width: "max-content",
+          margin: "0 auto",
+          padding: "10px",
+          borderRadius: "14px",
+          backgroundColor: "var(--calendar-bg)",
+          boxShadow: "0 3px 10px rgba(0,0,0,0.12)"
+        }}
+      >
         <Card.Body>
           <Row className="align-items-center mb-3">
             <Col xs="auto">
-              <Button variant="secondary" onClick={handlePrevMonth}>&lt;</Button>
+              <Button variant="outline-dark" onClick={handlePrevMonth}>&lt;</Button>
             </Col>
+
             <Col className="text-center">
-              <h4>{monthNames[currentMonth]} {currentYear}</h4>
+              <h4 style={{ marginBottom: 0 }}>
+                {monthNames[currentMonth]} {currentYear}
+              </h4>
             </Col>
+
             <Col xs="auto">
-              <Button variant="secondary" onClick={handleNextMonth}>&gt;</Button>
+              <Button variant="outline-dark" onClick={handleNextMonth}>&gt;</Button>
             </Col>
           </Row>
 
           {/* Weekday headers */}
           <Row className="mb-2 text-center">
-            {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d, idx) => (
-              <Col key={idx} style={{ width: "100%", fontSize: fontSize }}>{d}</Col>
+            {weekDays.map((d, idx) => (
+              <Col
+                key={idx}
+                style={{
+                  fontSize: fontSize * 0.8,
+                  opacity: 0.7
+                }}
+              >
+                {d}
+              </Col>
             ))}
           </Row>
 
-          {/* Calendar weeks */}
           {generateCalendar()}
         </Card.Body>
       </Card>

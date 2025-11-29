@@ -17,7 +17,7 @@ import Inventory from './pages/inventory/inventory.jsx';
 import Employees from './pages/employees/employees.jsx';
 
 import AppAbout from './pages/about/AppAbout.jsx';
-import Services from './pages/services/Services.jsx';
+import AppArchive from './pages/archives/AppArchive.jsx';
 import Calendar from './pages/calendar/Calendar.jsx';
 import Schedule from './pages/schedule/Schedule.jsx';
 
@@ -41,7 +41,7 @@ function App() {
                     </Route>
                     <Route element={<AppLayout />}>
                         <Route path="/appAbout" element={<AppAbout />} /> 
-                        <Route path="/services" element={<Services />} />
+                        <Route path="/appArchive" element={<AppArchive />} />
                         <Route path="/calendar" element={<Calendar />} />
                         <Route path="/schedule" element={<Schedule />} />
                     </Route>
