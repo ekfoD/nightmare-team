@@ -11,7 +11,7 @@ namespace Point_of_Sale_System.Server.Controllers
     public class EmployeesController : Controller
     {
         
-        private IEnumerable<Employee> employeeList = new List<Employee>
+        private List<Employee> employeeList = new List<Employee>
         {
             new Employee{
                 Id = Guid.NewGuid(),
@@ -43,7 +43,7 @@ namespace Point_of_Sale_System.Server.Controllers
                 PasswordHash = "HASH789",
                 PasswordSalt = "SALT789",
                 AccessFlag = 3,
-                Status = StatusEnum.active,
+                Status = StatusEnum.unavailable,
                 Timestamp = DateTime.Now,
                 Schedules = new List<Schedule>(),
                 Appointments = new List<Appointment>(),
@@ -54,6 +54,31 @@ namespace Point_of_Sale_System.Server.Controllers
         [HttpGet("{organizationId}")]
         public IEnumerable<Employee> Get(Guid organizationId){
             return employeeList;
+        }
+
+        [HttpPost("add")] 
+        public async Task<IActionResult> AddEmployee(Employee request)
+        {
+
+
+            var employee = new Employee
+            {
+                Id = Guid.NewGuid(),
+                Username = request.Username,
+                PasswordHash = "LikeReallyMadeUp",   // You should replace this with real hashing
+                PasswordSalt = "MadeUp",
+                AccessFlag = request.AccessFlag,
+                Status = request.Status,
+                Timestamp = DateTime.Now,
+
+                Schedules = new List<Schedule>(),
+                Appointments = new List<Appointment>(),
+                Organizations = new List<Organization>()
+            };
+
+            employeeList.Add(employee);
+
+            return Ok(employee);
         }
 
 

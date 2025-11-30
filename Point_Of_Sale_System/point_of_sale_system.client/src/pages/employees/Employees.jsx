@@ -1,14 +1,25 @@
 import './Employees.css';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-const EMPLOYEE_API = "api/employees/35a03460-3e70-4aa3-af3e-fb5fac17e0df"
-const wtf = "https://localhost:7079/api/employees/35a03460-3e70-4aa3-af3e-fb5fac17e0df"
-const organizationId = "35a03460-3e70-4aa3-af3e-fb5fac17e0df"
+//const EMPLOYEE_API = "api/employees/"
+const EMPLOYEE_API = "https://localhost:7079/api/employees/"
+const organizationId = "8bbb7afb-d664-492a-bcd2-d29953ab924e" // cia random guid
+
+const StatusEnum = {
+    active: 1,
+    inactive: 2,
+    unavailable: 3
+};
+
 function Employees() {
 
     const [employees, setEmployees] = useState([]);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [errMsg, setErrMsg] = useState('');
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [access, setAccess] = useState(0);
+    const [status, setStatus] = useState("Active");
 
     const fetchEmployees = async () => {
         try {
@@ -25,14 +36,65 @@ function Employees() {
     }, []);
 
     function handleSelect(employee) {
+        if (employee === null) {
+            setSelectedEmployee(null);
+            setUsername('');
+            setStatus("Active");
+            setPassword('');
+            setAccess(0);
+            return;
+        }
+
         setSelectedEmployee(employee);
-        console.log(employee.username);
+        setUsername(employee.username);
+        setAccess(employee.accessFlag);
+        switch (employee.status) {
+            case 1:
+                setStatus("Active");
+                break;
+            case 2:
+                setStatus("Inactive");
+                break;
+            default:
+                setStatus("Unavailable");
+        }
+        console.log(employee.status);
+    }
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        try {
+            const response = await axios.post(EMPLOYEE_API + "/add", JSON.stringify(
+                {
+                    username: username,
+                    password: password,
+                    accessFlag: access,
+                    status: status,
+                    //organizationId: 
+                }));
+        } catch (error) {
+            setErrMsg(error.response?.data?.message || error.message);
+        }
+    }
+
+    const handleEdit = async (event) => {
+        event.preventDefault();
+        console.log(username + " " + password + " " + status);
+    }
+
+    const handleDelete = async (employee) => {
+        console.log("we gon delete you now, " + username);
+
     }
 
     const contents = employees === undefined
         ? <h2>Loading the page...</h2>
         : <div id="employeePageContent">
             <section id="employeeGrid">
+                <>
+                    <div className="employeeBox" onClick={() => {handleSelect(null)}}>
+                        Create Employee
+                    </div>
                 {employees.map(function (employee) {
                     return (
                         <div
@@ -45,22 +107,88 @@ function Employees() {
                         </div>
                     )
                 })}
+                </>
             </section>
             <section id="employeeEditField">
                 {
                     selectedEmployee === null
                         ?
-                        <>
+                        <form onSubmit={handleSubmit}>
                             <img src="../../public/Placeholder_view_vector.svg" />
-                            <h4>Temporary field on null</h4>
-                            <h4>Temporary field on null</h4>
-                        </>
+                            <label htmlFor="username">Username:</label>
+                            <input
+                                type="text"
+                                id="username"
+                                onChange={(e) => setUsername(e.target.value)}
+                                value={username}
+                                required
+                            />
+                            <label htmlFor="password">Password:</label>
+                            <input
+                                type="password"
+                                id="password"
+                                onChange={(e) => setPassword(e.target.value)}
+                                value={password}
+                                required
+                            />
+                            <label htmlFor="status">Set Status:</label>
+                            <select
+                                value={status}
+                                onChange={(e) => setStatus(e.target.value)}
+                            >
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                                <option value="Unavailable">Unavailable</option>
+                            </select>
+                            <label htmlFor="access">Access level:</label>
+                            <input
+                                type="number"
+                                id="accessFlag"
+                                onChange={(e) => setAccess(e.target.value)}
+                                value={access}
+                                required
+                            />
+                            <button>Create User</button>
+                        </form>
                         :
-                        <>
-                            <img src="https://www.nicepng.com/png/full/277-2774775_potato-png-images-potato-png.png" />
-                            <h4>{selectedEmployee.id}</h4>
-                            <h4>{selectedEmployee.username}</h4>
-                        </>
+                        <form onSubmit={handleEdit}>
+                            <img src="../../public/Placeholder_view_vector.svg" />
+                            <label htmlFor="username">Username:</label>
+                            <input
+                                type="text"
+                                id="username"
+                                onChange={(e) => setUsername(e.target.value)}
+                                value={username}
+                                required
+                            />
+                            <label htmlFor="password">New Password:</label>
+                            <input
+                                type="password"
+                                id="password"
+                                onChange={(e) => setPassword(e.target.value)}
+                                value={password}
+                                required
+                            />
+                            <label htmlFor="status">Set Status:</label>
+                            <select
+                                value={status}
+                                onChange={(e) => setStatus(e.target.value)}
+                            >
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                                <option value="Unavailable">Unavailable</option>
+                            </select>
+                            <label htmlFor="access">Access level:</label>
+                            <input
+                                type="number"
+                                id="accessFlag"
+                                onChange={(e) => setAccess(e.target.value)}
+                                value={access}
+                                required
+                            />
+                            <button type="submit">Edit</button>
+                            <button type="button" onClick={() => handleDelete(selectedEmployee)}>FIRE</button>
+                        </form>
                 }
             </section>
         </div>;
