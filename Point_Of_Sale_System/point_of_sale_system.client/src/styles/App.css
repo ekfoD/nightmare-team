@@ -1,0 +1,7 @@
+.app-container {
+  background-color: #31366b;  /* Dark blue */
+  color: white;  /* Text color so it's readable */
+  margin: 0;
+  min-height: 100vh;
+}
+
