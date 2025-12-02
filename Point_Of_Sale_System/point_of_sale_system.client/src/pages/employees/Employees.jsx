@@ -1,4 +1,4 @@
-import './Employees.css';
+import '../../styles/Employees.css';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 //const EMPLOYEE_API = "api/employees/"
