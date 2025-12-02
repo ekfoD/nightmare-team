@@ -5,13 +5,22 @@ using Point_of_Sale_System.Server.Models;
 
 namespace Point_of_Sale_System.Server.Controllers
 {
+    public class EmployeeRequest
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public int AccessFlag { get; set; }
+        public string Status { get; set; }
+    }
+
+
 
     [ApiController]
     [Route("api/[controller]")]
     public class EmployeesController : Controller
     {
         
-        private List<Employee> employeeList = new List<Employee>
+        private static List<Employee> employeeList = new List<Employee>
         {
             new Employee{
                 Id = Guid.NewGuid(),
@@ -56,31 +65,66 @@ namespace Point_of_Sale_System.Server.Controllers
             return employeeList;
         }
 
-        [HttpPost("add")] 
-        public async Task<IActionResult> AddEmployee(Employee request)
+        [HttpPost("add")]
+        public IActionResult AddEmployee([FromBody] EmployeeRequest request)
         {
-
-
             var employee = new Employee
             {
                 Id = Guid.NewGuid(),
                 Username = request.Username,
-                PasswordHash = "LikeReallyMadeUp",   // You should replace this with real hashing
+                PasswordHash = "LikeReallyMadeUp",
                 PasswordSalt = "MadeUp",
                 AccessFlag = request.AccessFlag,
-                Status = request.Status,
-                Timestamp = DateTime.Now,
-
-                Schedules = new List<Schedule>(),
-                Appointments = new List<Appointment>(),
-                Organizations = new List<Organization>()
+                Status = Enum.Parse<StatusEnum>(request.Status.ToLower()),
+                Timestamp = DateTime.Now
             };
 
             employeeList.Add(employee);
-
+            Console.WriteLine(employee);
             return Ok(employee);
         }
 
 
+        public class EmployeeLol
+        {
+            public Guid Id { get; set; } = Guid.NewGuid();
+            public required string Username { get; set; }
+            public required string Password { get; set; }
+            public int AccessFlag { get; set; }
+            public StatusEnum Status { get; set; }
+        }
+
+        [HttpPut("{employeeId}/edit")]
+        public IActionResult EditEmployee(Guid employeeId, [FromBody] EmployeeRequest request)
+        {
+            var employee = employeeList.FirstOrDefault(e => e.Id == employeeId);
+            if (employee == null)
+            {
+                return NotFound(new { message = "Employee not found." });
+            }
+
+            employee.Username = request.Username ?? employee.Username;
+            employee.PasswordHash = "Genuinelymadeup";
+            employee.AccessFlag = request.AccessFlag;
+            employee.Status = Enum.Parse<StatusEnum>(request.Status.ToLower());
+            employee.Timestamp = DateTime.Now;
+
+            return Ok(new { message = "Employee updated successfully." });
+        }
+
+        [HttpDelete("{employeeId}/delete")]
+        public IActionResult DeleteEmployee (Guid employeeId)
+        {
+            var employee = employeeList.FirstOrDefault(e => e.Id == employeeId);
+
+            if (employee == null)
+            {
+                return NotFound(new { message = "Employee not found." });
+            }
+
+            employeeList.Remove(employee);
+
+            return Ok(new { message = "Employee deleted successfully." });
+        }
     }
 }

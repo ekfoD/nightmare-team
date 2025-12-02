@@ -24,7 +24,6 @@ function Employees() {
     const fetchEmployees = async () => {
         try {
             const response = await axios.get("https://localhost:7079/api/Employees/" + organizationId);
-            //console.log("SHEESH:"+EMPLOYEE_API + "35a03460-3e70-4aa3-af3e-fb5fac17e0df")
             setEmployees(response.data);
         } catch (e) {
             setErrMsg(e.response?.data?.message || e.message);
@@ -58,32 +57,49 @@ function Employees() {
             default:
                 setStatus("Unavailable");
         }
-        console.log(employee.status);
     }
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            const response = await axios.post(EMPLOYEE_API + "/add", JSON.stringify(
+            const response = await axios.post(EMPLOYEE_API + "add", {
+                username,
+                password,
+                accessFlag: access,
+                status,
+            });
+            await fetchEmployees();
+        } catch (error) {
+            setErrMsg(error.response?.data?.message || error.message);
+        }
+    };
+
+
+    const handleEdit = async (event) => {
+        event.preventDefault();
+        try {
+            const response = await axios.put(EMPLOYEE_API + selectedEmployee.id + "/edit",
                 {
-                    username: username,
-                    password: password,
+                    username,
+                    password,
                     accessFlag: access,
-                    status: status,
-                    //organizationId: 
-                }));
+                    status,
+                });
+            await fetchEmployees();
         } catch (error) {
             setErrMsg(error.response?.data?.message || error.message);
         }
     }
 
-    const handleEdit = async (event) => {
-        event.preventDefault();
-        console.log(username + " " + password + " " + status);
-    }
-
     const handleDelete = async (employee) => {
-        console.log("we gon delete you now, " + username);
+        try {
+            const response = await axios.delete(EMPLOYEE_API + selectedEmployee.id + "/delete");
+
+            await fetchEmployees();
+
+        } catch (error) {
+            setErrMsg(error.response?.data?.message || error.message);
+        }
 
     }
 
@@ -167,7 +183,6 @@ function Employees() {
                                 id="password"
                                 onChange={(e) => setPassword(e.target.value)}
                                 value={password}
-                                required
                             />
                             <label htmlFor="status">Set Status:</label>
                             <select
