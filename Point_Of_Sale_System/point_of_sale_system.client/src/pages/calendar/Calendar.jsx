@@ -97,62 +97,60 @@ export default function Calendar() {
   const weekDays = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]; // Monday first
 
   return (
-    <Container className="mt-4">
-      <style>{`
-        :root {
-          --calendar-bg: #f6f7f9;
-          --calendar-day-bg: #ffffff;
-          --calendar-day-hover: #eef4ff;
-          --calendar-border: #d7d7d7;
-          --calendar-weekend-text: #a84646;
-        }
-      `}</style>
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      width: "100vw",
+      height: "100vh",
+    }}
+  >
+    <Card
+      style={{
+        width: "max-content",
+        padding: "10px",
+        borderRadius: "14px",
+        backgroundColor: "white",
+        boxShadow: "0 3px 10px rgba(0,0,0,0.12)"
+      }}
+    >
+      <Card.Body>
+        <Row className="align-items-center mb-3">
+          <Col xs="auto">
+            <Button variant="outline-dark" onClick={handlePrevMonth}>&lt;</Button>
+          </Col>
 
-      <Card
-        style={{
-          width: "max-content",
-          margin: "0 auto",
-          padding: "10px",
-          borderRadius: "14px",
-          backgroundColor: "var(--calendar-bg)",
-          boxShadow: "0 3px 10px rgba(0,0,0,0.12)"
-        }}
-      >
-        <Card.Body>
-          <Row className="align-items-center mb-3">
-            <Col xs="auto">
-              <Button variant="outline-dark" onClick={handlePrevMonth}>&lt;</Button>
+          <Col className="text-center">
+            <h4 style={{ marginBottom: 0 }}>
+              {monthNames[currentMonth]} {currentYear}
+            </h4>
+          </Col>
+
+          <Col xs="auto">
+            <Button variant="outline-dark" onClick={handleNextMonth}>&gt;</Button>
+          </Col>
+        </Row>
+
+        {/* Weekday headers */}
+        <Row className="mb-2 text-center">
+          {weekDays.map((d, idx) => (
+            <Col
+              key={idx}
+              style={{
+                fontSize: fontSize * 0.8,
+                opacity: 0.7
+              }}
+            >
+              {d}
             </Col>
+          ))}
+        </Row>
 
-            <Col className="text-center">
-              <h4 style={{ marginBottom: 0 }}>
-                {monthNames[currentMonth]} {currentYear}
-              </h4>
-            </Col>
+        {generateCalendar()}
+      </Card.Body>
+    </Card>
+  </div>
+);
 
-            <Col xs="auto">
-              <Button variant="outline-dark" onClick={handleNextMonth}>&gt;</Button>
-            </Col>
-          </Row>
-
-          {/* Weekday headers */}
-          <Row className="mb-2 text-center">
-            {weekDays.map((d, idx) => (
-              <Col
-                key={idx}
-                style={{
-                  fontSize: fontSize * 0.8,
-                  opacity: 0.7
-                }}
-              >
-                {d}
-              </Col>
-            ))}
-          </Row>
-
-          {generateCalendar()}
-        </Card.Body>
-      </Card>
-    </Container>
-  );
 }
