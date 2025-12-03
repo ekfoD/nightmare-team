@@ -1,1 +1,9 @@
-Test
+1. As we have a disgusting mac user we are using open source stuff
+DOWNLOAD THIS:
+https://learn.microsoft.com/en-us/azure-data-studio/download-azure-data-studio?tabs=win-install%2Cwin-user-install%2Credhat-install%2Cwindows-uninstall%2Credhat-uninstall
+2. Now little baby needs to write something in the cmd: dotnet ef database update. Let it run
+3. Open the pirated downloaded software.
+4. PRESS BIG WHITE BUTTON SAYING CREATE CONNECTION.
+5. this is the hardest part of them all so stay with me, write in the SERVER: (localdb)\mssqllocaldb.
+6. You're almost there, I know that last part was hard, but you're doing great, now choose from the Database PointOfSaleDB.
+
