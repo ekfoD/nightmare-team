@@ -1,7 +1,10 @@
 ﻿using Point_of_Sale_System.Server.Enums;
+using Point_of_Sale_System.Server.Models.Entities.MenuBased;
+using Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments;
+using Point_of_Sale_System.Server.Models.Entities.ServiceBased;
 using System.ComponentModel.DataAnnotations;
 
-namespace Point_of_Sale_System.Server.Models
+namespace Point_of_Sale_System.Server.Models.Entities.Buisness
 {
     public class Organization
     {

@@ -1,8 +1,9 @@
 ﻿using Point_of_Sale_System.Server.Enums;
+using Point_of_Sale_System.Server.Models.Entities.ServiceBased;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Point_of_Sale_System.Server.Models
+namespace Point_of_Sale_System.Server.Models.Entities.Buisness
 {
     public class Emploee
     {

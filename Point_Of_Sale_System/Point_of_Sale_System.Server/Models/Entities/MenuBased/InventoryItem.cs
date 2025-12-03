@@ -1,17 +1,18 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Point_of_Sale_System.Server.Enums;
+using Point_of_Sale_System.Server.Models.Entities.Buisness;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Point_of_Sale_System.Server.Models
+namespace Point_of_Sale_System.Server.Models.Entities.MenuBased
 {
-    public class Order
+    public class InventoryItem
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
+        public required string Name { get; set; }
+        public required int Quantity { get; set; }
+        public required StatusEnum Status { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.Now;
-
-        //navigation to FK's
-        public virtual ICollection<Payment> Payments { get; set; }
-        public virtual ICollection<OrderItem> OrderItems { get; set; }
 
         // foreign key to Organization
         [Required]
