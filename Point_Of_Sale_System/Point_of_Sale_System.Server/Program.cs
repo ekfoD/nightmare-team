@@ -1,3 +1,5 @@
+using Point_of_Sale_System.Server.Interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -19,6 +21,7 @@ builder.Services.AddCors(options =>
         });
 });
 
+builder.Services.AddSingleton<IEmployeeRepository, InMemoryEmployeeRepository>();
 
 var app = builder.Build();
 

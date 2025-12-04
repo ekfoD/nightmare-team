@@ -67,6 +67,7 @@ function Employees() {
                 password,
                 accessFlag: access,
                 status,
+                organizationId,
             });
             await fetchEmployees();
         } catch (error) {
@@ -84,7 +85,9 @@ function Employees() {
                     password,
                     accessFlag: access,
                     status,
+                    organizationId,
                 });
+            setPassword('');
             await fetchEmployees();
         } catch (error) {
             setErrMsg(error.response?.data?.message || error.message);
@@ -95,12 +98,12 @@ function Employees() {
         try {
             const response = await axios.delete(EMPLOYEE_API + selectedEmployee.id + "/delete");
 
+            handleSelect(null); // Just return the fields all to null if delete went well
             await fetchEmployees();
 
         } catch (error) {
             setErrMsg(error.response?.data?.message || error.message);
         }
-
     }
 
     const contents = employees === undefined
@@ -108,7 +111,7 @@ function Employees() {
         : <div id="employeePageContent">
             <section id="employeeGrid">
                 <>
-                    <div className="employeeBox" onClick={() => {handleSelect(null)}}>
+                    <div className="employeeBox" id="createEmployeeBox" onClick={() => {handleSelect(null)}}>
                         Create Employee
                     </div>
                 {employees.map(function (employee) {
@@ -211,7 +214,7 @@ function Employees() {
     return (
         <>
             <h3>Employees</h3>
-            <h3 className="hidden">{errMsg}</h3>
+            <h3 className="w-50 mx-auto text-center text-warning">{errMsg}</h3>
             {contents}
         </>
     );
