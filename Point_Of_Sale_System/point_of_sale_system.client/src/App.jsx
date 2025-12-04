@@ -43,7 +43,6 @@ function App() {
                     <Route element={<AppLayout />}>
                         <Route path="/appAbout" element={<AppAbout />} /> 
                         <Route path="/history" element={<OrderHistory /> }/>
-                        {/* <Route path="/calendar" element={<Calendar />} /> */}
                         <Route path="/schedule" element={<Schedule />} />
                     </Route>
                 </Route>

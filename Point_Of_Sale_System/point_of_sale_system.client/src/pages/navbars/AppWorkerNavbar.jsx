@@ -13,7 +13,6 @@ function AppNavbar() {
           <Nav className="ms-auto">
             <Nav.Link as={NavLink} to="/appAbout" end>Home</Nav.Link>
             <Nav.Link as={NavLink} to="/appArchive">Archive</Nav.Link>
-            <Nav.Link as={NavLink} to="/calendar">Calendar</Nav.Link>
             <Nav.Link as={NavLink} to="/schedule">Today's Schedule</Nav.Link>
             <Nav.Link as={NavLink} to="/" end>Back</Nav.Link>
           </Nav>
