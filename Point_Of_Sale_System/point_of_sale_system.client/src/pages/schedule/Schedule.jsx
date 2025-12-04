@@ -1,8 +1,9 @@
 // App.js
 import React, { useState } from 'react';
-import { Container, Card, Image, Button, Form } from 'react-bootstrap';
+import { Container, Card, Image, Button, Form, Modal } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import NewAppointmentPopup from './NewAppointmentPopup';
+import Calendar from './Calendar';
 
 const allWorkers = [
   { name: 'Alice', photo: 'https://via.placeholder.com/50' },
@@ -70,9 +71,13 @@ const Schedule = () => {
   const times = generateTimes(workStart, workEnd, intervalMinutes);
 
   const [showPopup, setShowPopup] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const openPopup = () => setShowPopup(true);
   const closePopup = () => setShowPopup(false);
+
+  const openCalendar = () => setShowCalendar(true);
+  const closeCalendar = () => setShowCalendar(false);
 
   const timeSlots = times;
 
@@ -240,7 +245,11 @@ const Schedule = () => {
             </div>
             <div style={{ fontSize: '3rem' }}>{fixedDate.getDate()}</div>
           </div>
-
+          
+            {/* Calendar button */}
+            <Button variant="primary" onClick={openCalendar}>
+            Calendar
+            </Button>
           {/* Search bar */}
           <Form.Control
             type="text"
@@ -262,6 +271,14 @@ const Schedule = () => {
         services={services}
         timeSlots={timeSlots}
       />
+      <Modal show={showCalendar} onHide={closeCalendar} size="lg" centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Calendar</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Calendar />
+        </Modal.Body>
+      </Modal>
     </Container>
   );
 };
