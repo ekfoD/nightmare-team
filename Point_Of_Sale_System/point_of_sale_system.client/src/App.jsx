@@ -12,8 +12,9 @@ import RequireAuth from './utilities/RequireAuth.jsx';
 
 import About from './pages/about/About.jsx';
 import Orders from './pages/orders/orders.jsx';
-import Inventory from './pages/inventory/inventory.jsx';
+import Inventory from './pages/inventory/Inventory.jsx';
 import Employees from './pages/employees/employees.jsx';
+import MenuManagement from './pages/Menu/MenuManagement.jsx';
 
 const BASE_URL = "http://localhost:5098"
 
@@ -29,6 +30,7 @@ function App() {
                 <Route element={<RequireAuth />}>
                     <Route element={<MainLayout />}> {/* Route kad atsirastu navbar, jo nereikia login ir register page'ui*/}
                         <Route path="/" element={<About />} /> {/* Placeholder Weather forecast vietoj actual home page'o, tsg nzn kas jame turi buti */}
+                        <Route path="/menu" element={<MenuManagement />} />
                         <Route path="/orders" element={<Orders />} />
                         <Route path="/inventory" element={<Inventory />} />
                         <Route path="/employees" element={<Employees />} />
