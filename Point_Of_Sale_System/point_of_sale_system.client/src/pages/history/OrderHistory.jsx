@@ -111,7 +111,7 @@ const dummyData = [
   }
 ];
 
-export default function AppArchive() {
+export default function OrderHistory() {
   const [selected, setSelected] = useState(dummyData[0]);
 
   return (

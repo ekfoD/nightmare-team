@@ -13,13 +13,13 @@ import RequireAuth from './utilities/RequireAuth.jsx';
 
 import About from './pages/about/About.jsx';
 import Orders from './pages/orders/orders.jsx';
-import Inventory from './pages/inventory/inventory.jsx';
+import Inventory from './pages/inventory/Inventory.jsx';
 import Employees from './pages/employees/employees.jsx';
+import MenuManagement from './pages/Menu/MenuManagement.jsx';
 
 import AppAbout from './pages/about/AppAbout.jsx';
-import AppArchive from './pages/archives/AppArchive.jsx';
-import Calendar from './pages/calendar/Calendar.jsx';
 import Schedule from './pages/schedule/Schedule.jsx';
+import OrderHistory from './pages/history/OrderHistory.jsx';
 
 const BASE_URL = "http://localhost:5098"
 
@@ -35,14 +35,14 @@ function App() {
                 <Route element={<RequireAuth />}>
                     <Route element={<MainLayout />}> {/* Route kad atsirastu navbar, jo nereikia login ir register page'ui*/}
                         <Route path="/" element={<About />} />
+                        <Route path="/menu" element={<MenuManagement />} />
                         <Route path="/orders" element={<Orders />} />
                         <Route path="/inventory" element={<Inventory />} />
                         <Route path="/employees" element={<Employees />} />
                     </Route>
                     <Route element={<AppLayout />}>
                         <Route path="/appAbout" element={<AppAbout />} /> 
-                        <Route path="/appArchive" element={<AppArchive />} />
-                        <Route path="/calendar" element={<Calendar />} />
+                        <Route path="/history" element={<OrderHistory /> }/>
                         <Route path="/schedule" element={<Schedule />} />
                     </Route>
                 </Route>
