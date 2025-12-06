@@ -20,6 +20,8 @@ import MenuManagement from './pages/Menu/MenuManagement.jsx';
 import AppAbout from './pages/about/AppAbout.jsx';
 import Schedule from './pages/schedule/Schedule.jsx';
 import OrderHistory from './pages/history/OrderHistory.jsx';
+import AppHistory from './pages/history/AppHistory.jsx';
+import Services from './pages/services/Services.jsx';
 
 const BASE_URL = "http://localhost:5098"
 
@@ -35,6 +37,7 @@ function App() {
                 <Route element={<RequireAuth />}>
                     <Route element={<MainLayout />}> {/* Route kad atsirastu navbar, jo nereikia login ir register page'ui*/}
                         <Route path="/" element={<About />} />
+                        <Route path="/orderHistory" element={<OrderHistory /> }/>
                         <Route path="/menu" element={<MenuManagement />} />
                         <Route path="/orders" element={<Orders />} />
                         <Route path="/inventory" element={<Inventory />} />
@@ -42,7 +45,8 @@ function App() {
                     </Route>
                     <Route element={<AppLayout />}>
                         <Route path="/appAbout" element={<AppAbout />} /> 
-                        <Route path="/history" element={<OrderHistory /> }/>
+                        <Route path="/appHistory" element={<AppHistory /> }/>
+                        <Route path="/services" element={<Services /> }/>
                         <Route path="/schedule" element={<Schedule />} />
                     </Route>
                 </Route>

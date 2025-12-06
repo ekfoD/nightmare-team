@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 
-const NewAppointmentPopup = ({ show, handleClose, workers, services, timeSlots }) => {
+const NewAppointmentPopup = ({ show, handleClose, workers, services, timeSlots, onSuccess }) => {
   const [service, setService] = useState("");
   const [worker, setWorker] = useState("");
   const [date, setDate] = useState("");
@@ -33,8 +33,11 @@ const NewAppointmentPopup = ({ show, handleClose, workers, services, timeSlots }
     console.log("Saving appointment:");
     console.log({ service, worker, date, time, extraInfo });
 
+    
     resetFields();
     handleClose();
+
+    if (onSuccess) onSuccess("Appointment created successfully!");
   };
 
   return (
