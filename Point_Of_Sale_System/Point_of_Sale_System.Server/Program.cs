@@ -1,3 +1,5 @@
+using Point_of_Sale_System.Server.Interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -40,6 +42,8 @@ app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseCors("AllowReact");
 
 app.MapControllers();
 

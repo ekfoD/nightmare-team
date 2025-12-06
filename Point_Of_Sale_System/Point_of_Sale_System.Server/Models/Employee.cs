@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Point_of_Sale_System.Server.Models
 {
-    public class Emploee
+    public class Employee
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
@@ -19,6 +19,12 @@ namespace Point_of_Sale_System.Server.Models
         //navigation to FK's
         public virtual ICollection<Schedule> Schedules { get; set; }
         public virtual ICollection<Appointment> Appointments { get; set; }
-        public virtual ICollection<Organization> Organizations { get; set; }
+
+        [Required]
+        public Guid OrganizationId { get; set; } // As sita pakeiciau panasiai kaip yra "MenuService" modelyje, tikiuosi kad tik vienas Orgnization turi buti
+
+        [ForeignKey("OrganizationId")]
+        public virtual Organization Organization { get; set; }
+
     }
 }
