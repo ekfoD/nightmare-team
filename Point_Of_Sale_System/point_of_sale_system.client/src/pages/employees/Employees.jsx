@@ -1,15 +1,22 @@
 import '../../styles/Employees.css';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+
+import { Container, Table, Button, Row, Col } from 'react-bootstrap';
+
 //const EMPLOYEE_API = "api/employees/"
 const EMPLOYEE_API = "https://localhost:7079/api/employees/"
 const organizationId = "8bbb7afb-d664-492a-bcd2-d29953ab924e" // cia random guid
+
+
 
 const StatusEnum = {
     active: 1,
     inactive: 2,
     unavailable: 3
 };
+
+
 
 function Employees() {
 
@@ -21,6 +28,22 @@ function Employees() {
     const [access, setAccess] = useState(0);
     const [status, setStatus] = useState("Active");
 
+    const [popupButton, setPopupButton] = useState(false);
+
+    const stupidAssPopup = () => {
+        return (
+            <div className="popupContainer">
+                <div className="innerPopup">
+                    <h2 className="text-success">Success!</h2>
+                    <br />
+                    <Button onClick={() => { setPopupButton(false) }}>Close</Button>
+
+                </div>
+            </div >
+        )
+
+    }
+
     const fetchEmployees = async () => {
         try {
             const response = await axios.get("https://localhost:7079/api/Employees/" + organizationId);
@@ -31,7 +54,7 @@ function Employees() {
     };
 
     useEffect(() => {
-        fetchEmployees();
+        //fetchEmployees();
     }, []);
 
     function handleSelect(employee) {
@@ -61,18 +84,19 @@ function Employees() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        try {
-            const response = await axios.post(EMPLOYEE_API + "add", {
-                username,
-                password,
-                accessFlag: access,
-                status,
-                organizationId,
-            });
-            await fetchEmployees();
-        } catch (error) {
-            setErrMsg(error.response?.data?.message || error.message);
-        }
+        setPopupButton(true);
+        //try {
+        //    const response = await axios.post(EMPLOYEE_API + "add", {
+        //        username,
+        //        password,
+        //        accessFlag: access,
+        //        status,
+        //        organizationId,
+        //    });
+        //    await fetchEmployees();
+        //} catch (error) {
+        //    setErrMsg(error.response?.data?.message || error.message);
+        //}
     };
 
 
@@ -214,7 +238,7 @@ function Employees() {
     return (
         <>
             <h3>Employees</h3>
-            <h3 className="w-50 mx-auto text-center text-warning">{errMsg}</h3>
+            {popupButton ? stupidAssPopup() : ""}
             {contents}
         </>
     );

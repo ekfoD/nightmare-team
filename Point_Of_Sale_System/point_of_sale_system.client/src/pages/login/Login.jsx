@@ -28,7 +28,6 @@ function Login() {
 
     const handleSubmit = async(e) => {
         e.preventDefault();
-        console.log("Fuck: ", user, pwd);
         //setSuccess(false);
         //setErrMsg("Generic error Message");
 

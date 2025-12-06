@@ -15,6 +15,8 @@ builder.Services.AddSwaggerGen();
 // builder.Services.AddDbContext<AppDbContext>(options =>
 //     options.UseSqlServer(connectionString));
 
+builder.Services.AddSingleton<IEmployeeRepository, InMemoryEmployeeRepository>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
