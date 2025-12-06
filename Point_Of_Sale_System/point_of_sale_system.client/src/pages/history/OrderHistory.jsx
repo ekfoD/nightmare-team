@@ -63,10 +63,6 @@ export default function OrderHistory() {
     return filtered;
   }, [searchTerm, sortKey]);
 
-  const handleRefund = () => {
-    alert(`Refund initiated for order ${selected.id}`);
-  };
-
   return (
     <div
       style={{

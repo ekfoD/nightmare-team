@@ -21,6 +21,7 @@ import AppAbout from './pages/about/AppAbout.jsx';
 import Schedule from './pages/schedule/Schedule.jsx';
 import OrderHistory from './pages/history/OrderHistory.jsx';
 import AppHistory from './pages/history/AppHistory.jsx';
+import Services from './pages/services/Services.jsx';
 
 const BASE_URL = "http://localhost:5098"
 
@@ -45,6 +46,7 @@ function App() {
                     <Route element={<AppLayout />}>
                         <Route path="/appAbout" element={<AppAbout />} /> 
                         <Route path="/appHistory" element={<AppHistory /> }/>
+                        <Route path="/services" element={<Services /> }/>
                         <Route path="/schedule" element={<Schedule />} />
                     </Route>
                 </Route>
