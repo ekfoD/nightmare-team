@@ -20,6 +20,7 @@ import MenuManagement from './pages/Menu/MenuManagement.jsx';
 import AppAbout from './pages/about/AppAbout.jsx';
 import Schedule from './pages/schedule/Schedule.jsx';
 import OrderHistory from './pages/history/OrderHistory.jsx';
+import Settings from './pages/settings/Settings.jsx';
 import AppHistory from './pages/history/AppHistory.jsx';
 import Services from './pages/services/Services.jsx';
 
@@ -42,6 +43,7 @@ function App() {
                         <Route path="/orders" element={<Orders />} />
                         <Route path="/inventory" element={<Inventory />} />
                         <Route path="/employees" element={<Employees />} />
+                        <Route path="/settings" element={<Settings/>} />
                     </Route>
                     <Route element={<AppLayout />}>
                         <Route path="/appAbout" element={<AppAbout />} /> 
