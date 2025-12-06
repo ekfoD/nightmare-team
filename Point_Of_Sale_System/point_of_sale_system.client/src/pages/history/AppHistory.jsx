@@ -1,4 +1,6 @@
+// AppointmentHistory.jsx
 import { useState, useMemo } from "react";
+import "../../styles/History.css";
 
 const dummyAppointments = [
   {
@@ -71,7 +73,7 @@ const dummyAppointments = [
 export default function AppointmentHistory() {
   const [selected, setSelected] = useState(dummyAppointments[0]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortKey, setSortKey] = useState("date"); // id, employee, customer, service
+  const [sortKey, setSortKey] = useState("date");
 
   const filteredAppointments = useMemo(() => {
     let filtered = dummyAppointments.filter(
@@ -83,7 +85,11 @@ export default function AppointmentHistory() {
     );
 
     if (sortKey === "date") {
-      filtered.sort((a, b) => new Date(b.date + " " + b.appointmentTime) - new Date(a.date + " " + a.appointmentTime));
+      filtered.sort(
+        (a, b) =>
+          new Date(b.date + " " + b.appointmentTime) -
+          new Date(a.date + " " + a.appointmentTime)
+      );
     } else if (sortKey === "id") {
       filtered.sort((a, b) => a.id.localeCompare(b.id));
     } else if (sortKey === "employee") {
@@ -102,48 +108,12 @@ export default function AppointmentHistory() {
   };
 
   return (
-    <div
-      style={{
-        width: "1100px",
-        height: "600px",
-        margin: "40px auto",
-        background: "#f2f2f2",
-        borderRadius: "14px",
-        padding: "20px",
-        display: "flex",
-        gap: "20px",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-        color: "#000"
-      }}
-    >
+    <div className="order-history-container">
       {/* LEFT — APPOINTMENT LIST */}
-      <div
-        style={{
-          width: "40%",
-          height: "100%",
-          background: "#ffffff",
-          borderRadius: "10px",
-          boxShadow: "0 0 4px rgba(0,0,0,0.1)",
-          display: "flex",
-          flexDirection: "column"
-        }}
-      >
-        <div
-          style={{
-            padding: "12px 16px",
-            borderBottom: "1px solid #ddd",
-            fontWeight: "600",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center"
-          }}
-        >
+      <div className="order-list">
+        <div className="list-header">
           <span>Appointments</span>
-          <select
-            value={sortKey}
-            onChange={(e) => setSortKey(e.target.value)}
-            style={{ fontSize: "14px", padding: "2px 6px" }}
-          >
+          <select value={sortKey} onChange={(e) => setSortKey(e.target.value)}>
             <option value="date">Sort by Date/Time</option>
             <option value="id">Sort by ID</option>
             <option value="employee">Sort by Employee</option>
@@ -152,68 +122,42 @@ export default function AppointmentHistory() {
           </select>
         </div>
 
-        <div style={{ padding: "8px 16px", borderBottom: "1px solid #ddd" }}>
+        <div className="list-search">
           <input
             type="text"
             placeholder="Search by ID, worker, customer, or service..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "6px",
-              borderRadius: "6px",
-              border: "1px solid #ccc"
-            }}
           />
         </div>
 
-        <div style={{ overflowY: "auto", flexGrow: 1 }}>
+        <div className="list-scroll">
           {filteredAppointments.map((app) => (
             <div
               key={app.id}
               onClick={() => setSelected(app)}
-              style={{
-                padding: "12px 16px",
-                cursor: "pointer",
-                background: selected.id === app.id ? "#e8eefc" : "transparent",
-                borderBottom: "1px solid #eee",
-                transition: "0.15s"
-              }}
+              className={selected.id === app.id ? "list-item selected" : "list-item"}
             >
-              <div style={{ fontWeight: "600" }}>{app.id}</div>
-              <div style={{ fontSize: "14px", color: "#666" }}>
+              <div className="item-id">{app.id}</div>
+              <div className="item-date">
                 {app.date} — {app.appointmentTime}
               </div>
-              <div style={{ fontSize: "13px", color: "#555" }}>
+              <div className="item-emp">
                 Employee: {app.employee} | Customer: {app.customerName} | Service: {app.service}
               </div>
             </div>
           ))}
           {filteredAppointments.length === 0 && (
-            <div style={{ padding: "12px 16px", color: "#999" }}>No appointments found</div>
+            <div className="no-orders">No appointments found</div>
           )}
         </div>
       </div>
 
       {/* RIGHT — APPOINTMENT DETAILS */}
-      <div
-        style={{
-          width: "60%",
-          height: "100%",
-          background: "#ffffff",
-          borderRadius: "10px",
-          padding: "20px",
-          boxShadow: "0 0 4px rgba(0,0,0,0.1)",
-          display: "flex",
-          flexDirection: "column",
-          position: "relative"
-        }}
-      >
-        <div style={{ marginBottom: "10px", fontWeight: "600", fontSize: "18px" }}>
-          Appointment Details — {selected.id}
-        </div>
+      <div className="order-details">
+        <div className="details-title">Appointment Details — {selected.id}</div>
 
-        <div style={{ flexGrow: 1, overflowY: "auto" }}>
+        <div className="details-scroll">
           <div style={{ marginBottom: "10px" }}>
             <div><strong>Employee:</strong> {selected.employee}</div>
             <div><strong>Time:</strong> {selected.appointmentTime}</div>
@@ -224,48 +168,14 @@ export default function AppointmentHistory() {
           </div>
         </div>
 
-        {/* Refund button & totals fixed at bottom */}
-        <div
-          style={{
-            position: "sticky",
-            bottom: 0,
-            background: "#ffffff",
-            paddingTop: "10px",
-            borderTop: "1px solid #ddd"
-          }}
-        >
-          <button
-            onClick={handleRefund}
-            style={{
-              background: "#dc3545",
-              color: "#fff",
-              padding: "8px 16px",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              marginBottom: "10px"
-            }}
-          >
+        <div className="order-summary">
+          <button className="refund-button" onClick={handleRefund}>
             Refund
           </button>
 
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <span>Subtotal</span> <span>{selected.subtotal} €</span>
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
-            <span>Tax</span> <span>{selected.tax} €</span>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginTop: "8px",
-              fontWeight: "700",
-              fontSize: "18px"
-            }}
-          >
-            <span>Total</span> <span>{selected.total} €</span>
-          </div>
+          <div className="summary-row"><span>Subtotal</span><span>{selected.subtotal} €</span></div>
+          <div className="summary-row"><span>Tax</span><span>{selected.tax} €</span></div>
+          <div className="summary-total"><span>Total</span><span>{selected.total} €</span></div>
         </div>
       </div>
     </div>
