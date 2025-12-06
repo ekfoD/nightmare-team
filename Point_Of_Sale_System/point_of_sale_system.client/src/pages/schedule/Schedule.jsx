@@ -1,32 +1,31 @@
 // App.js
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Container, Card, Image, Button, Form, Modal } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import NewAppointmentPopup from './NewAppointmentPopup';
 import Calendar from './Calendar';
 
 const allWorkers = [
-  { id: '11111111-1111-1111-1111-111111111111', name: 'Alice', photo: 'https://via.placeholder.com/50' },
-  { id: '22222222-2222-2222-2222-222222222222', name: 'Bob', photo: 'https://via.placeholder.com/50' },
-  { id: '33333333-3333-3333-3333-333333333333', name: 'Charlie', photo: 'https://via.placeholder.com/50' },
-  { id: '44444444-4444-4444-4444-444444444444', name: 'Diana', photo: 'https://via.placeholder.com/50' },
-  { id: '55555555-5555-5555-5555-555555555555', name: 'Eve', photo: 'https://via.placeholder.com/50' },
-  { id: '66666666-6666-6666-6666-666666666666', name: 'Frank', photo: 'https://via.placeholder.com/50' },
-  { id: '77777777-7777-7777-7777-777777777777', name: 'Grace', photo: 'https://via.placeholder.com/50' },
-  { id: '88888888-8888-8888-8888-888888888888', name: 'Hank', photo: 'https://via.placeholder.com/50' },
-  { id: '99999999-9999-9999-9999-999999999999', name: 'Ivy', photo: 'https://via.placeholder.com/50' },
+  { name: 'Alice', photo: 'https://via.placeholder.com/50' },
+  { name: 'Bob', photo: 'https://via.placeholder.com/50' },
+  { name: 'Charlie', photo: 'https://via.placeholder.com/50' },
+  { name: 'Diana', photo: 'https://via.placeholder.com/50' },
+  { name: 'Eve', photo: 'https://via.placeholder.com/50' },
+  { name: 'Frank', photo: 'https://via.placeholder.com/50' },
+  { name: 'Grace', photo: 'https://via.placeholder.com/50' },
+  { name: 'Hank', photo: 'https://via.placeholder.com/50' },
+  { name: 'Ivy', photo: 'https://via.placeholder.com/50' },
 ];
 
-
-// const appointments = [
-//   { worker: 'Alice', time: '08:30' },
-//   { worker: 'Bob', time: '09:00' },
-//   { worker: 'Charlie', time: '10:00' },
-//   { worker: 'Alice', time: '11:00' },
-//   { worker: 'Diana', time: '12:30' },
-//   { worker: 'Eve', time: '12:30' },
-//   { worker: 'Frank', time: '14:00' },
-// ];
+const appointments = [
+  { worker: 'Alice', time: '08:30' },
+  { worker: 'Bob', time: '09:00' },
+  { worker: 'Charlie', time: '10:00' },
+  { worker: 'Alice', time: '11:00' },
+  { worker: 'Diana', time: '12:30' },
+  { worker: 'Eve', time: '12:30' },
+  { worker: 'Frank', time: '14:00' },
+];
 
 const services = ["Haircut", "Nails", "Massage", "Makeup", "Coloring"];
 
@@ -63,7 +62,6 @@ const getAppointmentTop = (time, times) => {
 
 const Schedule = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [appointments, setAppointments] = useState([]);
 
   // Work schedule settings
   const workStart = '07:00';
@@ -82,39 +80,14 @@ const Schedule = () => {
   const closeCalendar = () => setShowCalendar(false);
 
   const timeSlots = times;
-  
+
   // Filter workers based on search term
   const workers = allWorkers.filter((worker) =>
     worker.name.toLowerCase().includes(searchTerm.toLowerCase())
-);
+  );
 
-  const fixedDate = new Date('2025-11-28');
   // Fixed date for now
-
-  useEffect(() => {
-  async function loadAppointments() {
-    try {
-      const res = await fetch(`/api/schedule/${fixedDate.toISOString().slice(0,10)}`);
-      if (!res.ok) throw new Error('Failed to fetch appointments');
-      const data = await res.json();
-
-      const mapped = data.map(a => ({
-        worker: allWorkers.find(w => w.id === a.EmploeeId)?.name || 'Unknown',
-        time: a.StartTime.slice(0,5), // HH:mm
-        id: a.Id,
-        customerName: a.CustomerName,
-        customerPhone: a.CustomerPhone,
-        extraInfo: a.ExtraInformation
-      }));
-
-      setAppointments(mapped);
-    } catch (err) {
-      console.error(err);
-    }
-  }
-  loadAppointments();
-}, [fixedDate]);
-
+  const fixedDate = new Date('2025-11-28');
 
   return (
     <Container

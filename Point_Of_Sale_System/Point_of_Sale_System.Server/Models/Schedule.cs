@@ -12,9 +12,6 @@ namespace Point_of_Sale_System.Server.Models
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.Now;
-        public required string CustomerName { get; set; }
-        public required string CustomerPhone { get; set; }
-        public string? ExtraInformation { get; set; }
 
         // foreign key to employee
         [Required]
