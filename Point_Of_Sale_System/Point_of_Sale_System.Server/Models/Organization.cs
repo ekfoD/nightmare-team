@@ -17,7 +17,7 @@ namespace Point_of_Sale_System.Server.Models
         public DateTime Timestamp { get; set; } = DateTime.Now;
 
         //navigation to FK's
-        public virtual ICollection<Emploee> Emploees { get; set; }
+        public virtual ICollection<Employee> Employees { get; set; }
         public virtual ICollection<Appointment> Appointments { get; set; }
         public virtual ICollection<Payment> Payments { get; set; }
         public virtual ICollection<Order> Orders { get; set; }

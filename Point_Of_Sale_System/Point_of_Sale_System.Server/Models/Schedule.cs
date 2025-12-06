@@ -16,12 +16,11 @@ namespace Point_of_Sale_System.Server.Models
         public required string CustomerPhone { get; set; }
         public string? ExtraInformation { get; set; }
 
-        // foreign key to emploee
+        // foreign key to employee
         [Required]
-        public Guid EmploeeId { get; set; }
+        public Guid EmployeeId { get; set; }
 
-        [ForeignKey("EmploeeId")]
-        public required virtual Emploee Emploee { get; set; }
-
+        [ForeignKey("EmployeeId")]
+        public virtual Employee Employee { get; set; }
     }
 }
