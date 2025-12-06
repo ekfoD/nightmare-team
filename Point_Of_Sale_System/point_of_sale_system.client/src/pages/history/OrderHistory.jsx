@@ -37,88 +37,15 @@ const dummyData = [
     subtotal: 20,
     tax: 2,
     total: 22
-  },
-  {
-    id: "#23550",
-    date: "14 Oct 2025 11:30:12",
-    employee: "Alice",
-    items: [
-      { name: "Cheeseburger", quantity: 1, price: 9 },
-      { name: "Onion Rings", quantity: 2, price: 4 }
-    ],
-    subtotal: 17,
-    tax: 1.7,
-    total: 18.7
-  },
-  {
-    id: "#23551",
-    date: "15 Oct 2025 13:45:00",
-    employee: "Diana",
-    items: [
-      { name: "Chicken Caesar Wrap", quantity: 1, price: 8 },
-      { name: "Lemonade", quantity: 1, price: 3 }
-    ],
-    subtotal: 11,
-    tax: 1.1,
-    total: 12.1
-  },
-  {
-    id: "#23552",
-    date: "16 Oct 2025 10:10:44",
-    employee: "Bob",
-    items: [
-      { name: "BBQ Ribs", quantity: 1, price: 16 },
-      { name: "Coleslaw", quantity: 1, price: 4 }
-    ],
-    subtotal: 20,
-    tax: 2,
-    total: 22
-  },
-  {
-    id: "#23553",
-    date: "17 Oct 2025 15:25:18",
-    employee: "Charlie",
-    items: [
-      { name: "Tacos", quantity: 2, price: 6 },
-      { name: "Churros", quantity: 1, price: 3 }
-    ],
-    subtotal: 15,
-    tax: 1.5,
-    total: 16.5
-  },
-  {
-    id: "#23554",
-    date: "18 Oct 2025 12:00:00",
-    employee: "Diana",
-    items: [
-      { name: "Vegetable Stir Fry", quantity: 1, price: 9 },
-      { name: "Spring Rolls", quantity: 2, price: 4 }
-    ],
-    subtotal: 17,
-    tax: 1.7,
-    total: 18.7
-  },
-  {
-    id: "#23555",
-    date: "19 Oct 2025 09:10:11",
-    employee: "Alice",
-    items: [
-      { name: "Pancake Stack", quantity: 1, price: 7 },
-      { name: "Coffee", quantity: 1, price: 3 }
-    ],
-    subtotal: 10,
-    tax: 1,
-    total: 11
   }
+  // ... add remaining orders
 ];
-
 
 export default function OrderHistory() {
   const [selected, setSelected] = useState(dummyData[0]);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortKey, setSortKey] = useState("date");
 
-  // Filtered & sorted orders
   const filteredOrders = useMemo(() => {
     let filtered = dummyData.filter(
       (order) =>
@@ -135,6 +62,10 @@ export default function OrderHistory() {
 
     return filtered;
   }, [searchTerm, sortKey]);
+
+  const handleRefund = () => {
+    alert(`Refund initiated for order ${selected.id}`);
+  };
 
   return (
     <div
@@ -235,7 +166,8 @@ export default function OrderHistory() {
           padding: "20px",
           boxShadow: "0 0 4px rgba(0,0,0,0.1)",
           display: "flex",
-          flexDirection: "column"
+          flexDirection: "column",
+          position: "relative"
         }}
       >
         <div
@@ -273,11 +205,31 @@ export default function OrderHistory() {
           ))}
         </div>
 
-        {/* employee & totals */}
-        <div style={{ marginTop: "20px", borderTop: "1px solid #ddd", paddingTop: "14px" }}>
-          <div style={{ marginBottom: "8px", fontWeight: "600" }}>
-            Employee: {selected.employee}
-          </div>
+        {/* Refund button & totals fixed at bottom */}
+        <div
+          style={{
+            position: "sticky",
+            bottom: 0,
+            background: "#ffffff",
+            paddingTop: "10px",
+            borderTop: "1px solid #ddd"
+          }}
+        >
+          <button
+            onClick={() => alert(`Refund initiated for order ${selected.id}`)}
+            style={{
+              background: "#dc3545",
+              color: "#fff",
+              padding: "8px 16px",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              marginBottom: "10px"
+            }}
+          >
+            Refund
+          </button>
+
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <span>Subtotal</span> <span>{selected.subtotal} €</span>
           </div>

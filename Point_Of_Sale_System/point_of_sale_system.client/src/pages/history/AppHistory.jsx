@@ -97,6 +97,10 @@ export default function AppointmentHistory() {
     return filtered;
   }, [searchTerm, sortKey]);
 
+  const handleRefund = () => {
+    alert(`Refund initiated for appointment ${selected.id}`);
+  };
+
   return (
     <div
       style={{
@@ -201,24 +205,50 @@ export default function AppointmentHistory() {
           padding: "20px",
           boxShadow: "0 0 4px rgba(0,0,0,0.1)",
           display: "flex",
-          flexDirection: "column"
+          flexDirection: "column",
+          position: "relative"
         }}
       >
         <div style={{ marginBottom: "10px", fontWeight: "600", fontSize: "18px" }}>
           Appointment Details — {selected.id}
         </div>
 
-        <div style={{ marginBottom: "10px" }}>
-          <div><strong>Employee:</strong> {selected.employee}</div>
-          <div><strong>Time:</strong> {selected.appointmentTime}</div>
-          <div><strong>Service:</strong> {selected.service}</div>
-          <div><strong>Customer:</strong> {selected.customerName}</div>
-          <div><strong>Phone:</strong> {selected.phone}</div>
-          {selected.extraInfo && <div><strong>Extra Info:</strong> {selected.extraInfo}</div>}
+        <div style={{ flexGrow: 1, overflowY: "auto" }}>
+          <div style={{ marginBottom: "10px" }}>
+            <div><strong>Employee:</strong> {selected.employee}</div>
+            <div><strong>Time:</strong> {selected.appointmentTime}</div>
+            <div><strong>Service:</strong> {selected.service}</div>
+            <div><strong>Customer:</strong> {selected.customerName}</div>
+            <div><strong>Phone:</strong> {selected.phone}</div>
+            {selected.extraInfo && <div><strong>Extra Info:</strong> {selected.extraInfo}</div>}
+          </div>
         </div>
 
-        {/* totals */}
-        <div style={{ marginTop: "20px", borderTop: "1px solid #ddd", paddingTop: "14px" }}>
+        {/* Refund button & totals fixed at bottom */}
+        <div
+          style={{
+            position: "sticky",
+            bottom: 0,
+            background: "#ffffff",
+            paddingTop: "10px",
+            borderTop: "1px solid #ddd"
+          }}
+        >
+          <button
+            onClick={handleRefund}
+            style={{
+              background: "#dc3545",
+              color: "#fff",
+              padding: "8px 16px",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              marginBottom: "10px"
+            }}
+          >
+            Refund
+          </button>
+
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <span>Subtotal</span> <span>{selected.subtotal} €</span>
           </div>
