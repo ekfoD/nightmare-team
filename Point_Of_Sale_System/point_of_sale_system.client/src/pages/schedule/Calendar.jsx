@@ -101,18 +101,14 @@ export default function Calendar() {
     style={{
       display: "flex",
       justifyContent: "center",
-      alignItems: "center",
-      width: "100vw",
-      height: "100vh",
+      alignItems: "center"
     }}
   >
     <Card
       style={{
         width: "max-content",
-        padding: "10px",
         borderRadius: "14px",
-        backgroundColor: "white",
-        boxShadow: "0 3px 10px rgba(0,0,0,0.12)"
+        boxShadow: "0 3px 10px rgba(0,0,0,0.12)",
       }}
     >
       <Card.Body>
