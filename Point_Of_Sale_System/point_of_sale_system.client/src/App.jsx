@@ -14,7 +14,7 @@ import About from './pages/about/About.jsx';
 import Orders from './pages/orders/orders.jsx';
 import Inventory from './pages/inventory/inventory.jsx';
 import Employees from './pages/employees/employees.jsx';
-import EditBusiness from './pages/business/EditBusiness.jsx';
+import Settings from './pages/settings/Settings.jsx';
 
 const BASE_URL = "http://localhost:5098"
 
@@ -33,7 +33,7 @@ function App() {
                         <Route path="/orders" element={<Orders />} />
                         <Route path="/inventory" element={<Inventory />} />
                         <Route path="/employees" element={<Employees />} />
-                        <Route path="/edit/organization" element={<EditBusiness/>} />
+                        <Route path="/settings" element={<Settings/>} />
                     </Route>
                 </Route>
             </Routes>

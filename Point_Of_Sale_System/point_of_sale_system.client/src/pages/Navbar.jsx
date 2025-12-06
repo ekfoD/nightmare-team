@@ -16,7 +16,7 @@ function Navbar() {
             <Nav.Link as={NavLink} to="/orders">Orders</Nav.Link>
             <Nav.Link as={NavLink} to="/inventory">Inventory</Nav.Link>
             <Nav.Link as={NavLink} to="/employees">Employees</Nav.Link>
-            <Nav.Link as={NavLink} to="/edit/organization">
+            <Nav.Link as={NavLink} to="/settings">
               <BsFillGearFill/>
             </Nav.Link>
           </Nav>

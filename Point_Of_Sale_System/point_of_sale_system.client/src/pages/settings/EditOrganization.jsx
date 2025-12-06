@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { Form, Button, Row, Col, Card } from "react-bootstrap";
 
-// export default function EditForm({ business, OnSave, OnCancel }) {
-
-export default function EditForm({ OnSubmit, business }) {
+export default function EditOrganization({ onSubmit, business }) {
     const [formData, setFormData] = useState({
         name: business.name || "",
         address: business.address || "",
@@ -35,14 +33,14 @@ export default function EditForm({ OnSubmit, business }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log("Form submitted:", formData);
-        OnSubmit(formData);   // send data back to parent
+        onSubmit(formData);
     };
 
     return (
-        <Card className="p-4 shadow-sm">
+        <Card className="p-4 shadow-sm w-50 ">
             <h3 className="mb-3">Organization settings</h3>
             <Form>
-                <Form.Group className="mb-3" controlId="formName">
+                <Form.Group className="mb-3 w-50" controlId="formName">
                     <Form.Label>Organization name</Form.Label>
                     <Form.Control
                         type="string"
@@ -52,7 +50,7 @@ export default function EditForm({ OnSubmit, business }) {
                     />
                 </Form.Group>
 
-                <Form.Group className="mb-3" controlId="formAddress">
+                <Form.Group className="mb-3 w-50" controlId="formAddress">
                     <Form.Label>Organization address</Form.Label>
                     <Form.Control
                         type="string"
@@ -62,7 +60,7 @@ export default function EditForm({ OnSubmit, business }) {
                     />
                 </Form.Group>
 
-                <Form.Group className="mb-3" controlId="formPhone">
+                <Form.Group className="mb-3 w-50" controlId="formPhone">
                     <Form.Label>Organization phone number</Form.Label>
                     <Form.Control
                         type="phone"
@@ -73,7 +71,7 @@ export default function EditForm({ OnSubmit, business }) {
                     />
                 </Form.Group>
 
-                <Form.Group className="mb-3" controlId="formOrganizationType">
+                <Form.Group className="mb-3 w-25" controlId="formOrganizationType">
                     <Form.Label>Choose organization type</Form.Label>
                     <Form.Select
                         value={formData.type}
@@ -85,7 +83,7 @@ export default function EditForm({ OnSubmit, business }) {
                     </Form.Select>
                 </Form.Group>
 
-                <Form.Group className="mb-3" controlId="formCurrency">
+                <Form.Group className="mb-3 w-25" controlId="formCurrency">
                     <Form.Label>Choose currency</Form.Label>
                     <Form.Select
                         value={formData.currency}
@@ -97,12 +95,15 @@ export default function EditForm({ OnSubmit, business }) {
                     </Form.Select>
                 </Form.Group>
 
-                <Button variant="primary" type="submit" onClick={handleSubmit}>
-                    Save Changes
-                </Button>
-                <Button variant="primary" type="cancel" onClick={handleCancel}>
-                    Cancel
-                </Button>
+                <div className="d-flex justify-content-center gap-3 mt-4">
+                    <Button variant="primary" type="submit" onClick={handleSubmit}>
+                        Save Changes
+                    </Button>
+
+                    <Button variant="secondary" onClick={handleCancel}>
+                        Cancel
+                    </Button>
+                </div>
             </Form>
         </Card>
     );
