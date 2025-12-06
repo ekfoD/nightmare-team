@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import { Container, Card, Image, Button, Form, Modal } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import NewAppointmentPopup from './NewAppointmentPopup';
-import Calendar from './Calendar';
+import EditAppointmentPopup from './EditAppointmentPopup';
 import SuccessNotifier from "./SuccessNotifier";
+import Calendar from './Calendar';
 
 
 const allWorkers = [
@@ -20,14 +21,64 @@ const allWorkers = [
 ];
 
 const appointments = [
-  { worker: 'Alice', time: '08:30' },
-  { worker: 'Bob', time: '09:00' },
-  { worker: 'Charlie', time: '10:00' },
-  { worker: 'Alice', time: '11:00' },
-  { worker: 'Diana', time: '12:30' },
-  { worker: 'Eve', time: '12:30' },
-  { worker: 'Frank', time: '14:00' },
+  {
+    worker: 'Alice',
+    time: '08:30',
+    date: '2025-11-28',
+    service: 'Haircut',
+    extraInfo: 'Regular client, prefers short trim'
+  },
+  {
+    worker: 'Bob',
+    time: '09:00',
+    date: '2025-11-28',
+    service: 'Nails',
+    extraInfo: 'French manicure'
+  },
+  {
+    worker: 'Charlie',
+    time: '10:00',
+    date: '2025-11-28',
+    service: 'Massage',
+    extraInfo: 'Focus on shoulders'
+  },
+  {
+    worker: 'Alice',
+    time: '11:00',
+    date: '2025-11-28',
+    service: 'Makeup',
+    extraInfo: 'Evening look'
+  },
+  {
+    worker: 'Diana',
+    time: '12:30',
+    date: '2025-11-28',
+    service: 'Coloring',
+    extraInfo: 'Highlights only'
+  },
+  {
+    worker: 'Eve',
+    time: '12:30',
+    date: '2025-11-28',
+    service: 'Nails',
+    extraInfo: 'Acrylic extensions'
+  },
+  {
+    worker: 'Frank',
+    time: '14:00',
+    date: '2025-11-28',
+    service: 'Haircut',
+    extraInfo: 'Trim and style'
+  },
 ];
+
+const mockAppointment = {
+  date: "2025-01-12",
+  time: "10:00",
+  service: "Nails",
+  worker: "Emma",
+  extraInfo: "Client prefers pink color"
+};
 
 const services = ["Haircut", "Nails", "Massage", "Makeup", "Coloring"];
 
@@ -65,6 +116,8 @@ const getAppointmentTop = (time, times) => {
 const Schedule = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [editingAppointment, setEditingAppointment] = useState(null);
 
   // Work schedule settings
   const workStart = '07:00';
@@ -75,14 +128,13 @@ const Schedule = () => {
 
   const [showPopup, setShowPopup] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
   const openPopup = () => setShowPopup(true);
   const closePopup = () => setShowPopup(false);
 
   const openCalendar = () => setShowCalendar(true);
   const closeCalendar = () => setShowCalendar(false);
-
-  const handleSuccess = () => {setShowSuccess(true);};
 
   const timeSlots = times;
 
@@ -213,7 +265,8 @@ const Schedule = () => {
                             userSelect: 'none',
                           }}
                           onClick={() => {
-                            /* TODO: implement edit appointment functionality */
+                            setEditingAppointment(app);  // set the appointment to edit
+                            setShowEdit(true);
                           }}
                         >
                           Edit
@@ -272,15 +325,31 @@ const Schedule = () => {
       <NewAppointmentPopup
         show={showPopup}
         handleClose={closePopup}
-        onSuccess={handleSuccess}
+        onSuccess={(message) => {
+          setSuccessMessage(message);
+          setShowSuccess(true);
+        }}
         workers={allWorkers}
         services={services}
         timeSlots={timeSlots}
       />
 
+      <EditAppointmentPopup
+        show={showEdit}
+        handleClose={() => setShowEdit(false)}
+        appointment={editingAppointment || mockAppointment}
+        workers={workers}
+        services={services}
+        timeSlots={timeSlots}
+        onSuccess={(message) => {
+          setSuccessMessage(message);
+          setShowSuccess(true);
+        }}
+      />
+
       <SuccessNotifier
         show={showSuccess}
-        message="Appointment created successfully!"
+        message={successMessage}
         onClose={() => setShowSuccess(false)}
       />
       <Modal show={showCalendar} onHide={closeCalendar} size="lg" centered>

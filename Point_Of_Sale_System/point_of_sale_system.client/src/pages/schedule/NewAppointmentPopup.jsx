@@ -36,8 +36,8 @@ const NewAppointmentPopup = ({ show, handleClose, workers, services, timeSlots, 
     
     resetFields();
     handleClose();
-    
-    if (onSuccess) onSuccess();
+
+    if (onSuccess) onSuccess("Appointment created successfully!");
   };
 
   return (
