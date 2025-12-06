@@ -1,0 +1,117 @@
+.schedule-container {
+  height: calc(100vh - 16px);
+  padding: 16px;
+  overflow: auto;
+}
+
+.schedule-wrapper {
+  display: flex;
+  gap: 16px;
+  height: 100%;
+}
+
+.schedule-card {
+  background-color: #f0f4f7;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 45px);
+}
+
+.schedule-grid {
+  display: flex;
+  overflow-x: auto;
+  flex: 1;
+}
+
+.time-column {
+  flex: 0 0 60px;
+  position: sticky;
+  left: 0;
+  background-color: #f0f4f7;
+  z-index: 2;
+  border-right: 1px solid #ccc;
+  padding-top: 91px;
+}
+
+.time-slot {
+  height: 39px;
+  border-bottom: 1px dashed #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.employees-wrapper {
+  display: flex;
+  min-width: max-content;
+}
+
+.employee-column {
+  width: 180px;
+  border-left: 1px solid #ccc;
+  position: relative;
+}
+
+.employee-header {
+  height: 91px;
+  text-align: center;
+  border-bottom: 1px solid #ccc;
+  background-color: #f0f4f7;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.time-slot-empty {
+  height: 39px;
+  border-bottom: 1px dashed #ccc;
+}
+
+.appointment-block {
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  height: 39px;
+  background-color: #d3d3d3;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  cursor: pointer;
+}
+
+.appointment-block span {
+  color: #0d6efd;
+  user-select: none;
+}
+
+.schedule-sidebar {
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.sidebar-date {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 2rem;
+}
+
+.sidebar-button, .sidebar-add-button {
+  width: 100%;
+}
+
+.sidebar-search {
+  margin-bottom: 8px;
+}
