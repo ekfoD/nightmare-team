@@ -21,7 +21,7 @@ namespace Point_of_Sale_System.Server.Models
         public Guid EmploeeId { get; set; }
 
         [ForeignKey("EmploeeId")]
-        public virtual Emploee Emploee { get; set; }
+        public virtual Employee Employee { get; set; }
 
         // foreign key to Organization
         [Required]
