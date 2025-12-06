@@ -33,6 +33,7 @@ export default function EditOrganization({ onSubmit, business }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log("Form submitted:", formData);
+        alert("Setting change succesfull");
         onSubmit(formData);
     };
 
