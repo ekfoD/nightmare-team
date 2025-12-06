@@ -21,98 +21,159 @@ const allWorkers = [
 ];
 
 const appointments = [
-  { worker: 'Alice', time: '08:30', date: '2025-11-28', service: 'Haircut', extraInfo: 'Regular client, prefers short trim' },
-  { worker: 'Bob', time: '09:00', date: '2025-11-28', service: 'Nails', extraInfo: 'French manicure' },
-  { worker: 'Charlie', time: '10:00', date: '2025-11-28', service: 'Massage', extraInfo: 'Focus on shoulders' },
-  { worker: 'Alice', time: '11:00', date: '2025-11-28', service: 'Makeup', extraInfo: 'Evening look' },
-  { worker: 'Diana', time: '12:30', date: '2025-11-28', service: 'Coloring', extraInfo: 'Highlights only' },
-  { worker: 'Eve', time: '12:30', date: '2025-11-28', service: 'Nails', extraInfo: 'Acrylic extensions' },
-  { worker: 'Frank', time: '14:00', date: '2025-11-28', service: 'Haircut', extraInfo: 'Trim and style' },
+  {
+    worker: 'Alice',
+    time: '08:30',
+    date: '2025-11-28',
+    service: 'Haircut',
+    extraInfo: 'Regular client, prefers short trim'
+  },
+  {
+    worker: 'Bob',
+    time: '09:00',
+    date: '2025-11-28',
+    service: 'Nails',
+    extraInfo: 'French manicure'
+  },
+  {
+    worker: 'Charlie',
+    time: '10:00',
+    date: '2025-11-28',
+    service: 'Massage',
+    extraInfo: 'Focus on shoulders'
+  },
+  {
+    worker: 'Alice',
+    time: '11:00',
+    date: '2025-11-28',
+    service: 'Makeup',
+    extraInfo: 'Evening look'
+  },
+  {
+    worker: 'Diana',
+    time: '12:30',
+    date: '2025-11-28',
+    service: 'Coloring',
+    extraInfo: 'Highlights only'
+  },
+  {
+    worker: 'Eve',
+    time: '12:30',
+    date: '2025-11-28',
+    service: 'Nails',
+    extraInfo: 'Acrylic extensions'
+  },
+  {
+    worker: 'Frank',
+    time: '14:00',
+    date: '2025-11-28',
+    service: 'Haircut',
+    extraInfo: 'Trim and style'
+  },
 ];
 
-const mockAppointment = { date: "2025-01-12", time: "10:00", service: "Nails", worker: "Emma", extraInfo: "Client prefers pink color" };
+const mockAppointment = {
+  date: "2025-01-12",
+  time: "10:00",
+  service: "Nails",
+  worker: "Emma",
+  extraInfo: "Client prefers pink color"
+};
+
 const services = ["Haircut", "Nails", "Massage", "Makeup", "Coloring"];
 
-const ROW_HEIGHT = 39;  // Adjusted to match CSS
+// Scaling factors
+const SCALE = 1.3;
+const ROW_HEIGHT = 30 * SCALE; 
 
-// Generate time slots
-const generateTimes = (start, end, interval) => {
+// Generate dynamic time slots
+const generateTimes = (workStart, workEnd, intervalMinutes) => {
   const times = [];
-  let [h, m] = start.split(':').map(Number);
-  const [endH, endM] = end.split(':').map(Number);
-  let date = new Date();
-  date.setHours(h, m, 0, 0);
-  const endDate = new Date();
-  endDate.setHours(endH, endM, 0, 0);
+  const [startHour, startMin] = workStart.split(':').map(Number);
+  const [endHour, endMin] = workEnd.split(':').map(Number);
+  let current = new Date();
+  current.setHours(startHour, startMin, 0, 0);
+  const end = new Date();
+  end.setHours(endHour, endMin, 0, 0);
 
-  while (date <= endDate) {
-    times.push(`${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`);
-    date.setMinutes(date.getMinutes() + interval);
+  while (current <= end) {
+    const hh = String(current.getHours()).padStart(2, '0');
+    const mm = String(current.getMinutes()).padStart(2, '0');
+    times.push(`${hh}:${mm}`);
+    current.setMinutes(current.getMinutes() + intervalMinutes);
   }
   return times;
 };
 
-// Get top offset for appointment
+// Calculate appointment top offset based on times array
 const getAppointmentTop = (time, times) => {
   const index = times.indexOf(time);
   return index >= 0 ? index * ROW_HEIGHT : 0;
 };
 
-const EmployeeColumn = ({ worker, times, appointments, onEdit }) => (
-  <div className="employee-column">
-    <div className="employee-header">
-      <Image src={worker.photo} roundedCircle width={65} height={65} />
-      <div>{worker.name}</div>
-    </div>
-
-    {times.map((_, idx) => <div key={idx} className="time-slot-empty" />)}
-
-    {appointments.filter(a => a.worker === worker.name).map((app, idx) => (
-      <div
-        key={idx}
-        className="appointment-block"
-        style={{ top: 91 + getAppointmentTop(app.time, times) }}
-        onClick={() => onEdit(app)}
-      >
-        <span>Edit</span>
-      </div>
-    ))}
-  </div>
-);
-
 const Schedule = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [showPopup, setShowPopup] = useState(false);
-  const [showEdit, setShowEdit] = useState(false);
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [editingAppointment, setEditingAppointment] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [editingAppointment, setEditingAppointment] = useState(null);
 
-  const workStart = '07:00', workEnd = '21:00', intervalMinutes = 30;
+  const workStart = '07:00';
+  const workEnd = '21:00';
+  const intervalMinutes = 30;
   const times = generateTimes(workStart, workEnd, intervalMinutes);
 
-  const workers = allWorkers.filter(w => w.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const [showPopup, setShowPopup] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+
+  const openPopup = () => setShowPopup(true);
+  const closePopup = () => setShowPopup(false);
+
+  const openCalendar = () => setShowCalendar(true);
+  const closeCalendar = () => setShowCalendar(false);
+
+  const workers = allWorkers.filter((worker) =>
+    worker.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const fixedDate = new Date('2025-11-28');
 
   return (
     <Container fluid className="schedule-container">
       <div className="schedule-wrapper">
         <Card className="schedule-card">
-          <div className="schedule-grid">
+          <div style={{ display: 'flex', overflowX: 'auto', flex: 1 }}>
             <div className="time-column">
-              {times.map((t, i) => <div key={i} className="time-slot">{t}</div>)}
+              {times.map((time, idx) => (
+                <div key={idx} className="time-slot">{time}</div>
+              ))}
             </div>
 
-            <div className="employees-wrapper">
-              {workers.map((w, i) => (
-                <EmployeeColumn
-                  key={i}
-                  worker={w}
-                  times={times}
-                  appointments={appointments}
-                  onEdit={(app) => { setEditingAppointment(app); setShowEdit(true); }}
-                />
+            <div style={{ display: 'flex', minWidth: `${workers.length * 234}px` }}>
+              {workers.map((worker, wIdx) => (
+                <div key={wIdx} className="employee-column" style={{ minHeight: `${times.length * 30 + 91}px` }}>
+                  <div className="employee-header">
+                    <Image src={worker.photo} roundedCircle width={65} height={65} />
+                    <div>{worker.name}</div>
+                  </div>
+
+                  {times.map((_, idx) => (
+                    <div key={idx} style={{ height: '30px', borderBottom: '1px dashed #ccc' }}></div>
+                  ))}
+
+                  {appointments
+                    .filter(a => a.worker === worker.name)
+                    .map((app, idx) => (
+                      <div
+                        key={idx}
+                        className="appointment-block"
+                        style={{ top: 91 + getAppointmentTop(app.time, times) }}
+                        onClick={() => { setEditingAppointment(app); setShowEdit(true); }}
+                      >
+                        <span>Edit</span>
+                      </div>
+                    ))}
+                </div>
               ))}
             </div>
           </div>
@@ -124,22 +185,23 @@ const Schedule = () => {
             <div>{fixedDate.toLocaleString('default', { month: 'long' })}</div>
             <div>{fixedDate.getDate()}</div>
           </div>
-          <Button className="sidebar-button" variant="primary" onClick={() => setShowCalendar(true)}>Calendar</Button>
+
+          <Button className="sidebar-button" variant="primary" onClick={openCalendar}>Calendar</Button>
           <Form.Control
             className="sidebar-search"
             type="text"
             placeholder="Search employees..."
             value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <Button className="sidebar-add-button" variant="primary" onClick={() => setShowPopup(true)}>Add new appointment</Button>
+          <Button className="sidebar-add-button" variant="primary" onClick={openPopup}>Add new appointment</Button>
         </div>
       </div>
 
       <NewAppointmentPopup
         show={showPopup}
-        handleClose={() => setShowPopup(false)}
-        onSuccess={msg => { setSuccessMessage(msg); setShowSuccess(true); }}
+        handleClose={closePopup}
+        onSuccess={(message) => { setSuccessMessage(message); setShowSuccess(true); }}
         workers={allWorkers}
         services={services}
         timeSlots={times}
@@ -152,7 +214,7 @@ const Schedule = () => {
         workers={workers}
         services={services}
         timeSlots={times}
-        onSuccess={msg => { setSuccessMessage(msg); setShowSuccess(true); }}
+        onSuccess={(message) => { setSuccessMessage(message); setShowSuccess(true); }}
       />
 
       <SuccessNotifier
@@ -161,11 +223,13 @@ const Schedule = () => {
         onClose={() => setShowSuccess(false)}
       />
 
-      <Modal show={showCalendar} onHide={() => setShowCalendar(false)} size="lg" centered>
+      <Modal show={showCalendar} onHide={closeCalendar} size="lg" centered>
         <Modal.Header closeButton>
           <Modal.Title>Calendar</Modal.Title>
         </Modal.Header>
-        <Modal.Body><Calendar /></Modal.Body>
+        <Modal.Body>
+          <Calendar />
+        </Modal.Body>
       </Modal>
     </Container>
   );

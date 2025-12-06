@@ -1,239 +1,152 @@
-import React, { useState } from 'react';
-import { Container, Card, Image, Button, Form, Modal } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import '../../styles/Schedule.css';
-import NewAppointmentPopup from './NewAppointmentPopup';
-import EditAppointmentPopup from './EditAppointmentPopup';
-import SuccessNotifier from "./SuccessNotifier";
-import Calendar from './Calendar';
+import React, { useState } from "react";
+import { Container, Row, Col, Button, Card } from "react-bootstrap";
 
-const allWorkers = [
-  { name: 'Alice', photo: 'https://via.placeholder.com/50' },
-  { name: 'Bob', photo: 'https://via.placeholder.com/50' },
-  { name: 'Charlie', photo: 'https://via.placeholder.com/50' },
-  { name: 'Diana', photo: 'https://via.placeholder.com/50' },
-  { name: 'Eve', photo: 'https://via.placeholder.com/50' },
-  { name: 'Frank', photo: 'https://via.placeholder.com/50' },
-  { name: 'Grace', photo: 'https://via.placeholder.com/50' },
-  { name: 'Hank', photo: 'https://via.placeholder.com/50' },
-  { name: 'Ivy', photo: 'https://via.placeholder.com/50' },
-];
+export default function Calendar() {
+  const today = new Date();
+  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
+  const [currentYear, setCurrentYear] = useState(today.getFullYear());
 
-const appointments = [
-  {
-    worker: 'Alice',
-    time: '08:30',
-    date: '2025-11-28',
-    service: 'Haircut',
-    extraInfo: 'Regular client, prefers short trim'
-  },
-  {
-    worker: 'Bob',
-    time: '09:00',
-    date: '2025-11-28',
-    service: 'Nails',
-    extraInfo: 'French manicure'
-  },
-  {
-    worker: 'Charlie',
-    time: '10:00',
-    date: '2025-11-28',
-    service: 'Massage',
-    extraInfo: 'Focus on shoulders'
-  },
-  {
-    worker: 'Alice',
-    time: '11:00',
-    date: '2025-11-28',
-    service: 'Makeup',
-    extraInfo: 'Evening look'
-  },
-  {
-    worker: 'Diana',
-    time: '12:30',
-    date: '2025-11-28',
-    service: 'Coloring',
-    extraInfo: 'Highlights only'
-  },
-  {
-    worker: 'Eve',
-    time: '12:30',
-    date: '2025-11-28',
-    service: 'Nails',
-    extraInfo: 'Acrylic extensions'
-  },
-  {
-    worker: 'Frank',
-    time: '14:00',
-    date: '2025-11-28',
-    service: 'Haircut',
-    extraInfo: 'Trim and style'
-  },
-];
+  const monthNames = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ];
 
-const mockAppointment = {
-  date: "2025-01-12",
-  time: "10:00",
-  service: "Nails",
-  worker: "Emma",
-  extraInfo: "Client prefers pink color"
-};
+  const buttonSize = 80;
+  const fontSize = 20;
 
-const services = ["Haircut", "Nails", "Massage", "Makeup", "Coloring"];
+  const daysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
 
-// Scaling factors
-const SCALE = 1.3;
-const HEADER_HEIGHT = 70 * SCALE; 
-const COLUMN_WIDTH = 180 * SCALE; 
-const ROW_HEIGHT = 30 * SCALE; 
+  // Adjust first day: Monday = 0
+  const firstDayOfMonth = (month, year) => {
+    const day = new Date(year, month, 1).getDay(); // 0 = Sunday
+    return day === 0 ? 6 : day - 1; // Shift Sunday to end, Monday = 0
+  };
 
-// Generate dynamic time slots
-const generateTimes = (workStart, workEnd, intervalMinutes) => {
-  const times = [];
-  const [startHour, startMin] = workStart.split(':').map(Number);
-  const [endHour, endMin] = workEnd.split(':').map(Number);
-  let current = new Date();
-  current.setHours(startHour, startMin, 0, 0);
-  const end = new Date();
-  end.setHours(endHour, endMin, 0, 0);
+  const generateCalendar = () => {
+    const numDays = daysInMonth(currentMonth, currentYear);
+    const startDay = firstDayOfMonth(currentMonth, currentYear);
 
-  while (current <= end) {
-    const hh = String(current.getHours()).padStart(2, '0');
-    const mm = String(current.getMinutes()).padStart(2, '0');
-    times.push(`${hh}:${mm}`);
-    current.setMinutes(current.getMinutes() + intervalMinutes);
-  }
-  return times;
-};
+    const totalCells = 5 * 7;
+    const cells = [];
 
-// Calculate appointment top offset based on times array
-const getAppointmentTop = (time, times) => {
-  const index = times.indexOf(time);
-  return index >= 0 ? index * ROW_HEIGHT : 0;
-};
+    for (let i = 0; i < totalCells; i++) {
+      const dayNumber = i - startDay + 1;
+      const isWeekend = i % 7 === 5 || i % 7 === 6; // Saturday=5, Sunday=6
 
-const Schedule = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [editingAppointment, setEditingAppointment] = useState(null);
+      if (i >= startDay && dayNumber <= numDays) {
+        cells.push(
+          <Col key={i} className="p-1 d-flex justify-content-center">
+            <Button
+              variant="light"
+              style={{
+                width: buttonSize,
+                height: buttonSize,
+                fontSize: fontSize,
+                backgroundColor: "var(--calendar-day-bg)",
+                borderColor: "var(--calendar-border)",
+                color: isWeekend ? "var(--calendar-weekend-text)" : "black",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+                transition: "0.2s ease",
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = "var(--calendar-day-hover)"}
+              onMouseLeave={(e) => e.target.style.backgroundColor = "var(--calendar-day-bg)"}
+            >
+              {dayNumber}
+            </Button>
+          </Col>
+        );
+      } else {
+        cells.push(
+          <Col key={i} className="p-1 d-flex justify-content-center">
+            <div style={{ width: buttonSize, height: buttonSize }}></div>
+          </Col>
+        );
+      }
+    }
 
-  const workStart = '07:00';
-  const workEnd = '21:00';
-  const intervalMinutes = 30;
-  const times = generateTimes(workStart, workEnd, intervalMinutes);
+    const weeks = [];
+    for (let i = 0; i < 5; i++) {
+      weeks.push(
+        <Row key={i} className="mb-1">
+          {cells.slice(i * 7, (i + 1) * 7)}
+        </Row>
+      );
+    }
 
-  const [showPopup, setShowPopup] = useState(false);
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [showEdit, setShowEdit] = useState(false);
+    return weeks;
+  };
 
-  const openPopup = () => setShowPopup(true);
-  const closePopup = () => setShowPopup(false);
+  const handlePrevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(currentYear - 1);
+    } else {
+      setCurrentMonth(currentMonth - 1);
+    }
+  };
 
-  const openCalendar = () => setShowCalendar(true);
-  const closeCalendar = () => setShowCalendar(false);
+  const handleNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear(currentYear + 1);
+    } else {
+      setCurrentMonth(currentMonth + 1);
+    }
+  };
 
-  const workers = allWorkers.filter((worker) =>
-    worker.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const fixedDate = new Date('2025-11-28');
+  const weekDays = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]; // Monday first
 
   return (
-    <Container fluid className="schedule-container">
-      <div className="schedule-wrapper">
-        <Card className="schedule-card">
-          <div style={{ display: 'flex', overflowX: 'auto', flex: 1 }}>
-            <div className="time-column">
-              {times.map((time, idx) => (
-                <div key={idx} className="time-slot">{time}</div>
-              ))}
-            </div>
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center"
+    }}
+  >
+    <Card
+      style={{
+        width: "max-content",
+        borderRadius: "14px",
+        boxShadow: "0 3px 10px rgba(0,0,0,0.12)",
+      }}
+    >
+      <Card.Body>
+        <Row className="align-items-center mb-3">
+          <Col xs="auto">
+            <Button variant="outline-dark" onClick={handlePrevMonth}>&lt;</Button>
+          </Col>
 
-            <div style={{ display: 'flex', minWidth: `${workers.length * 234}px` }}>
-              {workers.map((worker, wIdx) => (
-                <div key={wIdx} className="employee-column" style={{ minHeight: `${times.length * 30 + 91}px` }}>
-                  <div className="employee-header">
-                    <Image src={worker.photo} roundedCircle width={65} height={65} />
-                    <div>{worker.name}</div>
-                  </div>
+          <Col className="text-center">
+            <h4 style={{ marginBottom: 0 }}>
+              {monthNames[currentMonth]} {currentYear}
+            </h4>
+          </Col>
 
-                  {times.map((_, idx) => (
-                    <div key={idx} style={{ height: '30px', borderBottom: '1px dashed #ccc' }}></div>
-                  ))}
+          <Col xs="auto">
+            <Button variant="outline-dark" onClick={handleNextMonth}>&gt;</Button>
+          </Col>
+        </Row>
 
-                  {appointments
-                    .filter(a => a.worker === worker.name)
-                    .map((app, idx) => (
-                      <div
-                        key={idx}
-                        className="appointment-block"
-                        style={{ top: 91 + getAppointmentTop(app.time, times) }}
-                        onClick={() => { setEditingAppointment(app); setShowEdit(true); }}
-                      >
-                        <span>Edit</span>
-                      </div>
-                    ))}
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
+        {/* Weekday headers */}
+        <Row className="mb-2 text-center">
+          {weekDays.map((d, idx) => (
+            <Col
+              key={idx}
+              style={{
+                fontSize: fontSize * 0.8,
+                opacity: 0.7
+              }}
+            >
+              {d}
+            </Col>
+          ))}
+        </Row>
 
-        <div className="schedule-sidebar">
-          <div className="sidebar-date">
-            <div>{fixedDate.getFullYear()}</div>
-            <div>{fixedDate.toLocaleString('default', { month: 'long' })}</div>
-            <div>{fixedDate.getDate()}</div>
-          </div>
+        {generateCalendar()}
+      </Card.Body>
+    </Card>
+  </div>
+);
 
-          <Button className="sidebar-button" variant="primary" onClick={openCalendar}>Calendar</Button>
-          <Form.Control
-            className="sidebar-search"
-            type="text"
-            placeholder="Search employees..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <Button className="sidebar-add-button" variant="primary" onClick={openPopup}>Add new appointment</Button>
-        </div>
-      </div>
-
-      <NewAppointmentPopup
-        show={showPopup}
-        handleClose={closePopup}
-        onSuccess={(message) => { setSuccessMessage(message); setShowSuccess(true); }}
-        workers={allWorkers}
-        services={services}
-        timeSlots={times}
-      />
-
-      <EditAppointmentPopup
-        show={showEdit}
-        handleClose={() => setShowEdit(false)}
-        appointment={editingAppointment || mockAppointment}
-        workers={workers}
-        services={services}
-        timeSlots={times}
-        onSuccess={(message) => { setSuccessMessage(message); setShowSuccess(true); }}
-      />
-
-      <SuccessNotifier
-        show={showSuccess}
-        message={successMessage}
-        onClose={() => setShowSuccess(false)}
-      />
-
-      <Modal show={showCalendar} onHide={closeCalendar} size="lg" centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Calendar</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Calendar />
-        </Modal.Body>
-      </Modal>
-    </Container>
-  );
-};
-
-export default Schedule;
+}
