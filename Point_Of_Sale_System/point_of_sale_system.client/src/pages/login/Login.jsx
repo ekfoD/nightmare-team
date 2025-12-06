@@ -3,7 +3,7 @@ import useAuth from "../../hooks/useAuth.jsx"
 import { Link, useNavigate, useLocation, NavLink } from 'react-router-dom';
 import "../../styles/Register.css";
 
-const LOGIN_URL = '/login';
+const LOGIN_URL = '/api/login';
 function Login() {
     const { setAuth } = useAuth();
 

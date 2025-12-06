@@ -13,9 +13,11 @@ function Navbar() {
         <BootstrapNavbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto">
             <Nav.Link as={NavLink} to="/" end>Home</Nav.Link>
+            <Nav.Link as={NavLink} to="/menu" end>Menu</Nav.Link>
             <Nav.Link as={NavLink} to="/orders">Orders</Nav.Link>
             <Nav.Link as={NavLink} to="/inventory">Inventory</Nav.Link>
             <Nav.Link as={NavLink} to="/employees">Employees</Nav.Link>
+            <Nav.Link as={NavLink} to="/appAbout" end>AppointmentWorker</Nav.Link>
             <Nav.Link as={NavLink} to="/settings">
               <BsFillGearFill/>
             </Nav.Link>

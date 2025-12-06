@@ -1,11 +1,29 @@
+using Point_of_Sale_System.Server.Interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// DB STUFF SHOULD BE HERE
+// var connectionString =
+//     builder.Configuration.GetConnectionString("DefaultConnection")
+//         ?? throw new InvalidOperationException("Connection string"
+//         + "'DefaultConnection' not found.");
+
+// builder.Services.AddDbContext<AppDbContext>(options =>
+//     options.UseSqlServer(connectionString));
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin() // when prod phase, domain can be added
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
@@ -19,12 +37,30 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowAll");
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseCors("AllowReact");
 
 app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
 
 app.Run();
+
+
+
+// kas turi prieiga prie employees edit?
+
+// ar employees gali keisti savo log in info? 
+
+
+
+
+
+// hierarchines roles
+
+// kai service based: menu -> services, inventory -> schedule

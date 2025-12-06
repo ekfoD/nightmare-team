@@ -15,3 +15,18 @@
 ### 5. Ruslanas Maksimkinas
 
 ## [Overleaf page of the project](https://www.overleaf.com/read/drqfryhqkydx#1757ba)
+
+
+# About the project:
+
+## Frontend
+
+## Backend
+
+### File seperations and how information travels
+
+Repositories folder holds logically grouped tables for easier and more maintainable access
+
+Services folder holds business logic for querying results which database gives back
+
+Controller calls Services, Services calls Repositories

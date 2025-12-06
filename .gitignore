@@ -1,5 +1,11 @@
 .vs/
 .vscode/
 Debug/
+node_modules/
+obj/
+bin/
+
+Point_Of_Sale_System/point_of_sale_system.client/obj\\Debug/
 
 .fake
+*.user
