@@ -4,6 +4,8 @@ import { Container, Card, Image, Button, Form, Modal } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import NewAppointmentPopup from './NewAppointmentPopup';
 import Calendar from './Calendar';
+import SuccessNotifier from "./SuccessNotifier";
+
 
 const allWorkers = [
   { name: 'Alice', photo: 'https://via.placeholder.com/50' },
@@ -62,6 +64,7 @@ const getAppointmentTop = (time, times) => {
 
 const Schedule = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Work schedule settings
   const workStart = '07:00';
@@ -78,6 +81,8 @@ const Schedule = () => {
 
   const openCalendar = () => setShowCalendar(true);
   const closeCalendar = () => setShowCalendar(false);
+
+  const handleSuccess = () => {setShowSuccess(true);};
 
   const timeSlots = times;
 
@@ -267,9 +272,16 @@ const Schedule = () => {
       <NewAppointmentPopup
         show={showPopup}
         handleClose={closePopup}
+        onSuccess={handleSuccess}
         workers={allWorkers}
         services={services}
         timeSlots={timeSlots}
+      />
+
+      <SuccessNotifier
+        show={showSuccess}
+        message="Appointment created successfully!"
+        onClose={() => setShowSuccess(false)}
       />
       <Modal show={showCalendar} onHide={closeCalendar} size="lg" centered>
         <Modal.Header closeButton>
