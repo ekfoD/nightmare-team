@@ -15,7 +15,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: calc(100% - 45px);
+  height: calc(100% - 55px);
 }
 
 .schedule-grid {
@@ -50,7 +50,7 @@
 }
 
 .employee-column {
-  width: 180px;
+  width: 220px;
   border-left: 1px solid #ccc;
   position: relative;
 }
@@ -105,7 +105,7 @@
   text-align: center;
   font-weight: bold;
   margin-bottom: 8px;
-  font-size: 2rem;
+  font-size: 3rem;
 }
 
 .sidebar-button, .sidebar-add-button {

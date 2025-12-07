@@ -158,7 +158,7 @@ const Schedule = () => {
                   </div>
 
                   {times.map((_, idx) => (
-                    <div key={idx} style={{ height: '30px', borderBottom: '1px dashed #ccc' }}></div>
+                    <div key={idx} style={{ height: '39px', borderBottom: '1px dashed #ccc' }}></div>
                   ))}
 
                   {appointments
