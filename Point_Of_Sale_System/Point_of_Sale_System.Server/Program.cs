@@ -16,6 +16,7 @@ builder.Services.AddSwaggerGen();
 //     options.UseSqlServer(connectionString));
 
 builder.Services.AddSingleton<IEmployeeRepository, InMemoryEmployeeRepository>();
+builder.Services.AddScoped<IOrganizationrepository, InMemoryOrganizationRepository>();
 
 builder.Services.AddCors(options =>
 {
