@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Container, Card, Image, Button, Form, Modal } from 'react-bootstrap';
 import NewAppointmentPopup from './NewAppointmentPopup';
 import EditAppointmentPopup from './EditAppointmentPopup';
@@ -7,80 +7,6 @@ import Calendar from './Calendar';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../styles/Schedule.css';
-
-const allWorkers = [
-  { name: 'Alice', photo: 'https://via.placeholder.com/50' },
-  { name: 'Bob', photo: 'https://via.placeholder.com/50' },
-  { name: 'Charlie', photo: 'https://via.placeholder.com/50' },
-  { name: 'Diana', photo: 'https://via.placeholder.com/50' },
-  { name: 'Eve', photo: 'https://via.placeholder.com/50' },
-  { name: 'Frank', photo: 'https://via.placeholder.com/50' },
-  { name: 'Grace', photo: 'https://via.placeholder.com/50' },
-  { name: 'Hank', photo: 'https://via.placeholder.com/50' },
-  { name: 'Ivy', photo: 'https://via.placeholder.com/50' },
-];
-
-const appointments = [
-  {
-    worker: 'Alice',
-    time: '08:30',
-    date: '2025-11-28',
-    service: 'Haircut',
-    extraInfo: 'Regular client, prefers short trim'
-  },
-  {
-    worker: 'Bob',
-    time: '09:00',
-    date: '2025-11-28',
-    service: 'Nails',
-    extraInfo: 'French manicure'
-  },
-  {
-    worker: 'Charlie',
-    time: '10:00',
-    date: '2025-11-28',
-    service: 'Massage',
-    extraInfo: 'Focus on shoulders'
-  },
-  {
-    worker: 'Alice',
-    time: '11:00',
-    date: '2025-11-28',
-    service: 'Makeup',
-    extraInfo: 'Evening look'
-  },
-  {
-    worker: 'Diana',
-    time: '12:30',
-    date: '2025-11-28',
-    service: 'Coloring',
-    extraInfo: 'Highlights only'
-  },
-  {
-    worker: 'Eve',
-    time: '12:30',
-    date: '2025-11-28',
-    service: 'Nails',
-    extraInfo: 'Acrylic extensions'
-  },
-  {
-    worker: 'Frank',
-    time: '14:00',
-    date: '2025-11-28',
-    service: 'Haircut',
-    extraInfo: 'Trim and style'
-  },
-];
-
-const mockAppointment = {
-  date: "2025-01-12",
-  time: "10:00",
-  service: "Nails",
-  worker: "Emma",
-  extraInfo: "Client prefers pink color"
-};
-
-const services = ["Haircut", "Nails", "Massage", "Makeup", "Coloring"];
 
 // Scaling factors
 const SCALE = 1.3;
@@ -117,6 +43,28 @@ const Schedule = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [editingAppointment, setEditingAppointment] = useState(null);
 
+  const [allWorkers, setAllWorkers] = useState([]);
+  const [appointments, setAppointments] = useState([]);
+  const [services, setServices] = useState([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const workersRes = await fetch("/api/workers");
+        const apptsRes = await fetch("/api/appointments");
+        const servicesRes = await fetch("/api/services");
+
+        setAllWorkers(await workersRes.json());
+        setAppointments(await apptsRes.json());
+        setServices(await servicesRes.json());
+      } catch (err) {
+        console.error("Failed to load schedule data", err);
+      }
+    };
+
+    loadData();
+  }, []);
+
   const workStart = '07:00';
   const workEnd = '21:00';
   const intervalMinutes = 30;
@@ -133,8 +81,17 @@ const Schedule = () => {
   const closeCalendar = () => setShowCalendar(false);
 
   const workers = allWorkers.filter((worker) =>
-    worker.name.toLowerCase().includes(searchTerm.toLowerCase())
+    worker.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Fallback so Edit popup doesn't crash before data is loaded
+  const mockAppointment = {
+    date: "",
+    time: "",
+    service: "",
+    worker: "",
+    extraInfo: ""
+  };
 
   const fixedDate = new Date('2025-11-28');
 
@@ -143,12 +100,14 @@ const Schedule = () => {
       <div className="schedule-wrapper">
         <Card className="schedule-card">
           <div style={{ display: 'flex', overflowX: 'auto', flex: 1 }}>
+            {/* Time Column */}
             <div className="time-column">
               {times.map((time, idx) => (
                 <div key={idx} className="time-slot">{time}</div>
               ))}
             </div>
 
+            {/* Worker Columns */}
             <div style={{ display: 'flex', minWidth: `${workers.length * 234}px` }}>
               {workers.map((worker, wIdx) => (
                 <div key={wIdx} className="employee-column" style={{ minHeight: `${times.length * 30 + 91}px` }}>
@@ -179,6 +138,7 @@ const Schedule = () => {
           </div>
         </Card>
 
+        {/* Sidebar */}
         <div className="schedule-sidebar">
           <div className="sidebar-date">
             <div>{fixedDate.getFullYear()}</div>
@@ -186,7 +146,10 @@ const Schedule = () => {
             <div>{fixedDate.getDate()}</div>
           </div>
 
-          <Button className="sidebar-button" variant="primary" onClick={openCalendar}>Calendar</Button>
+          <Button className="sidebar-button" variant="primary" onClick={openCalendar}>
+            Calendar
+          </Button>
+
           <Form.Control
             className="sidebar-search"
             type="text"
@@ -194,7 +157,10 @@ const Schedule = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <Button className="sidebar-add-button" variant="primary" onClick={openPopup}>Add new appointment</Button>
+
+          <Button className="sidebar-add-button" variant="primary" onClick={openPopup}>
+            Add new appointment
+          </Button>
         </div>
       </div>
 
@@ -211,7 +177,7 @@ const Schedule = () => {
         show={showEdit}
         handleClose={() => setShowEdit(false)}
         appointment={editingAppointment || mockAppointment}
-        workers={workers}
+        workers={allWorkers}
         services={services}
         timeSlots={times}
         onSuccess={(message) => { setSuccessMessage(message); setShowSuccess(true); }}

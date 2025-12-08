@@ -9,5 +9,6 @@ namespace Point_of_Sale_System.Server.Interfaces
         Employee AddEmployee(Employee employee);
         Employee UpdateEmployee(Employee employee);
         bool DeleteEmployee(Guid employeeId);
+        Task<Employee?> GetByIdAsync(Guid id);
     }
 }

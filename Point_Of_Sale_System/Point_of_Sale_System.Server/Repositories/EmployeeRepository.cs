@@ -1,7 +1,7 @@
 ﻿using Point_of_Sale_System.Server.Models;
 using Point_of_Sale_System.Server.Interfaces;
 
-public class InMemoryEmployeeRepository : IEmployeeRepository
+public class EmployeeRepository : IEmployeeRepository
 {
     private static readonly List<Employee> _employees = new();
 
@@ -49,5 +49,9 @@ public class InMemoryEmployeeRepository : IEmployeeRepository
 
         _employees.Remove(existing);
         return true;
+    }
+    public Task<Employee?> GetByIdAsync(Guid id)
+    {
+        return Task.FromResult(_employees.FirstOrDefault(e => e.Id == id));
     }
 }

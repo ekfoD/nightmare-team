@@ -10,14 +10,17 @@ namespace Point_of_Sale_System.Server.Models
 
         public DateOnly Date {  get; set; }
         public TimeOnly StartTime { get; set; }
-        public TimeOnly EndTime { get; set; }
+
+        //public TimeOnly EndTime { get; set; } Discuss if this is needed
         public DateTime Timestamp { get; set; } = DateTime.Now;
+        public required string Service { get; set; }
+        public string? ExtraInfo { get; set; }
 
         // foreign key to employee
         [Required]
         public Guid EmployeeId { get; set; }
 
         [ForeignKey("EmployeeId")]
-        public virtual Employee Employee { get; set; }
+        public virtual required Employee Employee { get; set; }
     }
 }
