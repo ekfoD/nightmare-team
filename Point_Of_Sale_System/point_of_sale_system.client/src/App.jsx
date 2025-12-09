@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css' // bootstrap
 import "./styles/App.css";
 
 import MainLayout from './layouts/MainLayout.jsx'
+import AppLayout from './layouts/AppLayout.jsx';
 import AuthLayout from './layouts/AuthLayout.jsx';
 
 import Register from './pages/login/Register.jsx';
@@ -12,8 +13,16 @@ import RequireAuth from './utilities/RequireAuth.jsx';
 
 import About from './pages/about/About.jsx';
 import Orders from './pages/orders/orders.jsx';
-import Inventory from './pages/inventory/inventory.jsx';
+import Inventory from './pages/inventory/Inventory.jsx';
 import Employees from './pages/employees/employees.jsx';
+import MenuManagement from './pages/Menu/MenuManagement.jsx';
+
+import AppAbout from './pages/about/AppAbout.jsx';
+import Schedule from './pages/schedule/Schedule.jsx';
+import OrderHistory from './pages/history/OrderHistory.jsx';
+import Settings from './pages/settings/Settings.jsx';
+import AppHistory from './pages/history/AppHistory.jsx';
+import Services from './pages/services/Services.jsx';
 
 const BASE_URL = "http://localhost:5098"
 
@@ -28,10 +37,19 @@ function App() {
 
                 <Route element={<RequireAuth />}>
                     <Route element={<MainLayout />}> {/* Route kad atsirastu navbar, jo nereikia login ir register page'ui*/}
-                        <Route path="/" element={<About />} /> {/* Placeholder Weather forecast vietoj actual home page'o, tsg nzn kas jame turi buti */}
+                        <Route path="/" element={<About />} />
+                        <Route path="/orderHistory" element={<OrderHistory /> }/>
+                        <Route path="/menu" element={<MenuManagement />} />
                         <Route path="/orders" element={<Orders />} />
                         <Route path="/inventory" element={<Inventory />} />
                         <Route path="/employees" element={<Employees />} />
+                        <Route path="/settings" element={<Settings/>} />
+                    </Route>
+                    <Route element={<AppLayout />}>
+                        <Route path="/appAbout" element={<AppAbout />} /> 
+                        <Route path="/appHistory" element={<AppHistory /> }/>
+                        <Route path="/services" element={<Services /> }/>
+                        <Route path="/schedule" element={<Schedule />} />
                     </Route>
                 </Route>
             </Routes>
