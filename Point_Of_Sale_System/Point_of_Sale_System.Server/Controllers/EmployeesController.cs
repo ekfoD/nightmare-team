@@ -4,6 +4,7 @@ using Point_of_Sale_System.Server.DTOs;
 using Point_of_Sale_System.Server.Enums;
 using Point_of_Sale_System.Server.Interfaces;
 using Point_of_Sale_System.Server.Models;
+using Point_of_Sale_System.Server.Models.Entities.Buisness;
 
 
 namespace Point_of_Sale_System.Server.Controllers
@@ -48,8 +49,7 @@ namespace Point_of_Sale_System.Server.Controllers
                 Status = Enum.TryParse<StatusEnum>(request.Status, true, out var statusEnum)
                     ? statusEnum
                     : StatusEnum.inactive,
-                Timestamp = DateTime.UtcNow,
-                OrganizationId = request.OrganizationId
+                Timestamp = DateTime.UtcNow
             };
             
 
