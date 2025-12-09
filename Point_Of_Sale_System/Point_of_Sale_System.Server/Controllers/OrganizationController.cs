@@ -40,12 +40,18 @@ namespace Point_of_Sale_System.Server.Controllers
             return Ok(dto);
         }
         [HttpPut("{OrganizationId:guid}")]
-        public IActionResult UpdateOrganization(Guid OrganizationId, [FromBody] Organization updated)
+        public IActionResult UpdateOrganization(Guid OrganizationId, [FromBody] OrganizationRequest dto)
         {
             var org = _organizationRepository.GetOrganizationById(OrganizationId);
 
             if (org == null)
                 return NotFound();
+            org.Name = dto.Name;
+            org.Currency = dto.Currency;
+            org.Address = dto.Address;
+            org.EmailAddress = dto.EmailAddress;
+            org.PhoneNumber = dto.PhoneNumber;
+            org.Plan = dto.OrganizationType;
 
             _organizationRepository.UpdateOrganization(org);
 

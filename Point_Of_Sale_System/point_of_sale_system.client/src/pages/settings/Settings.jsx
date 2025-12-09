@@ -31,7 +31,7 @@ function Settings() {
     async function handleFormSubmit(updatedData) {
         try {
             const response = await axios.put(
-                '/api/Organization/${business.id}',
+                `/api/Organization/${business.id}`,
                 updatedData
             );
 
