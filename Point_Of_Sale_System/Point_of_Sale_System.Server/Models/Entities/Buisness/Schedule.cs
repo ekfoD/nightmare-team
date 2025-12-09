@@ -13,11 +13,11 @@ namespace Point_of_Sale_System.Server.Models.Entities.Buisness
         public TimeOnly EndTime { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.Now;
 
-        // foreign key to emploee
+        // foreign key to employee
         [Required]
-        public Guid EmploeeId { get; set; }
+        public Guid EmployeeId { get; set; }
 
-        [ForeignKey("EmploeeId")]
-        public virtual Emploee Emploee { get; set; }
+        [ForeignKey("EmployeeId")]
+        public virtual Employee Employee { get; set; }
     }
 }
