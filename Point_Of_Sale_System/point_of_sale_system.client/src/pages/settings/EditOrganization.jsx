@@ -1,15 +1,30 @@
-import { useState } from "react";
 import { Form, Button, Row, Col, Card } from "react-bootstrap";
+import { useState, useEffect } from 'react';
 
 export default function EditOrganization({ onSubmit, business }) {
     const [formData, setFormData] = useState({
-        name: business.name || "",
-        address: business.address || "",
-        emailAddress: business.emailAddress || "",
-        phoneNumber: business.phoneNumber || "",
-        bussinesType: business.bussinesType || "",
-        currency: business.currency || "",
+        name: "",
+        address: "",
+        emailAddress: "",
+        phoneNumber: "",
+        organizationType: "",
+        currency: "",
     });
+
+    useEffect(() => {
+        if (business) {
+            setFormData({
+                name: business.name || "",
+                address: business.address || "",
+                emailAddress: business.emailAddress || "",
+                phoneNumber: business.phoneNumber || "",
+                organizationType: business.organizationType || "",
+                currency: business.currency || "",
+            });
+        }
+    }, [business]);
+
+    console.log("BUSINESS PROPS:", business);
 
     function handleChange(e) {
         setFormData({
@@ -25,7 +40,7 @@ export default function EditOrganization({ onSubmit, business }) {
             address: business.address || "",
             emailAddress: business.emailAddress || "",
             phoneNumber: business.phoneNumber || "",
-            bussinesType: business.bussinesType || "",
+            bussinesType: business.organizationType || "",
             currency: business.currency || "",
         });
     }
@@ -47,6 +62,16 @@ export default function EditOrganization({ onSubmit, business }) {
                         type="string"
                         value={formData.name}
                         name="name"
+                        onChange={handleChange}
+                    />
+                </Form.Group>
+
+                <Form.Group className="mb-3 w-50" controlId="formAddress">
+                    <Form.Label>Organization email address</Form.Label>
+                    <Form.Control
+                        type="email"
+                        value={formData.emailAddress}
+                        name="emailAddress"
                         onChange={handleChange}
                     />
                 </Form.Group>
@@ -75,12 +100,13 @@ export default function EditOrganization({ onSubmit, business }) {
                 <Form.Group className="mb-3 w-25" controlId="formOrganizationType">
                     <Form.Label>Choose organization type</Form.Label>
                     <Form.Select
-                        value={formData.type}
-                        name="type"
+                        value={formData.organizationType}
+                        name="organizationType"
                         onChange={handleChange}
                     >
                         <option value="order">Order</option>
                         <option value="service">Service</option>
+                        <option value="order-service">Order-Service</option>
                     </Form.Select>
                 </Form.Group>
 
@@ -91,8 +117,8 @@ export default function EditOrganization({ onSubmit, business }) {
                         name="currency"
                         onChange={handleChange}
                     >
-                        <option value="$">USD - $</option>
-                        <option value="€">EUR - €</option>
+                        <option value="dollar">USD - $</option>
+                        <option value="euro">EUR - €</option>
                     </Form.Select>
                 </Form.Group>
 

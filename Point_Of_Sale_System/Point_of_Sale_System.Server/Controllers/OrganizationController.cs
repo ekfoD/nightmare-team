@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Point_of_Sale_System.Server.DTOs;
 using Point_of_Sale_System.Server.Interfaces;
+using Point_of_Sale_System.Server.Models;
 
 
 namespace Point_of_Sale_System.Server.Controllers
@@ -23,9 +25,36 @@ namespace Point_of_Sale_System.Server.Controllers
             if (organization == null)
                 return NotFound(new { message = "Organization not found" });
 
-            return Ok(organization);
+            var dto = new OrganizationRequest
+            {
+                Id = organization.Id,
+                OwnerId = organization.OwnerId,
+                Name = organization.Name,
+                OrganizationType = organization.Plan,
+                Currency = organization.Currency,
+                Address = organization.Address,
+                EmailAddress = organization.EmailAddress,
+                PhoneNumber = organization.PhoneNumber
+            };
+
+            return Ok(dto);
+        }
+        [HttpPut("{OrganizationId:guid}")]
+        public IActionResult UpdateOrganization(Guid OrganizationId, [FromBody] Organization updated)
+        {
+            var org = _organizationRepository.GetOrganizationById(OrganizationId);
+
+            if (org == null)
+                return NotFound();
+
+            _organizationRepository.UpdateOrganization(org);
+
+            return Ok(org);
         }
 
-        
     }
+
+
 }
+
+
