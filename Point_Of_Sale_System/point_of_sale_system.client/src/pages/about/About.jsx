@@ -1,7 +1,7 @@
 function About() {
     return (
         <>
-            <p>Page about the web app itself</p>
+            <h1>ZJBS WEEBISTE</h1>
         </>
     )
 }

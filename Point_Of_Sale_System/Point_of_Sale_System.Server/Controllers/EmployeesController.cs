@@ -8,10 +8,6 @@ using Point_of_Sale_System.Server.Models;
 
 namespace Point_of_Sale_System.Server.Controllers
 {
-
-
-
-
     [ApiController]
     [Route("api/[controller]")]
     public class EmployeesController : ControllerBase
