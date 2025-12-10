@@ -20,10 +20,27 @@ namespace Point_of_Sale_System.Server.Controllers
             _orgRepo = orgRepo;
         }
 
+        // [HttpGet("{organizationId}")]
+        // public ActionResult<IEnumerable<Employee>> Get(Guid organizationId)
+        // {
+        //     var employees = _employeeRepository.GetEmployees(organizationId);
+            
+        //     return Ok(employees);
+        // }
+
         [HttpGet("{organizationId}")]
-        public ActionResult<IEnumerable<Employee>> Get(Guid organizationId)
+        public ActionResult<IEnumerable<EmployeeDto>> Get(Guid organizationId)
         {
-            var employees = _employeeRepository.GetEmployees(organizationId);
+            var employees = _employeeRepository.GetEmployees(organizationId)
+                .Select(e => new EmployeeDto
+                {
+                    Id = e.Id,
+                    Username = e.Username,
+                    AccessFlag = e.AccessFlag,
+                    Status = e.Status.ToString(),
+                    OrganizationId = e.OrganizationId
+                });
+
             return Ok(employees);
         }
 

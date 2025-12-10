@@ -17,6 +17,7 @@ builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IServicesService, ServicesService>();
 
+
 // DB STUFF SHOULD BE HERE
 // var connectionString =
 //     builder.Configuration.GetConnectionString("DefaultConnection")
