@@ -1,8 +1,10 @@
 ﻿using Point_of_Sale_System.Server.Enums;
+using Point_of_Sale_System.Server.Models.Entities.Business;
+using Point_of_Sale_System.Server.Models.Entities.ServiceBased;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Point_of_Sale_System.Server.Models
+namespace Point_of_Sale_System.Server.Models.Entities.Business
 {
     public class Employee
     {
@@ -19,12 +21,6 @@ namespace Point_of_Sale_System.Server.Models
         //navigation to FK's
         public virtual ICollection<Schedule> Schedules { get; set; }
         public virtual ICollection<Appointment> Appointments { get; set; }
-
-        [Required]
-        public Guid OrganizationId { get; set; } // As sita pakeiciau panasiai kaip yra "MenuService" modelyje, tikiuosi kad tik vienas Orgnization turi buti
-
-        [ForeignKey("OrganizationId")]
-        public virtual Organization Organization { get; set; }
-
+        public virtual ICollection<Organization> Organizations { get; set; }
     }
 }
