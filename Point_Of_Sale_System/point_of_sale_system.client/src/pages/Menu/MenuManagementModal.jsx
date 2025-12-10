@@ -99,7 +99,7 @@ const MenuManagementModal = ({ show, menuItems, categories, onSave, onCancel }) 
 
         {activeTab === 'items' ? (
           <Table hover responsive>
-            <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 1 }}>
+            <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 10 }}>
               <tr>
                 <th style={{ width: '200px' }}>Name</th>
                 <th style={{ width: '100px' }}>Price ($)</th>

@@ -63,7 +63,7 @@ const InventoryModal = ({ show, products, onSave, onCancel }) => {
       </Modal.Header>
       
       <Modal.Body style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-        <Table hover className="mb-0"> {/* Added mb-0 to remove bottom margin */}
+        <Table hover className="mb-0">
           <thead style={{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: 'white', boxShadow: '0 2px 2px -1px rgba(0, 0, 0, 0.1)' }}>
             <tr>
               <th style={{ verticalAlign: 'middle' }}>Product Name</th>
@@ -74,7 +74,6 @@ const InventoryModal = ({ show, products, onSave, onCancel }) => {
           <tbody>
             {editedProducts.map((product) => (
               <tr key={product.id}>
-                {/* Product Name */}
                 <td style={{ verticalAlign: 'middle' }}>
                   <Form.Control 
                     type="text" 
