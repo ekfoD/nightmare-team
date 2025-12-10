@@ -2,7 +2,7 @@ using Point_of_Sale_System.Server.Models;
 using Point_of_Sale_System.Server.Interfaces;
 using Point_of_Sale_System.Server.Enums;
 
-public class InMemoryOrganizationRepository : IOrganizationrepository
+public class OrganizationRepository : IOrganizationrepository
 {
 
     private static readonly List<Organization> _organizations = new()
