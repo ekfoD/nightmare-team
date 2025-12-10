@@ -53,16 +53,20 @@ namespace Point_of_Sale_System.Server.Services
 
         public async Task<AppointmentDto> CreateAsync(CreateAppointmentDto dto)
         {
-            var emp = await _employeeRepo.GetByIdAsync(dto.EmployeeId)
-                      ?? throw new Exception("Employee not found.");
+
+            var emp = (await _employeeRepo.GetEmployeesAsync(dto.OrganizationId))
+                       .FirstOrDefault(e => e.Username.Equals(dto.EmployeeName, StringComparison.OrdinalIgnoreCase))
+                       ?? throw new Exception("Employee not found.");
+
+            var svc = (await _serviceRepo.GetAllForOrganizationAsync(dto.OrganizationId))
+                       .FirstOrDefault(s => s.Name.Equals(dto.ServiceName, StringComparison.OrdinalIgnoreCase))
+                       ?? throw new Exception("Service not found.");
+
 
             if (emp.OrganizationId != dto.OrganizationId)
                 throw new Exception("Employee does not belong to this organization.");
             
             var org = await _organizationRepo.GetByIdAsync(dto.OrganizationId);
-
-            var svc = await _serviceRepo.GetByIdAsync(dto.MenuServiceId)
-                      ?? throw new Exception("Service not found.");
 
             if (svc.OrganizationId != dto.OrganizationId)
                 throw new Exception("Service does not belong to this organization.");
@@ -73,9 +77,9 @@ namespace Point_of_Sale_System.Server.Services
             var appt = new Appointment
             {
                 Id = Guid.NewGuid(),
-                EmployeeId = dto.EmployeeId,
+                EmployeeId = emp.Id,
                 Employee = emp,              // assign navigation property
-                MenuServiceId = dto.MenuServiceId,
+                MenuServiceId = svc.Id,
                 MenuService = svc,           // assign navigation property
                 OrganizationId = dto.OrganizationId,
                 Organization = org,          // fetch org if needed

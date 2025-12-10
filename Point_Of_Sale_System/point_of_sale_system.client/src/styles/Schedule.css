@@ -1,3 +1,6 @@
+/* ---------------------
+   Schedule container
+---------------------- */
 .schedule-container {
   height: calc(100vh - 16px);
   padding: 16px;
@@ -18,6 +21,9 @@
   height: calc(100% - 55px);
 }
 
+/* ---------------------
+   Schedule grid & columns
+---------------------- */
 .schedule-grid {
   display: flex;
   overflow-x: auto;
@@ -93,6 +99,9 @@
   user-select: none;
 }
 
+/* ---------------------
+   Sidebar
+---------------------- */
 .schedule-sidebar {
   width: 250px;
   display: flex;
@@ -116,7 +125,4 @@
   margin-bottom: 8px;
 }
 
-.modal-body > * {
-  all: unset; 
-  display: block;
-}
+
