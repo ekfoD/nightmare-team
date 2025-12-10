@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Point_of_Sale_System.Server.Models.Entities.Buisness;
+using Point_of_Sale_System.Server.Models.Entities.Business;
 using Point_of_Sale_System.Server.Models.Entities.MenuBased;
 using Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments;
 using Point_of_Sale_System.Server.Models.Entities.ServiceBased;

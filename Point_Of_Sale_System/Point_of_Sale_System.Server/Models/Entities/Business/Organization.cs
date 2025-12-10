@@ -4,7 +4,7 @@ using Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments;
 using Point_of_Sale_System.Server.Models.Entities.ServiceBased;
 using System.ComponentModel.DataAnnotations;
 
-namespace Point_of_Sale_System.Server.Models.Entities.Buisness
+namespace Point_of_Sale_System.Server.Models.Entities.Business
 {
     public class Organization
     {

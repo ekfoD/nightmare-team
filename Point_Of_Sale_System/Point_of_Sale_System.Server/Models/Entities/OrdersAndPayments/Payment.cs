@@ -1,5 +1,5 @@
 ﻿using Point_of_Sale_System.Server.Enums;
-using Point_of_Sale_System.Server.Models.Entities.Buisness;
+using Point_of_Sale_System.Server.Models.Entities.Business;
 using Point_of_Sale_System.Server.Models.Entities.ServiceBased;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;

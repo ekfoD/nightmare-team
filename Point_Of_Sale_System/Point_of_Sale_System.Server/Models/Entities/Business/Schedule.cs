@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Point_of_Sale_System.Server.Models.Entities.Buisness
+namespace Point_of_Sale_System.Server.Models.Entities.Business
 {
     public class Schedule
     {

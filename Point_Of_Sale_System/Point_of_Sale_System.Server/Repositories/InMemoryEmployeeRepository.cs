@@ -1,5 +1,5 @@
 ﻿using Point_of_Sale_System.Server.Interfaces;
-using Point_of_Sale_System.Server.Models.Entities.Buisness;
+using Point_of_Sale_System.Server.Models.Entities.Business;
 
 public class InMemoryEmployeeRepository : IEmployeeRepository
 {
