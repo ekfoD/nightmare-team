@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Point_of_Sale_System.Server.Interfaces;
+using System.Text.Json.Serialization;
+using Point_of_Sale_System.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,35 @@ builder.Services.AddDbContext<Point_of_Sale_System.Server.Models.Data.PoSDbConte
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// DB STUFF SHOULD BE HERE
+// var connectionString =
+//     builder.Configuration.GetConnectionString("DefaultConnection")
+//         ?? throw new InvalidOperationException("Connection string"
+//         + "'DefaultConnection' not found.");
+
+// builder.Services.AddDbContext<AppDbContext>(options =>
+//     options.UseSqlServer(connectionString));
+
+builder.Services.AddSingleton<IEmployeeRepository, InMemoryEmployeeRepository>();
+builder.Services.AddScoped<IOrganizationrepository, OrganizationRepository>();
+builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin() // when prod phase, domain can be added
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 var app = builder.Build();
 
