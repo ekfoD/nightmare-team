@@ -1,6 +1,8 @@
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Point_of_Sale_System.Server.DTOs;
-using Point_of_Sale_System.Server.Services;
+using Point_of_Sale_System.Server.Interfaces;
+using Point_of_Sale_System.Server.Models;
 
 namespace Point_of_Sale_System.Server.Controllers
 {
@@ -8,34 +10,43 @@ namespace Point_of_Sale_System.Server.Controllers
     [Route("api/[controller]")]
     public class AppointmentsController : ControllerBase
     {
-        private readonly AppointmentService _service;
+        private readonly IAppointmentService _service;
+        private readonly IOrganizationRepository _orgRepo;
+        private readonly IAppointmentRepository _appointmentRepo;
 
-        public AppointmentsController(AppointmentService service)
+        public AppointmentsController(IAppointmentService service, IOrganizationRepository orgRepo, IAppointmentRepository appointmentRepo)
         {
             _service = service;
+            _orgRepo = orgRepo;
+            _appointmentRepo = appointmentRepo;
         }
 
-        [HttpPost]
-        public async Task<ActionResult<AppointmentDto>> Create(CreateAppointmentDto dto)
+        [HttpGet("{organizationId}/{date}")]
+        public async Task<IActionResult> GetAppointments(Guid organizationId, DateTime date)
         {
-            try
-            {
-                var result = await _service.CreateAppointmentAsync(dto);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
+            var items = await _service.GetAppointmentsForDateAsync(organizationId, date);
+            return Ok(items);
         }
 
-        [HttpGet("{employeeId:guid}/{date}")]
-        public async Task<ActionResult<List<AppointmentDto>>> GetForEmployee(
-            Guid employeeId, DateOnly date)
+        [HttpPost("create")]
+        public async Task<IActionResult> Create([FromBody] CreateAppointmentDto dto)
         {
-            var result = await _service.GetAppointmentsForEmployee(employeeId, date);
-            return Ok(result);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var created = await _service.CreateAsync(dto);
+            return Ok(created);
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> GetAllForTest()
+        {
+            var date = new DateTime(2025, 1, 1, 11, 0, 0);
+            var org = _orgRepo.GetAll().FirstOrDefault();
+            if (org == null)
+                return Ok(new List<Appointment>());
+            var appts = await _appointmentRepo.GetByDateAsync(org.Id, date);
+            return Ok(appts);
         }
     }
-
 }

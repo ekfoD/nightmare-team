@@ -1,10 +1,21 @@
+using System.Drawing;
 using Point_of_Sale_System.Server.Interfaces;
+using Point_of_Sale_System.Server.Repositories;
+using Point_of_Sale_System.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IMenuServiceRepository, MenuServiceRepository>();
+builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IServicesService, ServicesService>();
 
 // DB STUFF SHOULD BE HERE
 // var connectionString =
@@ -48,6 +59,8 @@ app.UseCors("AllowReact");
 app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
+
+FakeDataSeeder.Seed();
 
 app.Run();
 

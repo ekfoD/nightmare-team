@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Point_of_Sale_System.Server.DTOs;
 using Point_of_Sale_System.Server.Enums;
 using Point_of_Sale_System.Server.Interfaces;
@@ -8,19 +7,17 @@ using Point_of_Sale_System.Server.Models;
 
 namespace Point_of_Sale_System.Server.Controllers
 {
-
-
-
-
     [ApiController]
     [Route("api/[controller]")]
     public class EmployeesController : ControllerBase
     {
         private readonly IEmployeeRepository _employeeRepository;
+        private readonly IOrganizationRepository _orgRepo;
 
-        public EmployeesController(IEmployeeRepository employeeRepository)
+        public EmployeesController(IEmployeeRepository employeeRepository, IOrganizationRepository orgRepo)
         {
             _employeeRepository = employeeRepository;
+            _orgRepo = orgRepo;
         }
 
         [HttpGet("{organizationId}")]
@@ -95,6 +92,15 @@ namespace Point_of_Sale_System.Server.Controllers
                 return NotFound(new { message = "Employee not found" });
 
             return Ok(new { message = "Employee deleted successfully" });
+        }
+        [HttpGet]
+        public IActionResult GetAllForTest()
+        {
+            var org = _orgRepo.GetAll().FirstOrDefault();
+            if (org == null)
+                return Ok(new List<Employee>());
+
+            return Ok(_employeeRepository.GetEmployees(org.Id));
         }
     }
 }

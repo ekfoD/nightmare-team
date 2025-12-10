@@ -3,14 +3,18 @@ using Point_of_Sale_System.Server.Interfaces;
 
 public class EmployeeRepository : IEmployeeRepository
 {
-    private static readonly List<Employee> _employees = new();
+    public static readonly List<Employee> _employees = new();
 
     public IEnumerable<Employee> GetEmployees(Guid organizationId)
     {
         return _employees.Where(e => e.OrganizationId == organizationId);
     }
 
-
+    public Task<IEnumerable<Employee>> GetEmployeesAsync(Guid organizationId)
+    {
+        var result = _employees.Where(e => e.OrganizationId == organizationId);
+        return Task.FromResult(result);
+    }
     public Employee GetById(Guid id)
     {
         return _employees.FirstOrDefault(e => e.Id == id);
