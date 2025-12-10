@@ -1,15 +1,19 @@
 ﻿using Point_of_Sale_System.Server.Enums;
+using Point_of_Sale_System.Server.Models.Entities.MenuBased;
+using Point_of_Sale_System.Server.Models.Entities.ServiceBased;
 using System.ComponentModel.DataAnnotations;
 
-namespace Point_of_Sale_System.Server.Models
+namespace Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments
 {
-    public class Tax
+    public class Discount
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
-        public required string Name { get; set; }
         public required decimal Amount { get; set; }
         public NumberTypeEnum NumberType { get; set; }
+        public AppliedToEnum ApplicableTo { get; set; }
+        public DateOnly ValidFrom { get; set; }
+        public DateOnly ValidUntil { get; set; }
         public StatusEnum Status { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.Now;
 
