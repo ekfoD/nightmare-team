@@ -116,15 +116,15 @@ const EditAppointmentPopup = ({
             <Col>
               <Form.Group className="mb-3">
                 <Form.Label>Service Type *</Form.Label>
-                <Form.Select
-                  value={service}
-                  onChange={(e) => setService(e.target.value)}
-                  style={service !== original.service ? { borderColor: "#0d6efd" } : {}}
-                >
+                  <Form.Select
+                    value={service}
+                    onChange={(e) => setService(e.target.value)}
+                    required
+                  >
                   <option value="">Select a service</option>
                   {services.map((s, idx) => (
-                    <option key={idx} value={s}>
-                      {s}
+                    <option key={idx} value={s.name}>
+                      {s.name}
                     </option>
                   ))}
                 </Form.Select>

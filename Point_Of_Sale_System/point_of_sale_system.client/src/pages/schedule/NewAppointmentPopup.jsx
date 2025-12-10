@@ -91,8 +91,8 @@ const NewAppointmentPopup = ({ show, handleClose, workers, services, timeSlots, 
               >
                 <option value="">Select a service</option>
                 {services.map((s, idx) => (
-                  <option key={idx} value={s}>
-                    {s}
+                  <option key={idx} value={s.name}>
+                    {s.name}
                   </option>
                 ))}
               </Form.Select>

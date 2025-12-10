@@ -70,14 +70,20 @@ const Schedule = () => {
             })));
 
             // Map appointments for schedule
-            setAppointments(apptsRes.data.map(a => ({
-                id: a.id,
-                date: a.startTime?.split("T")[0] || "",
-                time: a.startTime?.split("T")[1].substring(0,5) || "",
-                worker: a.employee?.username || "",
-                service: a.menuService?.name || "",
-                extraInfo: a.extraInfo || ""
-            })));
+            setAppointments(apptsRes.data.map(a => {
+                const start = new Date(a.startTime);
+                const date = start.toISOString().split("T")[0];
+                const time = start.toTimeString().substring(0,5); // "HH:MM"
+
+                return {
+                    id: a.id,
+                    date,
+                    time,
+                    worker: a.employeeName || "",
+                    service: a.serviceName || "",
+                    extraInfo: a.extraInfo || ""
+                };
+            }));
 
             setServices(servicesRes.data.map(s => ({ name: s })));
 
