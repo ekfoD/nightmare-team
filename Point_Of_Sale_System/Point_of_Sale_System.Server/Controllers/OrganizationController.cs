@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Point_of_Sale_System.Server.DTOs;
 using Point_of_Sale_System.Server.Interfaces;
 using Point_of_Sale_System.Server.Models;
-
+using Point_of_Sale_System.Server.Services;
 
 namespace Point_of_Sale_System.Server.Controllers
 {
@@ -12,9 +12,12 @@ namespace Point_of_Sale_System.Server.Controllers
     {
         private readonly IOrganizationrepository _organizationRepository;
 
-        public OrganizationController(IOrganizationrepository organizationRepository)
+        private readonly IOrganizationService _organizationService;
+
+        public OrganizationController(IOrganizationrepository organizationRepository, IOrganizationService organizationService)
         {
             _organizationRepository = organizationRepository;
+            _organizationService = organizationService;
         }
 
         [HttpGet("{OrganizationId:guid}")]
@@ -25,17 +28,7 @@ namespace Point_of_Sale_System.Server.Controllers
             if (organization == null)
                 return NotFound(new { message = "Organization not found" });
 
-            var dto = new OrganizationRequest
-            {
-                Id = organization.Id,
-                OwnerId = organization.OwnerId,
-                Name = organization.Name,
-                OrganizationType = organization.Plan,
-                Currency = organization.Currency,
-                Address = organization.Address,
-                EmailAddress = organization.EmailAddress,
-                PhoneNumber = organization.PhoneNumber
-            };
+            var dto = _organizationService.ConvertOrganizationToDTO(organization);
 
             return Ok(dto);
         }
@@ -46,14 +39,9 @@ namespace Point_of_Sale_System.Server.Controllers
 
             if (org == null)
                 return NotFound();
-            org.Name = dto.Name;
-            org.Currency = dto.Currency;
-            org.Address = dto.Address;
-            org.EmailAddress = dto.EmailAddress;
-            org.PhoneNumber = dto.PhoneNumber;
-            org.Plan = dto.OrganizationType;
+            var orgUpdate = _organizationService.ConvertOrganizationFromDTO(org, dto);
 
-            _organizationRepository.UpdateOrganization(org);
+            _organizationRepository.UpdateOrganization(orgUpdate);
 
             return Ok(org);
         }

@@ -7,7 +7,6 @@ export default function EditOrganization({ onSubmit, business }) {
         address: "",
         emailAddress: "",
         phoneNumber: "",
-        organizationType: "",
         currency: "",
     });
 
@@ -18,7 +17,6 @@ export default function EditOrganization({ onSubmit, business }) {
                 address: business.address || "",
                 emailAddress: business.emailAddress || "",
                 phoneNumber: business.phoneNumber || "",
-                organizationType: business.organizationType || "",
                 currency: business.currency || "",
             });
         }
@@ -40,7 +38,6 @@ export default function EditOrganization({ onSubmit, business }) {
             address: business.address || "",
             emailAddress: business.emailAddress || "",
             phoneNumber: business.phoneNumber || "",
-            bussinesType: business.organizationType || "",
             currency: business.currency || "",
         });
     }
@@ -95,19 +92,6 @@ export default function EditOrganization({ onSubmit, business }) {
                         name="phoneNumber"
                         onChange={handleChange}
                     />
-                </Form.Group>
-
-                <Form.Group className="mb-3 w-25" controlId="formOrganizationType">
-                    <Form.Label>Choose organization type</Form.Label>
-                    <Form.Select
-                        value={formData.organizationType}
-                        name="organizationType"
-                        onChange={handleChange}
-                    >
-                        <option value="order">Order</option>
-                        <option value="service">Service</option>
-                        <option value="order-service">Order-Service</option>
-                    </Form.Select>
                 </Form.Group>
 
                 <Form.Group className="mb-3 w-25" controlId="formCurrency">

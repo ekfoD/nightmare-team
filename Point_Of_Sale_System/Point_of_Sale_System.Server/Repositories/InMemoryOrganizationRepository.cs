@@ -10,7 +10,6 @@ public class InMemoryOrganizationRepository : IOrganizationrepository
         new Organization
         {
             Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
-            OwnerId = Guid.Parse("43333333-3333-3333-3333-333333333333"),
             Name = "Acme Corporation",
             Address = "123 Market Street, Springfield",
             EmailAddress = "info@acme.com",
@@ -23,7 +22,6 @@ public class InMemoryOrganizationRepository : IOrganizationrepository
         new Organization
         {
             Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
-            OwnerId = Guid.Parse("23333333-3333-3333-3333-333333333333"),
             Name = "TechNova Solutions",
             Address = "456 Innovation Avenue, Silicon City",
             EmailAddress = "support@technova.com",
@@ -36,7 +34,6 @@ public class InMemoryOrganizationRepository : IOrganizationrepository
         new Organization
         {
             Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
-            OwnerId = Guid.Parse("13333333-3333-3333-3333-333333333333"),
             Name = "BlueWave Retail",
             Address = "789 Ocean Drive, Miami",
             EmailAddress = "contact@bluewave.com",

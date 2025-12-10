@@ -1,5 +1,6 @@
 using Point_of_Sale_System.Server.Interfaces;
 using System.Text.Json.Serialization;
+using Point_of_Sale_System.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IEmployeeRepository, InMemoryEmployeeRepository>();
 builder.Services.AddScoped<IOrganizationrepository, InMemoryOrganizationRepository>();
+builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 
 builder.Services.AddCors(options =>
 {
