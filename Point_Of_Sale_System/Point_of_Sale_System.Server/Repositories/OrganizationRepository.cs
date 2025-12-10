@@ -1,6 +1,8 @@
 using Point_of_Sale_System.Server.Models;
 using Point_of_Sale_System.Server.Interfaces;
 using Point_of_Sale_System.Server.Enums;
+using Point_of_Sale_System.Server.Models.Entities.Business;
+
 
 public class OrganizationRepository : IOrganizationrepository
 {
