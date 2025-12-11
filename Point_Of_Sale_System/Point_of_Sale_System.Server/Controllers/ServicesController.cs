@@ -18,12 +18,15 @@ namespace Point_of_Sale_System.Server.Controllers
         public async Task<IActionResult> GetAll()
         {
             var items = await _services.GetAllAsync();
-            return Ok(items.Select(s => s.Name).ToList());
-        }
-        [HttpGet("test")]
-        public async Task<IActionResult> GetAllForTest()
-        {
-            return Ok(await _services.GetAllAsync());
+
+            // Return objects instead of just names
+            var result = items.Select(s => new 
+            {
+                name = s.Name,
+                duration = s.Duration
+            }).ToList();
+
+            return Ok(result);
         }
 
     }

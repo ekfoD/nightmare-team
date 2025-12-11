@@ -2,13 +2,12 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import axios from "axios";
 
-// helper: parse service.duration to minutes
 const parseDurationToMinutes = (duration) => {
-  if (!duration) return 30;
-  if (typeof duration === "number") return duration;
-  const parts = duration.split(":").map(Number);
-  if (parts.length >= 2) return parts[0]*60 + parts[1];
-  return parseInt(duration, 10) || 30;
+    if (!duration) return 30;
+    if (typeof duration === "number") return duration;
+    const parts = duration.split(":").map(Number);
+    if (parts.length === 2) return parts[0]*60 + parts[1];
+    return parseInt(duration, 10) || 30;
 };
 
 // overlap checker
@@ -56,7 +55,7 @@ const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, 
     }
 
     const start = new Date(`${date}T${time}:00`);
-    const durationMins = parseDurationToMinutes(30); // default duration since string services don't have duration
+    const durationMins = parseDurationToMinutes(service?.duration);
     const end = new Date(start.getTime() + durationMins*60000);
 
     if (doesOverlap(start, end, employeeId, allAppointments)) {
@@ -67,8 +66,8 @@ const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, 
     const payload = {
       employeeId,
       employeeName: workers.find(w => w.id === employeeId)?.name,
-      menuServiceId: service,  // using string as ID
-      serviceName: service,
+      //menuServiceId: service,  // using string as ID
+      serviceName: service.name,
       startTime: start.toISOString(),
       customerName,
       customerPhone,
@@ -96,9 +95,14 @@ const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, 
       <Modal.Body>
         <Form.Group className="mb-3">
           <Form.Label>Service *</Form.Label>
-          <Form.Select value={service} onChange={e => setService(e.target.value)}>
+          <Form.Select value={service?.name || ""} onChange={e => {
+            const selected = services.find(s => s.name === e.target.value);
+            setService(selected);
+          }}>
             <option value="">Select service</option>
-            {services.map((s, idx) => <option key={idx} value={s}>{s}</option>)}
+            {services.map((s, idx) => (
+              <option key={idx} value={s.name}>{s.name}</option>
+            ))}
           </Form.Select>
         </Form.Group>
 
@@ -112,22 +116,37 @@ const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, 
 
         <Form.Group className="mb-3">
           <Form.Label>Date & Time *</Form.Label>
-          <div style={{ display:'flex', gap:8 }}>
-            <Form.Control type="date" value={date} onChange={e => setDate(e.target.value)} />
-            <Form.Select value={time} onChange={e => setTime(e.target.value)}>
+          <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+            <Form.Control type="date" value={date} onChange={e => setDate(e.target.value)} style={{flex:1}} />
+            <Form.Select value={time} onChange={e => setTime(e.target.value)} style={{flex:1}}>
               {timeSlots.map(t => <option key={t} value={t}>{t}</option>)}
             </Form.Select>
+            <Form.Control 
+              type="text" 
+              value={service && time && date ? (() => {
+                const start = new Date(`${date}T${time}:00`);
+                const durationMins = parseDurationToMinutes(service.duration);
+                const end = new Date(start.getTime() + durationMins*60000);
+                return end.toTimeString().substring(0,5);
+              })() : ""} 
+              readOnly 
+              placeholder="End time" 
+              style={{width:'90px', fontSize:'0.85rem', textAlign:'center', backgroundColor:'#f0f0f0'}}
+            />
           </div>
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Customer Name *</Form.Label>
-          <Form.Control value={customerName} onChange={e => setCustomerName(e.target.value)} />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label>Phone</Form.Label>
-          <Form.Control value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} />
+          <div style={{ display:'flex', gap:8 }}>
+            <div style={{flex:2}}>
+              <Form.Label>Customer Name *</Form.Label>
+              <Form.Control value={customerName} onChange={e => setCustomerName(e.target.value)} />
+            </div>
+            <div style={{flex:1}}>
+              <Form.Label>Phone</Form.Label>
+              <Form.Control value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} />
+            </div>
+          </div>
         </Form.Group>
 
         <Form.Group className="mb-3">
@@ -135,6 +154,7 @@ const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, 
           <Form.Control as="textarea" rows={2} value={extraInfo} onChange={e => setExtraInfo(e.target.value)} />
         </Form.Group>
       </Modal.Body>
+
 
       <Modal.Footer>
         <Button variant="secondary" onClick={() => { reset(); handleClose(); }}>Cancel</Button>
