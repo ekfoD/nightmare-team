@@ -1,248 +1,164 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Button, Form, Table, InputGroup } from 'react-bootstrap';
+import React, { useState, useEffect } from "react";
+import { Modal, Button, Form } from "react-bootstrap";
 
-const numberTypes = [
-  { value: 1, label: "Flat" },
-  { value: 2, label: "Percentage" }
-];
+const TaxModal = ({ show, tax, onSave, onCancel }) => {
 
-const statusTypes = [
-  { value: 1, label: "Active" },
-  { value: 2, label: "Inactive" },
-  { value: 3, label: "Unavailable" }
-];
+    const [name, setName] = useState("");
+    const [amount, setAmount] = useState("");
+    const [numberType, setNumberType] = useState("Flat");
+    const [status, setStatus] = useState(1);
+    const [error, setError] = useState(null); // State for general submission error
 
-const TaxModal = ({ show, taxes, onSave, onCancel }) => {
-  const [editedTaxes, setEditedTaxes] = useState([]);
-  const [newTax, setNewTax] = useState({
-    name: "",
-    amount: 0,
-    numberType: 1,
-    status: 1
-  });
-
-  useEffect(() => {
-    if (show) {
-      setEditedTaxes(taxes.map(t => ({ ...t })));
-      setNewTax({ name: "", amount: 0, numberType: 1, status: 1 });
-    }
-  }, [show, taxes]);
-
-  const handleFieldChange = (id, field, value) => {
-    setEditedTaxes(editedTaxes.map(tax =>
-      tax.id === id ? { ...tax, [field]: value } : tax
-    ));
-  };
-
-  const handleDelete = (id) => {
-    setEditedTaxes(editedTaxes.filter(tax => tax.id !== id));
-  };
-
-  const handleAddNew = () => {
-    if (newTax.name.trim()) {
-      const maxId = editedTaxes.length > 0 ? Math.max(...editedTaxes.map(t => t.id)) : 0;
-      const newId = maxId + 1;
-
-      setEditedTaxes([
-        ...editedTaxes,
-        {
-          id: newId,
-          name: newTax.name.trim(),
-          amount: parseFloat(newTax.amount) || 0,
-          numberType: parseInt(newTax.numberType),
-          status: parseInt(newTax.status)
+    useEffect(() => {
+        if (show) { // Reset state only when the modal opens/changes context
+            if (tax) {
+                // Initialize state from existing tax object, converting amount to string for input
+                setName(tax.name || "");
+                setAmount(String(tax.amount) || "");
+                setNumberType(tax.numberType || "Flat");
+                setStatus(tax.status || 1);
+            } else {
+                // Initialize state for a new tax
+                setName("");
+                setAmount("");
+                setNumberType("Flat");
+                setStatus(1);
+            }
+            setError(null); // Clear errors on context change
         }
-      ]);
+    }, [tax, show]);
 
-      setNewTax({
-        name: "",
-        amount: 0,
-        numberType: 1,
-        status: 1
-      });
-    }
-  };
+    const isFormValid = () => {
+        // 1. Check for Tax Name
+        if (!name.trim()) {
+            setError("Tax Name is required.");
+            return false;
+        }
 
-  const handleSave = () => {
-    onSave(editedTaxes);
-  };
+        const numericAmount = parseFloat(amount);
+        
+        // 2. Check for Amount (required and numeric)
+        if (amount === "" || isNaN(numericAmount)) {
+            setError("Amount is required and must be a number.");
+            return false;
+        }
 
-  return (
-    <Modal show={show} onHide={onCancel} size="lg" centered>
-      <Modal.Header closeButton style={{ backgroundColor: "#f8f9fa" }}>
-        <Modal.Title>Manage Taxes</Modal.Title>
-      </Modal.Header>
+        // Note: The non-negative check is enforced in handleSubmit, but
+        // we can set a soft error here if needed.
 
-      <Modal.Body style={{ maxHeight: "70vh", overflowY: "auto" }}>
-        <Table hover className="mb-0">
-          <thead
-            style={{
-              position: "sticky",
-              top: 0,
-              zIndex: 10,
-              backgroundColor: "white",
-              boxShadow: "0 2px 2px -1px rgba(0, 0, 0, 0.1)"
-            }}
-          >
-            <tr>
-              <th>Name</th>
-              <th style={{ width: "150px", textAlign: "center" }}>Amount</th>
-              <th style={{ width: "150px", textAlign: "center" }}>Number Type</th>
-              <th style={{ width: "150px", textAlign: "center" }}>Status</th>
-              <th style={{ width: "100px", textAlign: "center" }}>Action</th>
-            </tr>
-          </thead>
+        setError(null);
+        return true;
+    };
 
-          <tbody>
-            {editedTaxes.map((tax) => (
-              <tr key={tax.id}>
-                <td>
-                  <Form.Control
-                    type="text"
-                    value={tax.name}
-                    onChange={(e) =>
-                      handleFieldChange(tax.id, "name", e.target.value)
-                    }
-                  />
-                </td>
+    const handleSubmit = () => {
+        if (!isFormValid()) {
+            return; // Stop submission if validation fails
+        }
 
-                <td className="text-center">
-                  <Form.Control
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={tax.amount}
-                    onChange={(e) =>
-                      handleFieldChange(tax.id, "amount", e.target.value)
-                    }
-                    style={{ textAlign: "center" }}
-                  />
-                </td>
+        // Enforce non-negative amount using Math.max(0, X)
+        const finalAmount = Math.max(0, parseFloat(amount));
 
-                <td className="text-center">
-                  <Form.Select
-                    value={tax.numberType}
-                    onChange={(e) =>
-                      handleFieldChange(tax.id, "numberType", e.target.value)
-                    }
-                  >
-                    {numberTypes.map((nt) => (
-                      <option key={nt.value} value={nt.value}>
-                        {nt.label}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </td>
+        onSave({
+            id: tax?.id,
+            name: name.trim(),
+            amount: finalAmount, // Use the corrected, non-negative amount
+            numberType,
+            status: parseInt(status)
+        });
+    };
 
-                <td className="text-center">
-                  <Form.Select
-                    value={tax.status}
-                    onChange={(e) =>
-                      handleFieldChange(tax.id, "status", e.target.value)
-                    }
-                  >
-                    {statusTypes.map((st) => (
-                      <option key={st.value} value={st.value}>
-                        {st.label}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </td>
+    // Disabled state based on simple field checks for the button UX
+    const isSaveDisabled = !name.trim() || amount === "" || isNaN(parseFloat(amount));
 
-                <td className="text-center">
-                  <Button
-                    variant="outline-danger"
-                    size="sm"
-                    onClick={() => handleDelete(tax.id)}
-                  >
-                    Delete
-                  </Button>
-                </td>
-              </tr>
-            ))}
+    // Determine invalid state for input fields
+    const isNameInvalid = !name.trim() && show;
+    const isAmountInvalid = (amount === "" || isNaN(parseFloat(amount))) && show;
+    
+    return (
+        <Modal show={show} onHide={onCancel} centered>
+            <Modal.Header closeButton>
+                <Modal.Title>{tax ? "Edit Tax" : "Add Tax"}</Modal.Title>
+            </Modal.Header>
 
-            {/* Add new tax row */}
-            <tr style={{ backgroundColor: "#f0f8ff" }}>
-              <td>
-                <Form.Control
-                  type="text"
-                  value={newTax.name}
-                  placeholder="Name"
-                  onChange={(e) =>
-                    setNewTax({ ...newTax, name: e.target.value })
-                  }
-                />
-              </td>
+            <Modal.Body>
+                {/* General Error Message Display */}
+                {error && (
+                    <div className="alert alert-danger" role="alert">
+                        {error}
+                    </div>
+                )}
 
-              <td className="text-center">
-                <Form.Control
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={newTax.amount}
-                  placeholder="Amount"
-                  onChange={(e) =>
-                    setNewTax({ ...newTax, amount: e.target.value })
-                  }
-                  style={{ textAlign: "center" }}
-                />
-              </td>
+                <Form>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Tax Name <span className="text-danger">*</span></Form.Label>
+                        <Form.Control 
+                            value={name} 
+                            onChange={(e) => {
+                                setName(e.target.value);
+                                setError(null);
+                            }}
+                            required
+                            isInvalid={isNameInvalid} // Apply invalid state
+                        />
+                        <Form.Control.Feedback type="invalid">
+                            Tax name is required.
+                        </Form.Control.Feedback>
+                    </Form.Group>
 
-              <td className="text-center">
-                <Form.Select
-                  value={newTax.numberType}
-                  onChange={(e) =>
-                    setNewTax({ ...newTax, numberType: e.target.value })
-                  }
+                    <Form.Group className="mb-3">
+                        <Form.Label>Amount <span className="text-danger">*</span></Form.Label>
+                        <Form.Control
+                            type="number"
+                            step="0.01"
+                            min="0" // HTML validation hint for non-negative
+                            value={amount}
+                            onChange={(e) => {
+                                setAmount(e.target.value);
+                                setError(null);
+                            }}
+                            required
+                            isInvalid={isAmountInvalid} // Apply invalid state
+                        />
+                        <Form.Control.Feedback type="invalid">
+                            Amount is required and must be a valid number.
+                        </Form.Control.Feedback>
+                    </Form.Group>
+
+                    <Form.Group className="mb-3">
+                        <Form.Label>Number Type</Form.Label>
+                        <Form.Select
+                            value={numberType}
+                            onChange={(e) => setNumberType(e.target.value)}
+                        >
+                            <option value="Flat">Flat</option>
+                            <option value="Percentage">Percentage</option>
+                        </Form.Select>
+                    </Form.Group>
+
+                    <Form.Group className="mb-3">
+                        <Form.Label>Status</Form.Label>
+                        <Form.Select value={status} onChange={(e) => setStatus(e.target.value)}>
+                            <option value={1}>Active</option>
+                            <option value={2}>Inactive</option>
+                            <option value={3}>Unavailable</option>
+                        </Form.Select>
+                    </Form.Group>
+                </Form>
+            </Modal.Body>
+
+            <Modal.Footer className="d-flex justify-content-center gap-3">
+                <Button variant="secondary" onClick={onCancel} style={{ minWidth: "120px" }}>Cancel</Button>
+                <Button 
+                    variant="primary" 
+                    onClick={handleSubmit} 
+                    style={{ minWidth: "120px" }}
+                    disabled={isSaveDisabled} // Disable button if fields are incomplete
                 >
-                  {numberTypes.map((nt) => (
-                    <option key={nt.value} value={nt.value}>
-                      {nt.label}
-                    </option>
-                  ))}
-                </Form.Select>
-              </td>
-
-              <td className="text-center">
-                <Form.Select
-                  value={newTax.status}
-                  onChange={(e) =>
-                    setNewTax({ ...newTax, status: e.target.value })
-                  }
-                >
-                  {statusTypes.map((st) => (
-                    <option key={st.value} value={st.value}>
-                      {st.label}
-                    </option>
-                  ))}
-                </Form.Select>
-              </td>
-
-              <td className="text-center">
-                <Button
-                  variant="success"
-                  size="sm"
-                  onClick={handleAddNew}
-                  disabled={!newTax.name.trim()}
-                >
-                  Add
+                    Save
                 </Button>
-              </td>
-            </tr>
-          </tbody>
-        </Table>
-      </Modal.Body>
-
-      <Modal.Footer style={{ backgroundColor: "#f8f9fa" }}>
-        <Button variant="secondary" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button variant="primary" onClick={handleSave}>
-          Save Changes
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  );
+            </Modal.Footer>
+        </Modal>
+    );
 };
 
 export default TaxModal;
