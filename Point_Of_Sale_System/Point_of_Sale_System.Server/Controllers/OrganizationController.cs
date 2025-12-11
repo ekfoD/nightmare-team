@@ -22,7 +22,7 @@ public class OrganizationController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedResponseDto<OrganizationGetDTO>>> GetOrganizationsPaginatedAsync(
+    public async Task<ActionResult<PagedResponseDTO<OrganizationGetDTO>>> GetOrganizationsPaginatedAsync(
         int pageNumber = 1,
         int pageSize = 10)
     {
@@ -44,7 +44,7 @@ public class OrganizationController : ControllerBase
             })
             .ToListAsync();
 
-        var response = new PagedResponseDto<OrganizationGetDTO>
+        var response = new PagedResponseDTO<OrganizationGetDTO>
         {
             TotalItems = totalItems,
             TotalPages = totalPages,

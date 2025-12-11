@@ -1,6 +1,6 @@
 ﻿namespace Point_of_Sale_System.Server.DTOs
 {
-    public class PagedResponseDto<T>
+    public class PagedResponseDTO<T>
     {
         public int TotalItems { get; set; }
         public int TotalPages { get; set; }
