@@ -11,8 +11,33 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../styles/Schedule.css';
 
 // Scaling
-const SCALE = 1.3;
-const ROW_HEIGHT = 30 * SCALE;
+const ROW_HEIGHT = 40;
+
+// Pleasant and distinct colors for service blocks
+const servicePalette = [
+    "#ffb3ba", // soft red
+    "#bae1ff", // light blue
+    "#baffc9", // mint green
+    "#ffffba", // light yellow
+    "#ffdfba", // peach
+    "#e2baff", // lavender
+    "#ffbfff", // pink
+    "#caffbf", // lime green
+    "#ffd6a5", // light orange
+    "#a0c4ff", // sky blue
+];
+
+// Map to remember assigned colors
+const serviceColors = new Map();
+
+const getColorForService = (serviceName) => {
+    if (!serviceColors.has(serviceName)) {
+        const index = serviceColors.size % servicePalette.length;
+        serviceColors.set(serviceName, servicePalette[index]);
+    }
+    return serviceColors.get(serviceName);
+};
+
 
 // Time slots generator
 const generateTimes = (workStart, workEnd, intervalMinutes) => {
@@ -35,13 +60,30 @@ const generateTimes = (workStart, workEnd, intervalMinutes) => {
     return times;
 };
 
-// Get appointment top offset
-const getAppointmentTop = (time, times) => {
-    const index = times.indexOf(time);
-    return index >= 0 ? index * ROW_HEIGHT : 0;
+// Get appointment top offset (supports fractional slots)
+const getAppointmentTop = (startTime, times) => {
+    const start = new Date(startTime);
+    const hhmm = `${String(start.getHours()).padStart(2,'0')}:${String(start.getMinutes()).padStart(2,'0')}`;
+    const index = times.findIndex(t => t === hhmm);
+
+    if(index >= 0) return index * ROW_HEIGHT;
+
+    // if not exactly in times array, calculate fractional
+    const firstSlot = times[0].split(':').map(Number);
+    const slotMinutes = (start.getHours() - firstSlot[0])*60 + (start.getMinutes() - firstSlot[1]);
+    return (slotMinutes / 30) * ROW_HEIGHT; // 30 = intervalMinutes
 };
 
-// Organization ID for fetching (move to config/env)
+// Compute height in px for appointment block based on duration
+const getAppointmentHeight = (startTime, endTime) => {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    const durationMinutes = (end - start) / 60000; // convert ms to minutes
+    const height = (durationMinutes / 30) * ROW_HEIGHT; // 30 = intervalMinutes
+    return height;
+};
+
+// Organization ID for fetching
 const organizationId = "8bbb7afb-d664-492a-bcd2-d29953ab924e";
 
 const Schedule = () => {
@@ -51,17 +93,16 @@ const Schedule = () => {
     const [editingAppointment, setEditingAppointment] = useState(null);
 
     const [allWorkers, setAllWorkers] = useState([]);
-    const [allAppointments, setAllAppointments] = useState([]); // full list (for calendar and overlap checks)
-    const [dayAppointments, setDayAppointments] = useState([]); // for selected date
+    const [allAppointments, setAllAppointments] = useState([]);
+    const [dayAppointments, setDayAppointments] = useState([]);
     const [services, setServices] = useState([]);
-
     const [selectedDate, setSelectedDate] = useState(new Date());
 
-    // Load backend data (workers + services + appointments for selected date)
+    // Load backend data
     const fetchDataForDate = async (date) => {
         try {
             const yyyy = date.getFullYear();
-            const mm = String(date.getMonth() + 1).padStart(2, '0'); // month 0-11
+            const mm = String(date.getMonth() + 1).padStart(2, '0'); 
             const dd = String(date.getDate()).padStart(2, '0');
             const isoDate = `${yyyy}-${mm}-${dd}`;
 
@@ -77,7 +118,6 @@ const Schedule = () => {
                 photo: w.photoUrl || "/default.jpg"
             })));
 
-            // map appointments (keep employeeId & start/end times)
             const mappedAppts = apptsRes.data.map(a => {
                 const start = new Date(a.startTime);
                 const end = new Date(a.endTime);
@@ -102,7 +142,6 @@ const Schedule = () => {
 
             setAllAppointments(mappedAppts);
             setDayAppointments(mappedAppts);
-            // services expected to be array of objects: { id, name, duration } or similar
             setServices(servicesRes.data);
 
         } catch (err) {
@@ -110,10 +149,8 @@ const Schedule = () => {
         }
     };
 
-    // initial load
     useEffect(() => {
         fetchDataForDate(selectedDate);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const workStart = '07:00';
@@ -136,14 +173,12 @@ const Schedule = () => {
 
     const mockAppointment = { date: "", time: "", service: "", worker: "", extraInfo: "" };
 
-    // Called when calendar day is selected
     const handleDaySelect = async (date) => {
         setSelectedDate(date);
         await fetchDataForDate(date);
         closeCalendar();
     };
 
-    // refresh for current selected date (used after create/edit)
     const refresh = () => fetchDataForDate(selectedDate);
 
     return (
@@ -151,33 +186,38 @@ const Schedule = () => {
             <div className="schedule-wrapper">
                 <Card className="schedule-card">
                     <div style={{ display: 'flex', overflowX: 'auto', flex: 1 }}>
-                        {/* Time Column */}
                         <div className="time-column">
                             {times.map((time, idx) => (
                                 <div key={idx} className="time-slot">{time}</div>
                             ))}
                         </div>
 
-                        {/* Worker Columns */}
                         <div style={{ display: 'flex', minWidth: `${workers.length * 234}px` }}>
                             {workers.map((worker, wIdx) => (
                                 <div key={wIdx} className="employee-column" style={{ minHeight: `${times.length * ROW_HEIGHT + 91}px` }}>
                                     <div className="employee-header">
-                                        <Image src={worker.photo} roundedCircle width={65} height={65} />
-                                        <div>{worker.name}</div>
+                                        <div className="employee-name">{worker.name}</div>
                                     </div>
 
+                                    {/* Grid lines */}
                                     {times.map((_, idx) => (
                                         <div key={idx} style={{ height: `${ROW_HEIGHT}px`, borderBottom: '1px dashed #ccc' }}></div>
                                     ))}
 
+                                    {/* Appointments */}
                                     {dayAppointments
                                         .filter(a => a.employeeId === worker.id)
                                         .map((app, idx) => (
                                             <div
                                                 key={idx}
                                                 className="appointment-block"
-                                                style={{ top: 91 + getAppointmentTop(app.time, times) }}
+                                                style={{
+                                                top: 91 + getAppointmentTop(app.startTime, times),
+                                                height: `${getAppointmentHeight(app.startTime, app.endTime)}px`,
+                                                backgroundColor: getColorForService(app.serviceName),
+                                                border: "2px solid rgba(0,0,0,0.15)",
+                                                color: "#000",
+                                                }}
                                                 onClick={() => { setEditingAppointment(app); setShowEdit(true); }}
                                             >
                                                 <div style={{ pointerEvents: 'none', textAlign: 'center' }}>
@@ -192,7 +232,6 @@ const Schedule = () => {
                     </div>
                 </Card>
 
-                {/* Sidebar */}
                 <div className="schedule-sidebar">
                     <div className="sidebar-date">
                         <div style={{fontSize:'2.8rem'}}>{selectedDate.getFullYear()}</div>
@@ -226,7 +265,7 @@ const Schedule = () => {
                 services={services}
                 timeSlots={times}
                 selectedDate={selectedDate}
-                allAppointments={allAppointments} // pass full day's appointments for overlap check
+                allAppointments={allAppointments}
                 organizationId={organizationId}
             />
 
@@ -248,7 +287,6 @@ const Schedule = () => {
                 onClose={() => setShowSuccess(false)}
             />
 
-            {/* CALENDAR MODAL */}
             <Modal show={showCalendar} onHide={closeCalendar} size="lg" centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Calendar</Modal.Title>
