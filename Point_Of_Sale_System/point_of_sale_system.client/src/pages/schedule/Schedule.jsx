@@ -65,7 +65,7 @@ const Schedule = () => {
       const [workersRes, apptsRes, servicesRes] = await Promise.all([
         axios.get(`https://localhost:7079/api/employees/${organizationId}`),
         axios.get(`https://localhost:7079/api/appointments/${organizationId}/${isoDate}`),
-        axios.get(`https://localhost:7079/api/services`)
+        axios.get(`https://localhost:7079/api/services/${organizationId}`),
       ]);
 
       setAllWorkers(workersRes.data.map(w => ({

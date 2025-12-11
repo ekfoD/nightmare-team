@@ -29,10 +29,10 @@ namespace Point_of_Sale_System.Server.Controllers
         // }
 
         [HttpGet("{organizationId}")]
-        public ActionResult<IEnumerable<EmployeeDto>> Get(Guid organizationId)
+        public ActionResult<IEnumerable<EmployeeRequest>> Get(Guid organizationId)
         {
             var employees = _employeeRepository.GetEmployees(organizationId)
-                .Select(e => new EmployeeDto
+                .Select(e => new EmployeeRequest
                 {
                     Id = e.Id,
                     Username = e.Username,
@@ -109,15 +109,6 @@ namespace Point_of_Sale_System.Server.Controllers
                 return NotFound(new { message = "Employee not found" });
 
             return Ok(new { message = "Employee deleted successfully" });
-        }
-        [HttpGet]
-        public IActionResult GetAllForTest()
-        {
-            var org = _orgRepo.GetAll().FirstOrDefault();
-            if (org == null)
-                return Ok(new List<Employee>());
-
-            return Ok(_employeeRepository.GetEmployees(org.Id));
         }
     }
 }

@@ -1,8 +1,6 @@
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Point_of_Sale_System.Server.DTOs;
 using Point_of_Sale_System.Server.Interfaces;
-using Point_of_Sale_System.Server.Models;
 
 namespace Point_of_Sale_System.Server.Controllers
 {
@@ -11,14 +9,12 @@ namespace Point_of_Sale_System.Server.Controllers
     public class AppointmentsController : ControllerBase
     {
         private readonly IAppointmentService _service;
-        private readonly IOrganizationRepository _orgRepo;
-        private readonly IAppointmentRepository _appointmentRepo;
 
-        public AppointmentsController(IAppointmentService service, IOrganizationRepository orgRepo, IAppointmentRepository appointmentRepo)
+
+        public AppointmentsController(IAppointmentService service)
         {
             _service = service;
-            _orgRepo = orgRepo;
-            _appointmentRepo = appointmentRepo;
+
         }
 
         [HttpGet("{organizationId}/{date}")]
@@ -36,17 +32,6 @@ namespace Point_of_Sale_System.Server.Controllers
 
             var created = await _service.CreateAsync(dto);
             return Ok(created);
-        }
-        
-        [HttpGet]
-        public async Task<IActionResult> GetAllForTest()
-        {
-            var date = new DateTime(2025, 1, 1, 11, 0, 0);
-            var org = _orgRepo.GetAll().FirstOrDefault();
-            if (org == null)
-                return Ok(new List<Appointment>());
-            var appts = await _appointmentRepo.GetByDateAsync(org.Id, date);
-            return Ok(appts);
         }
 
         [HttpPut("{id}/edit")]

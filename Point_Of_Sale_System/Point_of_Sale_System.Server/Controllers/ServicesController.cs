@@ -14,12 +14,10 @@ namespace Point_of_Sale_System.Server.Controllers
             _services = services;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
+        [HttpGet("{organizationId}")]
+        public async Task<IActionResult> GetServices(Guid organizationId) //get all services despite organization until multi-org is implemented
         {
-            var items = await _services.GetAllAsync();
-
-            // Return objects instead of just names
+            var items = await _services.GetAllForOrganizationAsync(organizationId);
             var result = items.Select(s => new 
             {
                 name = s.Name,
