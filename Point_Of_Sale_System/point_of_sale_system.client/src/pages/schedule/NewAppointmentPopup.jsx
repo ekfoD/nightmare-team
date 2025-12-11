@@ -2,83 +2,82 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import axios from "axios";
 
+// Helpers
 const parseDurationToMinutes = (duration) => {
-    if (!duration) return 30;
-    if (typeof duration === "number") return duration;
-    const parts = duration.split(":").map(Number);
-    if (parts.length === 2) return parts[0]*60 + parts[1];
-    return parseInt(duration, 10) || 30;
+  if (!duration) return 30;
+  if (typeof duration === "number") return duration;
+  const parts = duration.split(":").map(Number);
+  return parts.length === 2 ? parts[0]*60 + parts[1] : parseInt(duration, 10) || 30;
 };
 
-// overlap checker
-const doesOverlap = (newStart, newEnd, employeeId, allAppts, excludeId = null) => {
-  return allAppts.some(a => {
-    if (excludeId && a.id === excludeId) return false;
-    if (a.employeeId !== employeeId) return false;
-    const s = new Date(a.startTime);
-    const e = new Date(a.endTime);
-    return newStart < e && s < newEnd;
+const doesOverlap = (newStart, newEnd, employeeId, allAppts, excludeId = null) =>
+  allAppts.some(a => a.employeeId === employeeId && a.id !== excludeId &&
+                     newStart < new Date(a.endTime) && new Date(a.startTime) < newEnd);
+
+const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, selectedDate, allAppointments, organizationId }) => {
+  const [form, setForm] = useState({
+    service: services[0] || null,
+    employeeId: workers[0]?.id || "",
+    date: selectedDate?.toISOString().slice(0,10) || "",
+    time: "",
+    customerName: "",
+    customerPhone: "",
+    extraInfo: ""
   });
-};
 
-const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, timeSlots, selectedDate, allAppointments, organizationId }) => {
-  const [service, setService] = useState("");
-  const [employeeId, setEmployeeId] = useState("");
-  const [time, setTime] = useState("");
-  const [customerName, setCustomerName] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
-  const [extraInfo, setExtraInfo] = useState("");
-  const [date, setDate] = useState("");
-
+  // Initialize defaults when popup opens
   useEffect(() => {
-    // initialize defaults
-    setDate(selectedDate ? selectedDate.toISOString().slice(0,10) : "");
-    if (services && services.length && !service) setService(services[0]);
-    if (workers && workers.length && !employeeId) setEmployeeId(workers[0].id);
-    if (timeSlots && timeSlots.length && !time) setTime(timeSlots[0]);
-  }, [show, services, workers, timeSlots, selectedDate]);
+    setForm(f => ({
+      ...f,
+      service: services[0] || null,
+      employeeId: workers[0]?.id || "",
+      date: selectedDate?.toISOString().slice(0,10) || "",
+      time: ""
+    }));
+  }, [show, services, workers, selectedDate]);
 
-  const reset = () => {
-    setService(services && services.length ? services[0] : "");
-    setEmployeeId(workers && workers.length ? workers[0].id : "");
-    setTime(timeSlots && timeSlots.length ? timeSlots[0] : "");
-    setCustomerName("");
-    setCustomerPhone("");
-    setExtraInfo("");
-    setDate(selectedDate ? selectedDate.toISOString().slice(0,10) : "");
+  const handleChange = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }));
+
+  const computeEndTime = () => {
+    if (!form.service || !form.time || !form.date) return "";
+    const start = new Date(`${form.date}T${form.time}:00`);
+    const end = new Date(start.getTime() + parseDurationToMinutes(form.service.duration) * 60000);
+    return end.toTimeString().substring(0,5);
   };
 
+  const resetForm = () => setForm({
+    service: services[0] || null,
+    employeeId: workers[0]?.id || "",
+    date: selectedDate?.toISOString().slice(0,10) || "",
+    time: "",
+    customerName: "",
+    customerPhone: "",
+    extraInfo: ""
+  });
+
   const handleSave = async () => {
-    if (!service || !employeeId || !time || !customerName || !date) {
-      alert("Fill required fields.");
-      return;
-    }
+    const { service, employeeId, date, time, customerName, customerPhone, extraInfo } = form;
+    if (!service || !employeeId || !time || !customerName || !date) return alert("Fill required fields.");
 
     const start = new Date(`${date}T${time}:00`);
-    const durationMins = parseDurationToMinutes(service?.duration);
-    const end = new Date(start.getTime() + durationMins*60000);
+    const end = new Date(start.getTime() + parseDurationToMinutes(service.duration)*60000);
 
-    if (doesOverlap(start, end, employeeId, allAppointments)) {
-      alert("This appointment overlaps with an existing appointment for this employee.");
-      return;
-    }
-
-    const payload = {
-      employeeId,
-      employeeName: workers.find(w => w.id === employeeId)?.name,
-      //menuServiceId: service,  // using string as ID
-      serviceName: service.name,
-      startTime: start.toISOString(),
-      customerName,
-      customerPhone,
-      extraInfo,
-      organizationId
-    };
+    if (doesOverlap(start, end, employeeId, allAppointments)) 
+      return alert("This appointment overlaps with an existing appointment for this employee.");
 
     try {
-      await axios.post("https://localhost:7079/api/appointments/create", payload);
+      await axios.post("https://localhost:7079/api/appointments/create", {
+        employeeId,
+        employeeName: workers.find(w => w.id === employeeId)?.name,
+        serviceName: service.name,
+        startTime: start.toISOString(),
+        customerName,
+        customerPhone,
+        extraInfo,
+        organizationId
+      });
       onSuccess && onSuccess("Appointment created");
-      reset();
+      resetForm();
       handleClose();
     } catch (err) {
       console.error(err);
@@ -87,7 +86,7 @@ const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, 
   };
 
   return (
-    <Modal show={show} onHide={() => { reset(); handleClose(); }} centered size="lg">
+    <Modal show={show} onHide={() => { resetForm(); handleClose(); }} centered size="lg">
       <Modal.Header closeButton>
         <Modal.Title>New Appointment</Modal.Title>
       </Modal.Header>
@@ -95,20 +94,15 @@ const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, 
       <Modal.Body>
         <Form.Group className="mb-3">
           <Form.Label>Service *</Form.Label>
-          <Form.Select value={service?.name || ""} onChange={e => {
-            const selected = services.find(s => s.name === e.target.value);
-            setService(selected);
-          }}>
+          <Form.Select value={form.service?.name || ""} onChange={e => setForm(f => ({ ...f, service: services.find(s => s.name === e.target.value) }))}>
             <option value="">Select service</option>
-            {services.map((s, idx) => (
-              <option key={idx} value={s.name}>{s.name}</option>
-            ))}
+            {services.map((s, idx) => <option key={idx} value={s.name}>{s.name}</option>)}
           </Form.Select>
         </Form.Group>
 
         <Form.Group className="mb-3">
           <Form.Label>Employee *</Form.Label>
-          <Form.Select value={employeeId} onChange={e => setEmployeeId(e.target.value)}>
+          <Form.Select value={form.employeeId} onChange={handleChange("employeeId")}>
             <option value="">Select employee</option>
             {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
           </Form.Select>
@@ -117,47 +111,26 @@ const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, 
         <Form.Group className="mb-3">
           <Form.Label>Date & Time *</Form.Label>
           <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-            <Form.Control type="date" value={date} onChange={e => setDate(e.target.value)} style={{flex:1}} />
-            <Form.Select value={time} onChange={e => setTime(e.target.value)} style={{flex:1}}>
-              {timeSlots.map(t => <option key={t} value={t}>{t}</option>)}
-            </Form.Select>
-            <Form.Control 
-              type="text" 
-              value={service && time && date ? (() => {
-                const start = new Date(`${date}T${time}:00`);
-                const durationMins = parseDurationToMinutes(service.duration);
-                const end = new Date(start.getTime() + durationMins*60000);
-                return end.toTimeString().substring(0,5);
-              })() : ""} 
-              readOnly 
-              placeholder="End time" 
-              style={{width:'90px', fontSize:'0.85rem', textAlign:'center', backgroundColor:'#f0f0f0'}}
-            />
+            <Form.Control type="date" value={form.date} onChange={handleChange("date")} style={{flex:1}} />
+            <Form.Control type="time" value={form.time} onChange={handleChange("time")} style={{flex:1}} />
+            <Form.Control type="text" value={computeEndTime()} readOnly placeholder="End time" style={{width:'90px', fontSize:'0.85rem', textAlign:'center', backgroundColor:'#f0f0f0'}} />
           </div>
         </Form.Group>
 
         <Form.Group className="mb-3">
           <div style={{ display:'flex', gap:8 }}>
-            <div style={{flex:2}}>
-              <Form.Label>Customer Name *</Form.Label>
-              <Form.Control value={customerName} onChange={e => setCustomerName(e.target.value)} />
-            </div>
-            <div style={{flex:1}}>
-              <Form.Label>Phone</Form.Label>
-              <Form.Control value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} />
-            </div>
+            <Form.Control placeholder="Customer Name *" value={form.customerName} onChange={handleChange("customerName")} style={{flex:2}} />
+            <Form.Control placeholder="Phone" value={form.customerPhone} onChange={handleChange("customerPhone")} style={{flex:1}} />
           </div>
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Extra Info</Form.Label>
-          <Form.Control as="textarea" rows={2} value={extraInfo} onChange={e => setExtraInfo(e.target.value)} />
+          <Form.Control as="textarea" rows={2} placeholder="Extra Info" value={form.extraInfo} onChange={handleChange("extraInfo")} />
         </Form.Group>
       </Modal.Body>
 
-
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => { reset(); handleClose(); }}>Cancel</Button>
+        <Button variant="secondary" onClick={() => { resetForm(); handleClose(); }}>Cancel</Button>
         <Button variant="primary" onClick={handleSave}>Save Appointment</Button>
       </Modal.Footer>
     </Modal>
