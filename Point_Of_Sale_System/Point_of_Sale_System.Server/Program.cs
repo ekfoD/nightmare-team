@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Point_of_Sale_System.Server.Interfaces;
+using System.Text.Json.Serialization;
+using Point_of_Sale_System.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

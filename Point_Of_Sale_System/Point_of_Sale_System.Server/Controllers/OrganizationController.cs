@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Point_of_Sale_System.Server.DTOs;
 using Point_of_Sale_System.Server.Enums;
