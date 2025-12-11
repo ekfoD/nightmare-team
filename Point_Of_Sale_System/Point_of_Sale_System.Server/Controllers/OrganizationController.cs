@@ -113,7 +113,7 @@ public class OrganizationController : ControllerBase
     [HttpPut("{organizationId}")]
     public async Task<ActionResult<OrganizationGetDTO>> PutOrganizationAsync(
     Guid organizationId,
-    [FromBody] OrganizationPostDTO request)
+    [FromBody] OrganizationPutDTO request)
     {
         if (request == null)
             return BadRequest("Request body is null.");
@@ -125,12 +125,21 @@ public class OrganizationController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.Name))
             return BadRequest("Name is required.");
 
-        organization.Name = request.Name;
-        organization.Plan = (PlanEnum)request.OrganizationType;
-        organization.Address = request.Address;
-        organization.EmailAddress = request.EmailAddress;
-        organization.PhoneNumber = request.PhoneNumber;
-        organization.Currency = (CurrencyEnum)request.CurrencyType;
+        if (request.Name != null)
+            organization.Name = request.Name;
+
+        if (request.Address != null)
+            organization.Address = request.Address;
+
+        if (request.EmailAddress != null)
+            organization.EmailAddress = request.EmailAddress;
+
+        if (request.PhoneNumber != null)
+            organization.PhoneNumber = request.PhoneNumber;
+
+        if (request.CurrencyType != null)
+            organization.Currency = (CurrencyEnum)request.CurrencyType;
+
 
         _context.Organizations.Update(organization);
         await _context.SaveChangesAsync();

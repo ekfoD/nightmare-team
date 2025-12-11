@@ -22,6 +22,12 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
 var app = builder.Build();
 
 app.UseDefaultFiles();
