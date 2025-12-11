@@ -23,6 +23,7 @@ import OrderHistory from './pages/history/OrderHistory.jsx';
 import Settings from './pages/settings/Settings.jsx';
 import AppHistory from './pages/history/AppHistory.jsx';
 import Services from './pages/services/Services.jsx';
+import Management from './pages/management/management.jsx';
 
 const BASE_URL = "http://localhost:5098"
 
@@ -43,6 +44,7 @@ function App() {
                         <Route path="/orders" element={<Orders />} />
                         <Route path="/inventory" element={<Inventory />} />
                         <Route path="/employees" element={<Employees />} />
+                        <Route path="/management" element={<Management />} />
                         <Route path="/settings" element={<Settings/>} />
                     </Route>
                     <Route element={<AppLayout />}>
