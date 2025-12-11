@@ -22,7 +22,7 @@ namespace Point_of_Sale_System.Server.Repositories
             _appointments.Add(appointment);
             return Task.FromResult(appointment);
         }
-
+    
         public Task<Appointment?> GetByIdAsync(Guid id)
         {
             return Task.FromResult(_appointments.FirstOrDefault(a => a.Id == id));

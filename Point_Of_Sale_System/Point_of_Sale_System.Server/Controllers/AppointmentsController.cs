@@ -48,5 +48,34 @@ namespace Point_of_Sale_System.Server.Controllers
             var appts = await _appointmentRepo.GetByDateAsync(org.Id, date);
             return Ok(appts);
         }
+
+        [HttpPut("{id}/edit")]
+        public async Task<ActionResult<AppointmentDto>> Update(Guid id, [FromBody] CreateAppointmentDto dto)
+        {
+            try
+            {
+                var updated = await _service.UpdateAsync(id, dto);
+                return Ok(updated);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpDelete("{id}/delete")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            try
+            {
+                await _service.DeleteAsync(id);
+                return Ok(new { message = "Appointment deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
     }
 }

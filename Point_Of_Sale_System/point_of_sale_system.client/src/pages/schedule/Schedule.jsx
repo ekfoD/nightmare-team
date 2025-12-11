@@ -73,7 +73,7 @@ const Schedule = () => {
             setAppointments(apptsRes.data.map(a => {
                 const start = new Date(a.startTime);
                 const date = start.toISOString().split("T")[0];
-                const time = start.toTimeString().substring(0,5); // "HH:MM"
+                const time = start.toTimeString().substring(0,5); 
 
                 return {
                     id: a.id,
@@ -81,7 +81,9 @@ const Schedule = () => {
                     time,
                     worker: a.employeeName || "",
                     service: a.serviceName || "",
-                    extraInfo: a.extraInfo || ""
+                    extraInfo: a.extraInfo || "",
+                    customerName: a.customerName || "",    
+                    customerPhone: a.customerPhone || ""      
                 };
             }));
 

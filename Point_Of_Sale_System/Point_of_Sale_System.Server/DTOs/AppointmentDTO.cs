@@ -9,7 +9,7 @@ public class AppointmentDto
         public string? ServiceName { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-        public string CustomerName { get; set; } = string.Empty;
-        public string CustomerPhone { get; set; } = string.Empty;
+        public required string CustomerName { get; set; }
+        public string? CustomerPhone { get; set; }
         public string? ExtraInfo { get; set; }
 }

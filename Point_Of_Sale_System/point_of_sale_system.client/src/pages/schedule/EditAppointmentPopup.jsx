@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
+import axios from "axios";
 
 const EditAppointmentPopup = ({
   show,
@@ -14,11 +15,12 @@ const EditAppointmentPopup = ({
   const [worker, setWorker] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
   const [extraInfo, setExtraInfo] = useState("");
+  const [errMsg, setErrMsg] = useState("");
 
-  const [original, setOriginal] = useState({});
-  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const organizationId = "8bbb7afb-d664-492a-bcd2-d29953ab924e";
 
   useEffect(() => {
     if (appointment && show) {
@@ -26,188 +28,168 @@ const EditAppointmentPopup = ({
       setWorker(appointment.worker || "");
       setDate(appointment.date || "");
       setTime(appointment.time || "");
+      setCustomerName(appointment.customerName || "");
+      setCustomerPhone(appointment.customerPhone || "");
       setExtraInfo(appointment.extraInfo || "");
-      setOriginal({
-        service: appointment.service || "",
-        worker: appointment.worker || "",
-        date: appointment.date || "",
-        time: appointment.time || "",
-        extraInfo: appointment.extraInfo || "",
-      });
     }
   }, [appointment, show]);
 
-  const onClose = () => handleClose();
+  const resetFields = () => {
+    setService("");
+    setWorker("");
+    setDate("");
+    setTime("");
+    setCustomerName("");
+    setCustomerPhone("");
+    setExtraInfo("");
+    setErrMsg("");
+  };
 
-  const onSave = () => {
-    if (!date || !time || !service || !worker) {
-      alert("Please fill in all required fields.");
+  const onClose = () => {
+    resetFields();
+    handleClose();
+  };
+
+  const onSave = async () => {
+    if (!date || !time || !service || !worker || !customerName || !customerPhone) {
+      setErrMsg("Please fill in all required fields.");
       return;
     }
-    setShowSaveConfirm(true);
+
+    try {
+      await axios.put(`https://localhost:7079/api/appointments/${appointment.id}/edit`, {
+        organizationId,
+        employeeName: worker,
+        serviceName: service,
+        startTime: `${date}T${time}:00`,
+        endTime: calculateEndTime(date, time, service),
+        customerName,
+        customerPhone,
+        extraInfo,
+      });
+
+      resetFields();
+      handleClose();
+      if (onSuccess) onSuccess("Appointment updated successfully!");
+    } catch (error) {
+      console.error("Failed to update appointment:", error);
+      setErrMsg(error.response?.data?.message || error.message);
+    }
   };
 
-  const confirmSave = () => {
-    const updatedFields = {};
-    if (service !== original.service) updatedFields.service = service;
-    if (worker !== original.worker) updatedFields.worker = worker;
-    if (date !== original.date) updatedFields.date = date;
-    if (time !== original.time) updatedFields.time = time;
-    if (extraInfo !== original.extraInfo) updatedFields.extraInfo = extraInfo;
+  const onDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this appointment?")) return;
 
-    console.log("Saved appointment:", { ...appointment, ...updatedFields });
-    console.log("Fields edited:", Object.keys(updatedFields));
+    try {
+        await axios.delete(`https://localhost:7079/api/appointments/${appointment.id}/delete`);
+        resetFields();
+        handleClose();
+        if (onSuccess) onSuccess("Appointment deleted successfully!");
+    } catch (error) {
+        console.error("Failed to delete appointment:", error);
+        setErrMsg(error.response?.data?.message || error.message);
+    }
+};
 
-    setShowSaveConfirm(false);
-    handleClose();
-    if (onSuccess) onSuccess("Appointment updated successfully!");
-  };
+  const calculateEndTime = (date, startTime, serviceName) => {
+    const serviceObj = services.find(s => s.name === serviceName);
+    if (!serviceObj) return `${date}T${startTime}:00`;
 
-  const onDelete = () => setShowDeleteConfirm(true);
+    const [hours, minutes] = startTime.split(":").map(Number);
+    const durationMinutes = serviceObj.durationMinutes || 30;
+    const endDate = new Date(date);
+    endDate.setHours(hours, minutes + durationMinutes, 0, 0);
 
-  const confirmDelete = () => {
-    console.log("Deleted appointment:", appointment);
-    setShowDeleteConfirm(false);
-    handleClose();
-    if (onSuccess) onSuccess("Appointment deleted successfully!");
+    const hh = String(endDate.getHours()).padStart(2, "0");
+    const mm = String(endDate.getMinutes()).padStart(2, "0");
+    return `${date}T${hh}:${mm}:00`;
   };
 
   return (
-    <>
-      {/* Main Edit Modal */}
-      <Modal show={show} onHide={onClose} centered size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title style={{ fontSize: "1.8rem" }}>
-            Edit Appointment
-          </Modal.Title>
-        </Modal.Header>
+    <Modal show={show} onHide={onClose} centered size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title style={{ fontSize: "1.8rem" }}>Edit Appointment</Modal.Title>
+      </Modal.Header>
 
-        <Modal.Body style={{ padding: "25px" }}>
-          {/* Date */}
-          <Form.Group className="mb-3">
-            <Form.Label>Date *</Form.Label>
-            <Form.Control
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              style={date !== original.date ? { borderColor: "#0d6efd" } : {}}
-            />
-          </Form.Group>
+      <Modal.Body style={{ padding: "25px" }}>
+        {errMsg && <div style={{ color: "red", marginBottom: "10px" }}>{errMsg}</div>}
 
-          {/* Time */}
-          <Form.Group className="mb-3">
-            <Form.Label>Time Slot *</Form.Label>
-            <Form.Select
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              style={time !== original.time ? { borderColor: "#0d6efd" } : {}}
-            >
-              <option value="">Select a time</option>
-              {timeSlots.map((t, idx) => (
-                <option key={idx} value={t}>
-                  {t}
-                </option>
-              ))}
-            </Form.Select>
-          </Form.Group>
+        {/* Customer Name + Phone */}
+        <Row>
+          <Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Customer Name *</Form.Label>
+              <Form.Control value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Customer Phone *</Form.Label>
+              <Form.Control value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
+            </Form.Group>
+          </Col>
+        </Row>
 
-          {/* Service + Worker */}
-          <Row>
-            <Col>
-              <Form.Group className="mb-3">
-                <Form.Label>Service Type *</Form.Label>
-                  <Form.Select
-                    value={service}
-                    onChange={(e) => setService(e.target.value)}
-                    required
-                  >
-                  <option value="">Select a service</option>
-                  {services.map((s, idx) => (
-                    <option key={idx} value={s.name}>
-                      {s.name}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            </Col>
+        {/* Date + Time */}
+        <Row>
+          <Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Date *</Form.Label>
+              <Form.Control type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Time Slot *</Form.Label>
+              <Form.Select value={time} onChange={(e) => setTime(e.target.value)}>
+                <option value="">Select a time</option>
+                {timeSlots.map((t, idx) => (
+                  <option key={idx} value={t}>{t}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Col>
+        </Row>
 
-            <Col>
-              <Form.Group className="mb-3">
-                <Form.Label>Worker *</Form.Label>
-                <Form.Select
-                  value={worker}
-                  onChange={(e) => setWorker(e.target.value)}
-                  style={worker !== original.worker ? { borderColor: "#0d6efd" } : {}}
-                >
-                  <option value="">Select a worker</option>
-                  {workers.map((w, idx) => (
-                    <option key={idx} value={w.name}>
-                      {w.name}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            </Col>
-          </Row>
+        {/* Service + Worker */}
+        <Row>
+          <Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Service Type *</Form.Label>
+              <Form.Select value={service} onChange={(e) => setService(e.target.value)}>
+                <option value="">Select a service</option>
+                {services.map((s, idx) => (
+                  <option key={idx} value={s.name}>{s.name}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group className="mb-3">
+              <Form.Label>Worker *</Form.Label>
+              <Form.Select value={worker} onChange={(e) => setWorker(e.target.value)}>
+                <option value="">Select a worker</option>
+                {workers.map((w, idx) => (
+                  <option key={idx} value={w.name}>{w.name}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Col>
+        </Row>
 
-          {/* Extra info */}
-          <Form.Group className="mb-3">
-            <Form.Label>Extra Information</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={2}
-              value={extraInfo}
-              onChange={(e) => setExtraInfo(e.target.value)}
-              style={extraInfo !== original.extraInfo ? { borderColor: "#0d6efd" } : {}}
-            />
-          </Form.Group>
-        </Modal.Body>
+        {/* Extra Info */}
+        <Form.Group className="mb-3">
+          <Form.Label>Extra Information</Form.Label>
+          <Form.Control as="textarea" rows={2} value={extraInfo} onChange={(e) => setExtraInfo(e.target.value)} />
+        </Form.Group>
+      </Modal.Body>
 
-        <Modal.Footer>
-          <Button variant="danger" onClick={onDelete}>
-            Delete
-          </Button>
-          <Button variant="secondary" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={onSave}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Save Confirmation Modal */}
-      <Modal show={showSaveConfirm} onHide={() => setShowSaveConfirm(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Save</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Are you sure you want to save changes to this appointment?</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowSaveConfirm(false)}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={confirmSave}>
-            Yes, Save
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Delete Confirmation Modal */}
-      <Modal show={showDeleteConfirm} onHide={() => setShowDeleteConfirm(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Delete</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Are you sure you want to delete this appointment?</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDeleteConfirm(false)}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={confirmDelete}>
-            Yes, Delete
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </>
+      <Modal.Footer>
+        <Button variant="danger" onClick={onDelete}>Delete</Button>
+        <Button variant="secondary" onClick={onClose}>Cancel</Button>
+        <Button variant="primary" onClick={onSave}>Save Changes</Button>
+      </Modal.Footer>
+    </Modal>
   );
 };
 

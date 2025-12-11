@@ -110,5 +110,50 @@ namespace Point_of_Sale_System.Server.Services
                 ExtraInfo = created.ExtraInfo
             };
         }
+        public async Task<AppointmentDto> UpdateAsync(Guid id, CreateAppointmentDto dto)
+        {
+            var appt = await _apptRepo.GetByIdAsync(id)
+                    ?? throw new Exception("Appointment not found.");
+
+            // Fetch employee by name
+            var emp = (await _employeeRepo.GetEmployeesAsync(dto.OrganizationId))
+                    .FirstOrDefault(e => e.Username.Equals(dto.EmployeeName, StringComparison.OrdinalIgnoreCase))
+                    ?? throw new Exception("Employee not found.");
+
+            // Fetch service by name
+            var svc = (await _serviceRepo.GetAllForOrganizationAsync(dto.OrganizationId))
+                    .FirstOrDefault(s => s.Name.Equals(dto.ServiceName, StringComparison.OrdinalIgnoreCase))
+                    ?? throw new Exception("Service not found.");
+
+            // Update fields
+            appt.EmployeeId = emp.Id;
+            appt.Employee = emp;
+            appt.MenuServiceId = svc.Id;
+            appt.MenuService = svc;
+            appt.StartTime = dto.StartTime;
+            appt.EndTime = dto.EndTime;
+            appt.CustomerName = dto.CustomerName;
+            appt.CustomerPhone = dto.CustomerPhone;
+            appt.ExtraInfo = dto.ExtraInfo;
+
+            return new AppointmentDto
+            {
+                Id = appt.Id,
+                EmployeeId = emp.Id,
+                EmployeeName = emp.Username,
+                MenuServiceId = svc.Id,
+                ServiceName = svc.Name,
+                StartTime = appt.StartTime,
+                EndTime = appt.EndTime,
+                CustomerName = appt.CustomerName,
+                CustomerPhone = appt.CustomerPhone,
+                ExtraInfo = appt.ExtraInfo
+            };
+        }
+        public Task<bool> DeleteAsync(Guid id)
+        {
+            return _apptRepo.DeleteAsync(id);
+        }
+
     }
 }
