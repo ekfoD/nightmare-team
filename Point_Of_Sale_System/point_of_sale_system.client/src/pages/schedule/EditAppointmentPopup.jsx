@@ -1,201 +1,173 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Button, Form, Row, Col } from "react-bootstrap";
-import { doesAppointmentOverlap } from './doesAppointmentOverlap';
+import { Modal, Button, Form } from "react-bootstrap";
 import axios from "axios";
 
-const EditAppointmentPopup = ({
-  show,
-  handleClose,
-  appointment,
-  workers,
-  services,
-  timeSlots,
-  onSuccess,
+// helper parse duration like in NewAppointmentPopup
+const parseDurationToMinutes = (duration) => {
+  if (!duration) return 30;
+  if (typeof duration === "number") return duration;
+  const parts = duration.split(":").map(Number);
+  if (parts.length >= 2) return parts[0] * 60 + parts[1];
+  return parseInt(duration, 10) || 30;
+};
+
+const doesOverlap = (newStart, newEnd, employeeId, allAppts, excludeId = null) => {
+  return allAppts.some(a => {
+    if (excludeId && a.id === excludeId) return false;
+    if (a.employeeId !== employeeId) return false;
+    const s = new Date(a.startTime);
+    const e = new Date(a.endTime);
+    return newStart < e && s < newEnd;
+  });
+};
+
+const EditAppointmentPopup = ({ 
+  show, handleClose, appointment, workers, services, timeSlots, selectedDate, 
+  onSuccess, allAppointments, organizationId 
 }) => {
   const [service, setService] = useState("");
-  const [worker, setWorker] = useState("");
-  const [date, setDate] = useState("");
+  const [employeeId, setEmployeeId] = useState("");
   const [time, setTime] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [extraInfo, setExtraInfo] = useState("");
-  const [errMsg, setErrMsg] = useState("");
+  const [date, setDate] = useState("");
 
-  const organizationId = "8bbb7afb-d664-492a-bcd2-d29953ab924e";
-
+  // Fill form when appointment changes
   useEffect(() => {
-    if (appointment && show) {
-      setService(appointment.service || "");
-      setWorker(appointment.worker || "");
-      setDate(appointment.date || "");
-      setTime(appointment.time || "");
-      setCustomerName(appointment.customerName || "");
-      setCustomerPhone(appointment.customerPhone || "");
-      setExtraInfo(appointment.extraInfo || "");
+    if (!appointment) {
+      setService("");
+      setEmployeeId("");
+      setTime("");
+      setCustomerName("");
+      setCustomerPhone("");
+      setExtraInfo("");
+      setDate(selectedDate ? selectedDate.toISOString().slice(0,10) : "");
+      return;
     }
-  }, [appointment, show]);
 
-  const resetFields = () => {
+    setService(appointment.serviceName || "");
+    setEmployeeId(appointment.employeeId || "");
+    setTime(appointment.startTime ? new Date(appointment.startTime).toTimeString().substring(0,5) : (appointment.time || ""));
+    setCustomerName(appointment.customerName || "");
+    setCustomerPhone(appointment.customerPhone || "");
+    setExtraInfo(appointment.extraInfo || "");
+    setDate(appointment.startTime ? new Date(appointment.startTime).toISOString().slice(0,10) : (appointment.date || ""));
+  }, [appointment, selectedDate]);
+
+  const reset = () => {
     setService("");
-    setWorker("");
-    setDate("");
+    setEmployeeId("");
     setTime("");
     setCustomerName("");
     setCustomerPhone("");
     setExtraInfo("");
-    setErrMsg("");
+    setDate(selectedDate ? selectedDate.toISOString().slice(0,10) : "");
   };
 
-  const onClose = () => {
-    resetFields();
-    handleClose();
-  };
-
-  const onSave = async () => {
-    if (!date || !time || !service || !worker || !customerName || !customerPhone) {
-      setErrMsg("Please fill in all required fields.");
+  const handleSave = async () => {
+    if (!service || !employeeId || !time || !customerName || !date) {
+      alert("Fill required fields");
       return;
     }
-    const start = new Date(`${date}T${time}`);
-    const end = new Date(start.getTime() + service.durationMinutes * 60000);
 
-    if (doesAppointmentOverlap(start, end, editedEmployeeId, appointments, appointment.id)) {
-        alert("This appointment overlaps with an existing appointment.");
-        return;
+    const start = new Date(`${date}T${time}:00`);
+    const durationMins = parseDurationToMinutes(service.duration); // service is just string now, default 30
+    const end = new Date(start.getTime() + durationMins * 60000);
+
+    if (doesOverlap(start, end, employeeId, allAppointments, appointment?.id)) {
+      alert("This appointment overlaps with an existing appointment for this employee.");
+      return;
     }
 
-    try {
-        axios.put(`https://localhost:7079/api/appointments/${appointment.id}/edit`, {
-        organizationId,
-        employeeName: worker,
-        serviceName: service,
-        startTime: `${date}T${time}:00`,
-        endTime: calculateEndTime(date, time, service),
-        customerName,
-        customerPhone,
-        extraInfo,
-      });
+    const payload = {
+      employeeId,
+      employeeName: workers.find(w => w.id === employeeId)?.name,
+      menuServiceId: service, // just send the string
+      serviceName: service,
+      startTime: start.toISOString(),
+      customerName,
+      customerPhone,
+      extraInfo,
+      organizationId
+    };
 
-      resetFields();
+    try {
+      await axios.put(`https://localhost:7079/api/appointments/${appointment.id}/edit`, payload);
+      onSuccess && onSuccess("Appointment updated");
       handleClose();
-      if (onSuccess) onSuccess("Appointment updated successfully!");
-    } catch (error) {
-      console.error("Failed to update appointment:", error);
-      setErrMsg(error.response?.data?.message || error.message);
-    }
-};
-
-  const onDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this appointment?")) return;
-
-    try {
-        await axios.delete(`https://localhost:7079/api/appointments/${appointment.id}/delete`);
-        resetFields();
-        handleClose();
-        if (onSuccess) onSuccess("Appointment deleted successfully!");
-    } catch (error) {
-        console.error("Failed to delete appointment:", error);
-        setErrMsg(error.response?.data?.message || error.message);
+    } catch (err) {
+      console.error(err);
+      alert(err?.response?.data?.error || "Failed to update appointment");
     }
   };
 
-  const calculateEndTime = (date, startTime, serviceName) => {
-    const serviceObj = services.find(s => s.name === serviceName);
-    if (!serviceObj) return `${date}T${startTime}:00`;
-
-    const [hours, minutes] = startTime.split(":").map(Number);
-    const durationMinutes = serviceObj.durationMinutes || 30;
-    const endDate = new Date(date);
-    endDate.setHours(hours, minutes + durationMinutes, 0, 0);
-
-    const hh = String(endDate.getHours()).padStart(2, "0");
-    const mm = String(endDate.getMinutes()).padStart(2, "0");
-    return `${date}T${hh}:${mm}:00`;
+  const handleDelete = async () => {
+    if (!appointment) return;
+    if (!confirm("Delete this appointment?")) return;
+    try {
+      await axios.delete(`https://localhost:7079/api/appointments/${appointment.id}/delete`);
+      onSuccess && onSuccess("Appointment deleted");
+      handleClose();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete appointment");
+    }
   };
 
   return (
-    <Modal show={show} onHide={onClose} centered size="lg">
+    <Modal show={show} onHide={() => { reset(); handleClose(); }} centered size="lg">
       <Modal.Header closeButton>
-        <Modal.Title style={{ fontSize: "1.8rem" }}>Edit Appointment</Modal.Title>
+        <Modal.Title>Edit Appointment</Modal.Title>
       </Modal.Header>
 
-      <Modal.Body style={{ padding: "25px" }}>
-        {errMsg && <div style={{ color: "red", marginBottom: "10px" }}>{errMsg}</div>}
-
-        {/* Customer Name + Phone */}
-        <Row>
-          <Col>
-            <Form.Group className="mb-3">
-              <Form.Label>Customer Name *</Form.Label>
-              <Form.Control value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
-            </Form.Group>
-          </Col>
-          <Col>
-            <Form.Group className="mb-3">
-              <Form.Label>Customer Phone *</Form.Label>
-              <Form.Control value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
-            </Form.Group>
-          </Col>
-        </Row>
-
-        {/* Date + Time */}
-        <Row>
-          <Col>
-            <Form.Group className="mb-3">
-              <Form.Label>Date *</Form.Label>
-              <Form.Control type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-            </Form.Group>
-          </Col>
-          <Col>
-            <Form.Group className="mb-3">
-              <Form.Label>Time Slot *</Form.Label>
-              <Form.Select value={time} onChange={(e) => setTime(e.target.value)}>
-                <option value="">Select a time</option>
-                {timeSlots.map((t, idx) => (
-                  <option key={idx} value={t}>{t}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
-        </Row>
-
-        {/* Service + Worker */}
-        <Row>
-          <Col>
-            <Form.Group className="mb-3">
-              <Form.Label>Service Type *</Form.Label>
-              <Form.Select value={service} onChange={(e) => setService(e.target.value)}>
-                <option value="">Select a service</option>
-                {services.map((s, idx) => (
-                  <option key={idx} value={s.name}>{s.name}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
-          <Col>
-            <Form.Group className="mb-3">
-              <Form.Label>Worker *</Form.Label>
-              <Form.Select value={worker} onChange={(e) => setWorker(e.target.value)}>
-                <option value="">Select a worker</option>
-                {workers.map((w, idx) => (
-                  <option key={idx} value={w.name}>{w.name}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
-        </Row>
-
-        {/* Extra Info */}
+      <Modal.Body>
         <Form.Group className="mb-3">
-          <Form.Label>Extra Information</Form.Label>
-          <Form.Control as="textarea" rows={2} value={extraInfo} onChange={(e) => setExtraInfo(e.target.value)} />
+          <Form.Label>Service *</Form.Label>
+          <Form.Select value={service} onChange={e => setService(e.target.value)}>
+            <option value="">Select service</option>
+            {services.map((s, idx) => <option key={idx} value={s}>{s}</option>)}
+          </Form.Select>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Employee *</Form.Label>
+          <Form.Select value={employeeId} onChange={e => setEmployeeId(e.target.value)}>
+            <option value="">Select employee</option>
+            {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+          </Form.Select>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Date & Time *</Form.Label>
+          <div style={{ display:'flex', gap:8 }}>
+            <Form.Control type="date" value={date} onChange={e => setDate(e.target.value)} />
+            <Form.Select value={time} onChange={e => setTime(e.target.value)}>
+              {timeSlots.map(t => <option key={t} value={t}>{t}</option>)}
+            </Form.Select>
+          </div>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Customer Name *</Form.Label>
+          <Form.Control value={customerName} onChange={e => setCustomerName(e.target.value)} />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Phone</Form.Label>
+          <Form.Control value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Extra Info</Form.Label>
+          <Form.Control as="textarea" rows={2} value={extraInfo} onChange={e => setExtraInfo(e.target.value)} />
         </Form.Group>
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="danger" onClick={onDelete}>Delete</Button>
-        <Button variant="secondary" onClick={onClose}>Cancel</Button>
-        <Button variant="primary" onClick={onSave}>Save Changes</Button>
+        <Button variant="danger" onClick={handleDelete}>Delete</Button>
+        <Button variant="secondary" onClick={() => { reset(); handleClose(); }}>Cancel</Button>
+        <Button variant="primary" onClick={handleSave}>Save changes</Button>
       </Modal.Footer>
     </Modal>
   );

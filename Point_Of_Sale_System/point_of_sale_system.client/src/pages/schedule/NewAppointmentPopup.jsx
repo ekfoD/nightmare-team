@@ -1,162 +1,144 @@
-import React, { useState } from "react";
-import { Modal, Button, Form, Row, Col } from "react-bootstrap";
-import { doesAppointmentOverlap } from './doesAppointmentOverlap';
+import React, { useState, useEffect } from "react";
+import { Modal, Button, Form } from "react-bootstrap";
 import axios from "axios";
 
-const NewAppointmentPopup = ({ show, handleClose, workers, services, timeSlots, onSuccess }) => {
+// helper: parse service.duration to minutes
+const parseDurationToMinutes = (duration) => {
+  if (!duration) return 30;
+  if (typeof duration === "number") return duration;
+  const parts = duration.split(":").map(Number);
+  if (parts.length >= 2) return parts[0]*60 + parts[1];
+  return parseInt(duration, 10) || 30;
+};
+
+// overlap checker
+const doesOverlap = (newStart, newEnd, employeeId, allAppts, excludeId = null) => {
+  return allAppts.some(a => {
+    if (excludeId && a.id === excludeId) return false;
+    if (a.employeeId !== employeeId) return false;
+    const s = new Date(a.startTime);
+    const e = new Date(a.endTime);
+    return newStart < e && s < newEnd;
+  });
+};
+
+const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, timeSlots, selectedDate, allAppointments, organizationId }) => {
   const [service, setService] = useState("");
-  const [worker, setWorker] = useState("");
-  const [date, setDate] = useState("");
+  const [employeeId, setEmployeeId] = useState("");
   const [time, setTime] = useState("");
-  const [extraInfo, setExtraInfo] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
-  const [errMsg, setErrMsg] = useState("");
+  const [extraInfo, setExtraInfo] = useState("");
+  const [date, setDate] = useState("");
 
-  const organizationId = "8bbb7afb-d664-492a-bcd2-d29953ab924e";
+  useEffect(() => {
+    // initialize defaults
+    setDate(selectedDate ? selectedDate.toISOString().slice(0,10) : "");
+    if (services && services.length && !service) setService(services[0]);
+    if (workers && workers.length && !employeeId) setEmployeeId(workers[0].id);
+    if (timeSlots && timeSlots.length && !time) setTime(timeSlots[0]);
+  }, [show, services, workers, timeSlots, selectedDate]);
 
-  const resetFields = () => {
-    setService("");
-    setWorker("");
-    setDate("");
-    setTime("");
-    setExtraInfo("");
+  const reset = () => {
+    setService(services && services.length ? services[0] : "");
+    setEmployeeId(workers && workers.length ? workers[0].id : "");
+    setTime(timeSlots && timeSlots.length ? timeSlots[0] : "");
     setCustomerName("");
     setCustomerPhone("");
-    setErrMsg("");
+    setExtraInfo("");
+    setDate(selectedDate ? selectedDate.toISOString().slice(0,10) : "");
   };
 
-  const onClose = () => {
-    resetFields();
-    handleClose();
-  };
-
-  const calculateEndTime = (date, startTime, serviceName) => {
-    const serviceObj = services.find(s => s.name === serviceName);
-    if (!serviceObj) return `${date}T${startTime}:00`;
-
-    const [hours, minutes] = startTime.split(":").map(Number);
-    const durationMinutes = serviceObj.durationMinutes || 30;
-    const endDate = new Date(date);
-    endDate.setHours(hours, minutes + durationMinutes, 0, 0);
-
-    const hh = String(endDate.getHours()).padStart(2, "0");
-    const mm = String(endDate.getMinutes()).padStart(2, "0");
-    return `${date}T${hh}:${mm}:00`;
-  };
-
-  const onSave = async () => {
-    if (!date || !time || !service || !worker || !customerName || !customerPhone) {
-      setErrMsg("Please fill in all required fields.");
+  const handleSave = async () => {
+    if (!service || !employeeId || !time || !customerName || !date) {
+      alert("Fill required fields.");
       return;
     }
-    const start = new Date(`${selectedDate}T${selectedTime}`);
-    const end = new Date(start.getTime() + selectedService.durationMinutes * 60000);
 
-    if (doesAppointmentOverlap(start, end, selectedEmployeeId, appointments)) {
-        alert("This appointment overlaps with an existing appointment.");
-        return;
+    const start = new Date(`${date}T${time}:00`);
+    const durationMins = parseDurationToMinutes(30); // default duration since string services don't have duration
+    const end = new Date(start.getTime() + durationMins*60000);
+
+    if (doesOverlap(start, end, employeeId, allAppointments)) {
+      alert("This appointment overlaps with an existing appointment for this employee.");
+      return;
     }
 
-    try {
-      await axios.post(`https://localhost:7079/api/appointments/create`, {
-        organizationId,
-        employeeName: worker,
-        serviceName: service,
-        startTime: `${date}T${time}:00`,
-        endTime: calculateEndTime(date, time, service),
-        extraInfo,
-        customerName,
-        customerPhone
-      });
+    const payload = {
+      employeeId,
+      employeeName: workers.find(w => w.id === employeeId)?.name,
+      menuServiceId: service,  // using string as ID
+      serviceName: service,
+      startTime: start.toISOString(),
+      customerName,
+      customerPhone,
+      extraInfo,
+      organizationId
+    };
 
-      resetFields();
+    try {
+      await axios.post("https://localhost:7079/api/appointments/create", payload);
+      onSuccess && onSuccess("Appointment created");
+      reset();
       handleClose();
-      if (onSuccess) onSuccess("Appointment created successfully!");
-    } catch (error) {
-      console.error("Failed to create appointment:", error);
-      setErrMsg(error.response?.data?.message || error.message);
+    } catch (err) {
+      console.error(err);
+      alert(err?.response?.data?.error || "Failed to create appointment");
     }
   };
 
   return (
-    <Modal show={show} onHide={onClose} centered size="lg">
+    <Modal show={show} onHide={() => { reset(); handleClose(); }} centered size="lg">
       <Modal.Header closeButton>
-        <Modal.Title style={{ fontSize: "1.8rem" }}>New Appointment</Modal.Title>
+        <Modal.Title>New Appointment</Modal.Title>
       </Modal.Header>
 
-      <Modal.Body style={{ padding: "25px" }}>
-        {errMsg && <div style={{ color: "red", marginBottom: "10px" }}>{errMsg}</div>}
-
-        {/* Date */}
+      <Modal.Body>
         <Form.Group className="mb-3">
-          <Form.Label style={{ fontSize: "1.3rem", fontWeight: "600" }}>Date *</Form.Label>
-          <Form.Control type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
-        </Form.Group>
-
-        {/* Time */}
-        <Form.Group className="mb-3">
-          <Form.Label>Time Slot *</Form.Label>
-          <Form.Select value={time} onChange={(e) => setTime(e.target.value)} required>
-            <option value="">Select a time</option>
-            {timeSlots.map((t, idx) => (
-              <option key={idx} value={t}>{t}</option>
-            ))}
+          <Form.Label>Service *</Form.Label>
+          <Form.Select value={service} onChange={e => setService(e.target.value)}>
+            <option value="">Select service</option>
+            {services.map((s, idx) => <option key={idx} value={s}>{s}</option>)}
           </Form.Select>
         </Form.Group>
 
-        {/* Customer Name + Phone (top row) */}
-        <Row>
-          <Col>
-            <Form.Group className="mb-3">
-              <Form.Label>Customer Name *</Form.Label>
-              <Form.Control type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} required />
-            </Form.Group>
-          </Col>
-          <Col>
-            <Form.Group className="mb-3">
-              <Form.Label>Customer Phone *</Form.Label>
-              <Form.Control type="text" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} required />
-            </Form.Group>
-          </Col>
-        </Row>
-
-        {/* Service + Worker (second row) */}
-        <Row>
-          <Col>
-            <Form.Group className="mb-3">
-              <Form.Label>Service Type *</Form.Label>
-              <Form.Select value={service} onChange={(e) => setService(e.target.value)} required>
-                <option value="">Select a service</option>
-                {services.map((s, idx) => (
-                  <option key={idx} value={s.name}>{s.name}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
-          <Col>
-            <Form.Group className="mb-3">
-              <Form.Label>Worker *</Form.Label>
-              <Form.Select value={worker} onChange={(e) => setWorker(e.target.value)} required>
-                <option value="">Select a worker</option>
-                {workers.map((w, idx) => (
-                  <option key={idx} value={w.name}>{w.name}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
-        </Row>
-
-        {/* Extra info */}
         <Form.Group className="mb-3">
-          <Form.Label>Extra Information (optional)</Form.Label>
-          <Form.Control as="textarea" rows={2} value={extraInfo} onChange={(e) => setExtraInfo(e.target.value)} />
+          <Form.Label>Employee *</Form.Label>
+          <Form.Select value={employeeId} onChange={e => setEmployeeId(e.target.value)}>
+            <option value="">Select employee</option>
+            {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+          </Form.Select>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Date & Time *</Form.Label>
+          <div style={{ display:'flex', gap:8 }}>
+            <Form.Control type="date" value={date} onChange={e => setDate(e.target.value)} />
+            <Form.Select value={time} onChange={e => setTime(e.target.value)}>
+              {timeSlots.map(t => <option key={t} value={t}>{t}</option>)}
+            </Form.Select>
+          </div>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Customer Name *</Form.Label>
+          <Form.Control value={customerName} onChange={e => setCustomerName(e.target.value)} />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Phone</Form.Label>
+          <Form.Control value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Extra Info</Form.Label>
+          <Form.Control as="textarea" rows={2} value={extraInfo} onChange={e => setExtraInfo(e.target.value)} />
         </Form.Group>
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={onClose}>Cancel</Button>
-        <Button variant="primary" onClick={onSave}>Save Appointment</Button>
+        <Button variant="secondary" onClick={() => { reset(); handleClose(); }}>Cancel</Button>
+        <Button variant="primary" onClick={handleSave}>Save Appointment</Button>
       </Modal.Footer>
     </Modal>
   );
