@@ -13,7 +13,7 @@ function Settings() {
     useEffect(() => {
         async function loadOrg() {
             try {
-                const response = await axios.get('/api/Organization/33333333-3333-3333-3333-333333333333');
+                const response = await axios.get('/api/Organizations/36f11d11-b412-4154-b288-056f258e6920');
                 console.log("Loaded:", response.data);
 
                 setBusiness(response.data);
@@ -31,7 +31,7 @@ function Settings() {
     async function handleFormSubmit(updatedData) {
         try {
             const response = await axios.put(
-                `/api/Organization/${business.id}`,
+                `/api/Organizations/${business.organizationId}`,
                 updatedData
             );
 

@@ -1,0 +1,2 @@
+- /organizations Get and Post response does not give an owner ID
+- /organization Post request now has currency too
