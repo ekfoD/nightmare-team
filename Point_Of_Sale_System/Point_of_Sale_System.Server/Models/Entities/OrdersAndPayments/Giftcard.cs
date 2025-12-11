@@ -1,7 +1,7 @@
 ﻿using Point_of_Sale_System.Server.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace Point_of_Sale_System.Server.Models
+namespace Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments
 {
     public class Giftcard
     {

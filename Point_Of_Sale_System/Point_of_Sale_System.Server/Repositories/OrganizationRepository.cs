@@ -1,62 +1,70 @@
-using Point_of_Sale_System.Server.Models;
 using Point_of_Sale_System.Server.Interfaces;
+using Point_of_Sale_System.Server.Enums;
+using Point_of_Sale_System.Server.Models.Entities.Business;
 
-namespace Point_of_Sale_System.Server.Repositories
+
+public class OrganizationRepository : IOrganizationrepository
 {
-    public class OrganizationRepository : IOrganizationRepository
+
+    private static readonly List<Organization> _organizations = new()
     {
-        public static readonly List<Organization> _organizations = new();
-
-        public IEnumerable<Organization> GetAll()
+        new Organization
         {
-            return _organizations;
-        }
-
-        public Organization? GetById(Guid id)
+            Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            Name = "Acme Corporation",
+            Address = "123 Market Street, Springfield",
+            EmailAddress = "info@acme.com",
+            PhoneNumber = "+15551234567",
+            Plan = PlanEnum.service,
+            Currency = CurrencyEnum.dollar,
+            Status = StatusEnum.active,
+            Timestamp = DateTime.Now
+        },
+        new Organization
         {
-            return _organizations.FirstOrDefault(o => o.Id == id);
-        }
-
-        public Task<Organization?> GetByIdAsync(Guid id)
+            Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+            Name = "TechNova Solutions",
+            Address = "456 Innovation Avenue, Silicon City",
+            EmailAddress = "support@technova.com",
+            PhoneNumber = "+15559876543",
+            Plan = PlanEnum.order,
+            Currency = CurrencyEnum.euro,
+            Status = StatusEnum.active,
+            Timestamp = DateTime.Now
+        },
+        new Organization
         {
-            return Task.FromResult(_organizations.FirstOrDefault(o => o.Id == id));
+            Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
+            Name = "BlueWave Retail",
+            Address = "789 Ocean Drive, Miami",
+            EmailAddress = "contact@bluewave.com",
+            PhoneNumber = "+15552227788",
+            Plan = PlanEnum.order_service,
+            Currency = CurrencyEnum.euro,
+            Status = StatusEnum.active,
+            Timestamp = DateTime.Now
         }
+    };
 
-        public Organization AddOrganization(Organization org)
-        {
-            _organizations.Add(org);
-            return org;
-        }
+    public Organization GetOrganizationById(Guid OrganizationId)
+    {
+        return _organizations.FirstOrDefault(e => e.Id == OrganizationId);
+    }
 
-        public Organization? UpdateOrganization(Organization updated)
-        {
-            var existing = GetById(updated.Id);
-            if (existing == null) return null;
+    public Organization UpdateOrganization(Organization updated)
+    {
+        var existing = GetOrganizationById(updated.Id);
+        if (existing == null)
+            return null;
 
-            existing.Name = updated.Name;
-            existing.Address = updated.Address;
-            existing.EmailAddress = updated.EmailAddress;
-            existing.PhoneNumber = updated.PhoneNumber;
-            existing.Plan = updated.Plan;
-            existing.Currency = updated.Currency;
-            existing.Status = updated.Status;
+        existing.Name = updated.Name;
+        existing.Address = updated.Address;
+        existing.EmailAddress = updated.EmailAddress;
+        existing.PhoneNumber = updated.PhoneNumber;
+        existing.Plan = updated.Plan;
+        existing.Currency = updated.Currency;
+        existing.Status = updated.Status;
 
-            return existing;
-        }
-
-        public bool DeleteOrganization(Guid id)
-        {
-            var existing = GetById(id);
-            if (existing == null) return false;
-
-            _organizations.Remove(existing);
-            return true;
-        }
-
-            public Organization Add(Organization organization)
-        {
-            _organizations.Add(organization);
-            return organization;
-        }
+        return existing;
     }
 }

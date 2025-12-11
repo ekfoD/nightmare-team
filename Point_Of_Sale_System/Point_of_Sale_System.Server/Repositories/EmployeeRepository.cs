@@ -1,5 +1,5 @@
-﻿using Point_of_Sale_System.Server.Models;
-using Point_of_Sale_System.Server.Interfaces;
+﻿using Point_of_Sale_System.Server.Interfaces;
+using Point_of_Sale_System.Server.Models.Entities.Business;
 
 public class EmployeeRepository : IEmployeeRepository
 {
@@ -7,7 +7,8 @@ public class EmployeeRepository : IEmployeeRepository
 
     public IEnumerable<Employee> GetEmployees(Guid organizationId)
     {
-        return _employees.Where(e => e.OrganizationId == organizationId);
+        return null;
+            // _employees.Where(e => e.OrganizationId == organizationId);
     }
 
     public Task<IEnumerable<Employee>> GetEmployeesAsync(Guid organizationId)

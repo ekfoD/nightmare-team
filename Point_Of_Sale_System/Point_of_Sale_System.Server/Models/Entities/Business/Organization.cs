@@ -1,12 +1,16 @@
 ﻿using Point_of_Sale_System.Server.Enums;
+using Point_of_Sale_System.Server.Models.Entities.MenuBased;
+using Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments;
+using Point_of_Sale_System.Server.Models.Entities.ServiceBased;
 using System.ComponentModel.DataAnnotations;
 
-namespace Point_of_Sale_System.Server.Models
+namespace Point_of_Sale_System.Server.Models.Entities.Business
 {
     public class Organization
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
+
         public required string Name { get; set; }
         public required string Address { get; set; }
         public required string EmailAddress { get; set; }

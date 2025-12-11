@@ -1,7 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Point_of_Sale_System.Server.Models.Entities.MenuBased;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Point_of_Sale_System.Server.Models
+namespace Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments
 {
     public class OrderItem
     {

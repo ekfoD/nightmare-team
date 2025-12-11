@@ -1,9 +1,12 @@
-using System.Drawing;
 using Point_of_Sale_System.Server.Interfaces;
-using Point_of_Sale_System.Server.Repositories;
+using System.Text.Json.Serialization;
 using Point_of_Sale_System.Server.Services;
+using Point_of_Sale_System.Server.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<Point_of_Sale_System.Server.Models.Data.PoSDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -27,6 +30,10 @@ builder.Services.AddScoped<IServicesService, ServicesService>();
 // builder.Services.AddDbContext<AppDbContext>(options =>
 //     options.UseSqlServer(connectionString));
 
+builder.Services.AddSingleton<IEmployeeRepository, InMemoryEmployeeRepository>();
+builder.Services.AddScoped<IOrganizationrepository, OrganizationRepository>();
+builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -37,11 +44,17 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
 var app = builder.Build();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
-
+    
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
