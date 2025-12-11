@@ -50,30 +50,33 @@ const Schedule = () => {
     const [editingAppointment, setEditingAppointment] = useState(null);
 
     const [allWorkers, setAllWorkers] = useState([]);
-    const [appointments, setAppointments] = useState([]);
+    const [allAppointments, setAllAppointments] = useState([]);
+    const [dayAppointments, setDayAppointments] = useState([]);
     const [services, setServices] = useState([]);
+
+    const [selectedDate, setSelectedDate] = useState(new Date());
 
     // Load backend data
     const fetchData = async () => {
         try {
+
+            const formattedDate = selectedDate.toISOString().split("T")[0]; 
             const [workersRes, apptsRes, servicesRes] = await Promise.all([
                 axios.get(`https://localhost:7079/api/employees/${organizationId}`),
-                axios.get(`https://localhost:7079/api/appointments/${organizationId}/2025-01-01`),
+                axios.get(`https://localhost:7079/api/appointments/${organizationId}/${formattedDate}`),
                 axios.get(`https://localhost:7079/api/services`)
             ]);
 
-            // Map employees for schedule
             setAllWorkers(workersRes.data.map(w => ({
                 id: w.id,
                 name: w.username,
                 photo: w.photoUrl || "/default.jpg"
             })));
 
-            // Map appointments for schedule
-            setAppointments(apptsRes.data.map(a => {
+            const mappedAppts = apptsRes.data.map(a => {
                 const start = new Date(a.startTime);
                 const date = start.toISOString().split("T")[0];
-                const time = start.toTimeString().substring(0,5); 
+                const time = start.toTimeString().substring(0, 5);
 
                 return {
                     id: a.id,
@@ -82,12 +85,16 @@ const Schedule = () => {
                     worker: a.employeeName || "",
                     service: a.serviceName || "",
                     extraInfo: a.extraInfo || "",
-                    customerName: a.customerName || "",    
-                    customerPhone: a.customerPhone || ""      
+                    customerName: a.customerName || "",
+                    customerPhone: a.customerPhone || ""
                 };
-            }));
+            });
 
+            setAllAppointments(mappedAppts);
             setServices(servicesRes.data.map(s => ({ name: s })));
+
+            // Refresh selected day view
+            filterAppointmentsForDate(selectedDate, mappedAppts);
 
         } catch (err) {
             console.error("Failed to load schedule data", err);
@@ -95,6 +102,12 @@ const Schedule = () => {
     };
 
     useEffect(() => { fetchData(); }, []);
+
+    const filterAppointmentsForDate = (date, appts = allAppointments) => {
+        const iso = date.toISOString().split("T")[0];
+        const filtered = appts.filter(a => a.date === iso);
+        setDayAppointments(filtered);
+    };
 
     const workStart = '07:00';
     const workEnd = '21:00';
@@ -115,13 +128,13 @@ const Schedule = () => {
     );
 
     const mockAppointment = { date: "", time: "", service: "", worker: "", extraInfo: "" };
-    const fixedDate = new Date('2025-11-28');
 
     return (
         <Container fluid className="schedule-container">
             <div className="schedule-wrapper">
                 <Card className="schedule-card">
                     <div style={{ display: 'flex', overflowX: 'auto', flex: 1 }}>
+                        
                         {/* Time Column */}
                         <div className="time-column">
                             {times.map((time, idx) => (
@@ -133,6 +146,7 @@ const Schedule = () => {
                         <div style={{ display: 'flex', minWidth: `${workers.length * 234}px` }}>
                             {workers.map((worker, wIdx) => (
                                 <div key={wIdx} className="employee-column" style={{ minHeight: `${times.length * 30 + 91}px` }}>
+                                    
                                     <div className="employee-header">
                                         <Image src={worker.photo} roundedCircle width={65} height={65} />
                                         <div>{worker.name}</div>
@@ -142,7 +156,7 @@ const Schedule = () => {
                                         <div key={idx} style={{ height: '39px', borderBottom: '1px dashed #ccc' }}></div>
                                     ))}
 
-                                    {appointments
+                                    {dayAppointments
                                         .filter(a => a.worker === worker.name)
                                         .map((app, idx) => (
                                             <div
@@ -163,9 +177,9 @@ const Schedule = () => {
                 {/* Sidebar */}
                 <div className="schedule-sidebar">
                     <div className="sidebar-date">
-                        <div>{fixedDate.getFullYear()}</div>
-                        <div>{fixedDate.toLocaleString('default', { month: 'long' })}</div>
-                        <div>{fixedDate.getDate()}</div>
+                        <div>{selectedDate.getFullYear()}</div>
+                        <div>{selectedDate.toLocaleString('default', { month: 'long' })}</div>
+                        <div>{selectedDate.getDate()}</div>
                     </div>
 
                     <Button className="sidebar-button" variant="primary" onClick={openCalendar}>
@@ -189,10 +203,15 @@ const Schedule = () => {
             <NewAppointmentPopup
                 show={showPopup}
                 handleClose={closePopup}
-                onSuccess={(message) => { setSuccessMessage(message); setShowSuccess(true); fetchData(); }}
+                onSuccess={(message) => {
+                    setSuccessMessage(message);
+                    setShowSuccess(true);
+                    fetchData();
+                }}
                 workers={allWorkers}
                 services={services}
                 timeSlots={times}
+                selectedDate={selectedDate}
             />
 
             <EditAppointmentPopup
@@ -202,7 +221,11 @@ const Schedule = () => {
                 workers={allWorkers}
                 services={services}
                 timeSlots={times}
-                onSuccess={(message) => { setSuccessMessage(message); setShowSuccess(true); fetchData(); }}
+                onSuccess={(message) => {
+                    setSuccessMessage(message);
+                    setShowSuccess(true);
+                    fetchData();
+                }}
             />
 
             <SuccessNotifier
@@ -211,12 +234,20 @@ const Schedule = () => {
                 onClose={() => setShowSuccess(false)}
             />
 
+            {/* CALENDAR MODAL */}
             <Modal show={showCalendar} onHide={closeCalendar} size="lg" centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Calendar</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Calendar />
+                    <Calendar
+                        appointmentDates={allAppointments.map(a => a.date)}
+                        onDaySelect={(date) => {
+                            setSelectedDate(date);
+                            filterAppointmentsForDate(date);
+                            closeCalendar();
+                        }}
+                    />
                 </Modal.Body>
             </Modal>
         </Container>

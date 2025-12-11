@@ -125,4 +125,12 @@
   margin-bottom: 8px;
 }
 
+:root {
+  --calendar-day-bg: #ffffff;
+  --calendar-day-hover: #f1f1f1;
+  --calendar-border: #cccccc;
+  --calendar-weekend-text: #b00;
+  --calendar-selected: #90caf9;
+  --calendar-has-appointments: #c8e6c9;
+}
 

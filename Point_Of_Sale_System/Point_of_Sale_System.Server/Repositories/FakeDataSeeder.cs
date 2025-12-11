@@ -108,8 +108,8 @@ namespace Point_of_Sale_System.Server.Repositories
                 EmployeeId = emp1.Id,
                 MenuServiceId = browService.Id,
 
-                StartTime = new DateTime(2025, 1, 1, 10, 0, 0),
-                EndTime = new DateTime(2025, 1, 1, 10, 30, 0),
+                StartTime = new DateTime(2025, 12, 11, 10, 0, 0),
+                EndTime = new DateTime(2025, 12, 11, 10, 30, 0),
                 CustomerName = "Greta",
                 CustomerPhone = "+37060012345",
                 ExtraInfo = "First time visit",
@@ -126,8 +126,8 @@ namespace Point_of_Sale_System.Server.Repositories
                 EmployeeId = emp2.Id,
                 MenuServiceId = lashService.Id,
 
-                StartTime = new DateTime(2025, 1, 1, 11, 0, 0),
-                EndTime = new DateTime(2025, 1, 1, 12, 0, 0),
+                StartTime = new DateTime(2025, 12, 11, 11, 0, 0),
+                EndTime = new DateTime(2025, 12, 11, 12, 0, 0),
                 CustomerName = "Rita",
                 CustomerPhone = "+37060054321",
                 ExtraInfo = "",
