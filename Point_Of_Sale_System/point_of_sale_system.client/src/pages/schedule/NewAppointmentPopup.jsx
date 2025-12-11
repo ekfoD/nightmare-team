@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
+import { doesAppointmentOverlap } from './doesAppointmentOverlap';
 import axios from "axios";
 
 const NewAppointmentPopup = ({ show, handleClose, workers, services, timeSlots, onSuccess }) => {
@@ -48,6 +49,13 @@ const NewAppointmentPopup = ({ show, handleClose, workers, services, timeSlots, 
     if (!date || !time || !service || !worker || !customerName || !customerPhone) {
       setErrMsg("Please fill in all required fields.");
       return;
+    }
+    const start = new Date(`${selectedDate}T${selectedTime}`);
+    const end = new Date(start.getTime() + selectedService.durationMinutes * 60000);
+
+    if (doesAppointmentOverlap(start, end, selectedEmployeeId, appointments)) {
+        alert("This appointment overlaps with an existing appointment.");
+        return;
     }
 
     try {

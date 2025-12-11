@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
+import { doesAppointmentOverlap } from './doesAppointmentOverlap';
 import axios from "axios";
 
 const EditAppointmentPopup = ({
@@ -55,9 +56,16 @@ const EditAppointmentPopup = ({
       setErrMsg("Please fill in all required fields.");
       return;
     }
+    const start = new Date(`${date}T${time}`);
+    const end = new Date(start.getTime() + service.durationMinutes * 60000);
+
+    if (doesAppointmentOverlap(start, end, editedEmployeeId, appointments, appointment.id)) {
+        alert("This appointment overlaps with an existing appointment.");
+        return;
+    }
 
     try {
-      await axios.put(`https://localhost:7079/api/appointments/${appointment.id}/edit`, {
+        axios.put(`https://localhost:7079/api/appointments/${appointment.id}/edit`, {
         organizationId,
         employeeName: worker,
         serviceName: service,
@@ -75,7 +83,7 @@ const EditAppointmentPopup = ({
       console.error("Failed to update appointment:", error);
       setErrMsg(error.response?.data?.message || error.message);
     }
-  };
+};
 
   const onDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this appointment?")) return;
@@ -89,7 +97,7 @@ const EditAppointmentPopup = ({
         console.error("Failed to delete appointment:", error);
         setErrMsg(error.response?.data?.message || error.message);
     }
-};
+  };
 
   const calculateEndTime = (date, startTime, serviceName) => {
     const serviceObj = services.find(s => s.name === serviceName);

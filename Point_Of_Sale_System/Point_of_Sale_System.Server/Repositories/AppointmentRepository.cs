@@ -37,5 +37,7 @@ namespace Point_of_Sale_System.Server.Repositories
             _appointments.Remove(existing);
             return Task.FromResult(true);
         }
+
+        
     }
 }
