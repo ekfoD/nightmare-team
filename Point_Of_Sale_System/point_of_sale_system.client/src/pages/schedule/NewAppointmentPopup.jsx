@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import axios from "axios";
-
-// Helpers
-const parseDurationToMinutes = (duration) => {
-  if (!duration) return 30;
-  if (typeof duration === "number") return duration;
-  const parts = duration.split(":").map(Number);
-  return parts.length === 2 ? parts[0]*60 + parts[1] : parseInt(duration, 10) || 30;
-};
-
-const doesOverlap = (newStart, newEnd, employeeId, allAppts, excludeId = null) =>
-  allAppts.some(a => a.employeeId === employeeId && a.id !== excludeId &&
-                     newStart < new Date(a.endTime) && new Date(a.startTime) < newEnd);
+import {workStart, workEnd, isWithinWorkHours, parseDurationToMinutes, doesOverlap } from './utils/ScheduleHelpers';
 
 const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, selectedDate, allAppointments, organizationId }) => {
   const [form, setForm] = useState({
@@ -61,6 +50,10 @@ const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, 
 
     const start = new Date(`${date}T${time}:00`);
     const end = new Date(start.getTime() + parseDurationToMinutes(service.duration)*60000);
+
+      if (!isWithinWorkHours(time)) {
+        return alert(`Time must be between ${workStart} and ${workEnd}.`);
+      }
 
     if (doesOverlap(start, end, employeeId, allAppointments)) 
       return alert("This appointment overlaps with an existing appointment for this employee.");

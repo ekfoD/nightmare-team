@@ -9,23 +9,7 @@ import Calendar from './Calendar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../styles/Schedule.css';
 
-// Scaling
-const ROW_HEIGHT = 40;
-
-// Color palette for services
-const servicePalette = [
-  "#ffb3ba", "#bae1ff", "#baffc9", "#ffffba", "#ffdfba",
-  "#e2baff", "#ffbfff", "#caffbf", "#ffd6a5", "#a0c4ff"
-];
-
-const serviceColors = new Map();
-const getColorForService = (serviceName) => {
-  if (!serviceColors.has(serviceName)) {
-    const index = serviceColors.size % servicePalette.length;
-    serviceColors.set(serviceName, servicePalette[index]);
-  }
-  return serviceColors.get(serviceName);
-};
+import { getColorForService, getAppointmentHeight, workStart, workEnd, getAppointmentTop } from './utils/ScheduleHelpers';
 
 // Generate time slots
 const generateTimes = (workStart, workEnd, intervalMinutes) => {
@@ -47,23 +31,6 @@ const generateTimes = (workStart, workEnd, intervalMinutes) => {
   return times;
 };
 
-// Compute appointment position & height
-const getAppointmentTop = (startTime, times) => {
-  const start = new Date(startTime);
-  const hhmm = `${String(start.getHours()).padStart(2,'0')}:${String(start.getMinutes()).padStart(2,'0')}`;
-  const index = times.findIndex(t => t === hhmm);
-  if(index >= 0) return index * ROW_HEIGHT;
-  const firstSlot = times[0].split(':').map(Number);
-  const slotMinutes = (start.getHours() - firstSlot[0])*60 + (start.getMinutes() - firstSlot[1]);
-  return (slotMinutes / 30) * ROW_HEIGHT;
-};
-const getAppointmentHeight = (startTime, endTime) => {
-  const start = new Date(startTime);
-  const end = new Date(endTime);
-  const durationMinutes = (end - start) / 60000;
-  return (durationMinutes / 30) * ROW_HEIGHT;
-};
-
 const organizationId = "8bbb7afb-d664-492a-bcd2-d29953ab924e";
 
 const Schedule = () => {
@@ -78,9 +45,8 @@ const Schedule = () => {
   const [services, setServices] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  const workStart = '07:00';
-  const workEnd = '21:00';
   const intervalMinutes = 30;
+
   const times = generateTimes(workStart, workEnd, intervalMinutes);
 
   const [showPopup, setShowPopup] = useState(false);

@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import axios from "axios";
-
-// Helpers
-const parseDurationToMinutes = (duration) => {
-  if (!duration) return 30;
-  if (typeof duration === "number") return duration;
-  const parts = duration.split(":").map(Number);
-  return parts.length >= 2 ? parts[0] * 60 + parts[1] : parseInt(duration, 10) || 30;
-};
-
-const doesOverlap = (newStart, newEnd, employeeId, allAppts, excludeId = null) =>
-  allAppts.some(a => a.employeeId === employeeId && a.id !== excludeId &&
-                     newStart < new Date(a.endTime) && new Date(a.startTime) < newEnd);
+import { workStart, workEnd, isWithinWorkHours, parseDurationToMinutes, doesOverlap } from './utils/ScheduleHelpers';
 
 const EditAppointmentPopup = ({
   show,
@@ -28,7 +17,7 @@ const EditAppointmentPopup = ({
   const [form, setForm] = useState({
     service: null,
     employeeId: workers.length ? workers[0].id : "",
-    date: selectedDate?.toISOString().slice(0,10) || "",
+    date: selectedDate?.toISOString().slice(0, 10) || "",
     time: "",
     endTime: "",
     customerName: "",
@@ -36,17 +25,18 @@ const EditAppointmentPopup = ({
     extraInfo: ""
   });
 
-  // Initialize form on appointment or services change
+  // Initialize form when appointment or services change
   useEffect(() => {
     if (!appointment) return resetForm();
 
     const serviceObj = services.find(s => s.name === appointment.serviceName) || null;
-    const startDate = new Date(appointment.startTime || "");
-    const startTime = startDate.toTimeString().substring(0,5);
-    const date = startDate.toISOString().slice(0,10);
 
-    const endTime = serviceObj?.duration
-      ? new Date(startDate.getTime() + parseDurationToMinutes(serviceObj.duration)*60000)
+    const startDate = appointment.startTime ? new Date(appointment.startTime) : null;
+    const startTime = startDate ? startDate.toTimeString().substring(0,5) : "";
+    const date = startDate ? startDate.toISOString().slice(0,10) : "";
+
+    const endTime = (startDate && serviceObj?.duration)
+      ? new Date(startDate.getTime() + parseDurationToMinutes(serviceObj.duration) * 60000)
           .toTimeString().substring(0,5)
       : "";
 
@@ -62,13 +52,14 @@ const EditAppointmentPopup = ({
     });
   }, [appointment, services]);
 
-  // Recalculate endTime when service, date, or time changes
+  // Update endTime whenever service, date, or time changes
   useEffect(() => {
     if (!form.service || !form.time || !form.date) return;
 
     const start = new Date(`${form.date}T${form.time}:00`);
-    const end = new Date(start.getTime() + parseDurationToMinutes(form.service.duration) * 60000);
+    if (isNaN(start)) return; // guard against invalid date
 
+    const end = new Date(start.getTime() + parseDurationToMinutes(form.service.duration) * 60000);
     setForm(f => ({ ...f, endTime: end.toTimeString().substring(0,5) }));
   }, [form.service, form.time, form.date]);
 
@@ -83,17 +74,26 @@ const EditAppointmentPopup = ({
     extraInfo: ""
   });
 
-  const handleChange = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }));
+  const handleChange = key => e => setForm(f => ({ ...f, [key]: e.target.value }));
 
   const handleSave = async () => {
     const { service, employeeId, date, time, customerName, customerPhone, extraInfo } = form;
-    if (!service || !employeeId || !time || !customerName || !date) return alert("Fill required fields.");
+    if (!service || !employeeId || !time || !customerName || !date) {
+      return alert("Fill required fields.");
+    }
 
     const start = new Date(`${date}T${time}:00`);
+    if (isNaN(start)) return alert("Invalid date or time.");
+
     const end = new Date(start.getTime() + parseDurationToMinutes(service.duration) * 60000);
 
-    if (doesOverlap(start, end, employeeId, allAppointments, appointment?.id))
+    if (!isWithinWorkHours(time)) {
+      return alert(`Time must be between ${workStart} and ${workEnd}.`);
+    }
+
+    if (doesOverlap(start, end, employeeId, allAppointments, appointment?.id)) {
       return alert("This appointment overlaps with an existing appointment for this employee.");
+    }
 
     try {
       await axios.put(`https://localhost:7079/api/appointments/${appointment.id}/edit`, {
@@ -138,7 +138,7 @@ const EditAppointmentPopup = ({
           <Form.Label>Service *</Form.Label>
           <Form.Select value={form.service?.name || ""} onChange={e => setForm(f => ({ ...f, service: services.find(s => s.name === e.target.value) } ))}>
             <option value="">Select service</option>
-            {services.map((s, idx) => <option key={idx} value={s.name}>{s.name}</option>)}
+            {services.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
           </Form.Select>
         </Form.Group>
 
