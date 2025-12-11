@@ -1,6 +1,6 @@
 import { Container, Nav, Navbar as BootstrapNavbar } from 'react-bootstrap'
 import { Link, NavLink } from 'react-router-dom'
-//import { BsFillGearFill } from "react-icons/bs";
+import { BsFillGearFill } from "react-icons/bs";
 
 function Navbar() {
   return (
@@ -20,7 +20,7 @@ function Navbar() {
             <Nav.Link as={NavLink} to="/employees">Employees</Nav.Link>
             <Nav.Link as={NavLink} to="/appAbout" end>AppointmentWorker</Nav.Link>
             <Nav.Link as={NavLink} to="/settings">
-              {/* <BsFillGearFill/> */}
+              <BsFillGearFill/>
             </Nav.Link>
           </Nav>
         </BootstrapNavbar.Collapse>
