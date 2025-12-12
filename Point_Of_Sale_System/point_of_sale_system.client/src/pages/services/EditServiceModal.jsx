@@ -26,7 +26,7 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
     setDescription(service.description);
 
     // Ensure status is exactly "Active" or "Inactive"
-    setIsActive(service.status === "Inactive" ? "Inactive" : "Active");
+    setIsActive(service.status === "inactive" ? "Inactive" : "Active");
 
     setError("");
   } else if (!show) {
