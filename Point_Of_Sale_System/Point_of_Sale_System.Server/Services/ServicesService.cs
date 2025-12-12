@@ -1,5 +1,5 @@
 using Point_of_Sale_System.Server.Interfaces;
-using Point_of_Sale_System.Server.Models;
+using Point_of_Sale_System.Server.Models.Entities.ServiceBased;
 using Point_of_Sale_System.Server.Repositories;
 
 public class ServicesService : IServicesService

@@ -1,5 +1,9 @@
-using Point_of_Sale_System.Server.Models;
+using Point_of_Sale_System.Server.Models.Entities.ServiceBased;
 using Point_of_Sale_System.Server.Enums;
+using Point_of_Sale_System.Server.Models.Entities.Business;
+using Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments;
+using Point_of_Sale_System.Server.Models.Entities.MenuBased;
+
 
 namespace Point_of_Sale_System.Server.Repositories
 {
@@ -43,8 +47,7 @@ namespace Point_of_Sale_System.Server.Repositories
                 Username = "Laura",
                 AccessFlag = 1,
                 Status = StatusEnum.active,
-                OrganizationId = org.Id,
-                Organization = org,
+                Organizations = new List<Organization> { org },
                 PasswordHash = "HASH",
                 PasswordSalt = "SALT"
             };
@@ -55,8 +58,7 @@ namespace Point_of_Sale_System.Server.Repositories
                 Username = "Monika",
                 AccessFlag = 1,
                 Status = StatusEnum.active,
-                OrganizationId = org.Id,
-                Organization = org,
+                Organizations = new List<Organization> { org },
                 PasswordHash = "HASH",
                 PasswordSalt = "SALT"
             };

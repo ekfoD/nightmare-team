@@ -1,6 +1,6 @@
 using Point_of_Sale_System.Server.DTOs;
 using Point_of_Sale_System.Server.Interfaces;
-using Point_of_Sale_System.Server.Models;
+using Point_of_Sale_System.Server.Models.Entities.ServiceBased;
 
 namespace Point_of_Sale_System.Server.Services
 {
@@ -61,12 +61,8 @@ namespace Point_of_Sale_System.Server.Services
             var svc = (await _serviceRepo.GetAllForOrganizationAsync(dto.OrganizationId))
                        .FirstOrDefault(s => s.Name.Equals(dto.ServiceName, StringComparison.OrdinalIgnoreCase))
                        ?? throw new Exception("Service not found.");
-
-
-            if (emp.OrganizationId != dto.OrganizationId)
-                throw new Exception("Employee does not belong to this organization.");
             
-            var org = await _organizationRepo.GetByIdAsync(dto.OrganizationId);
+            var org = _organizationRepo.GetOrganizationById(dto.OrganizationId);
 
             if (svc.OrganizationId != dto.OrganizationId)
                 throw new Exception("Service does not belong to this organization.");

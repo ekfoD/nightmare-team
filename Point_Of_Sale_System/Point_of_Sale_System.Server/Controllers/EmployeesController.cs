@@ -2,7 +2,7 @@
 using Point_of_Sale_System.Server.DTOs;
 using Point_of_Sale_System.Server.Enums;
 using Point_of_Sale_System.Server.Interfaces;
-using Point_of_Sale_System.Server.Models;
+using Point_of_Sale_System.Server.Repositories;
 using Point_of_Sale_System.Server.Models.Entities.Business;
 
 
@@ -38,8 +38,7 @@ namespace Point_of_Sale_System.Server.Controllers
                     Id = e.Id,
                     Username = e.Username,
                     AccessFlag = e.AccessFlag,
-                    Status = e.Status.ToString(),
-                    OrganizationId = e.OrganizationId
+                    Status = e.Status.ToString()
                 });
 
             return Ok(employees);
@@ -54,6 +53,9 @@ namespace Point_of_Sale_System.Server.Controllers
             var salt = BCrypt.Net.BCrypt.GenerateSalt();
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password + salt);
 
+            var org = _orgRepo.GetOrganizationById(request.OrganizationId);
+            if (org == null) return BadRequest("Invalid organization");
+
             var newEmployee = new Employee
             {
                 Username = request.Username,
@@ -63,7 +65,8 @@ namespace Point_of_Sale_System.Server.Controllers
                 Status = Enum.TryParse<StatusEnum>(request.Status, true, out var statusEnum)
                     ? statusEnum
                     : StatusEnum.inactive,
-                Timestamp = DateTime.UtcNow
+                Timestamp = DateTime.UtcNow,
+                Organizations = new List<Organization> { org }
             };
             
 

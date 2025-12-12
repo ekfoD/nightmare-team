@@ -1,10 +1,9 @@
-using Point_of_Sale_System.Server.Models;
+using Point_of_Sale_System.Server.Models.Entities.ServiceBased;
 
 namespace Point_of_Sale_System.Server.Interfaces
 {
     public interface IMenuServiceRepository
     {
-        Task<MenuService?> GetByIdAsync(Guid id);
         Task<IEnumerable<MenuService>> GetAllForOrganizationAsync(Guid organizationId);
     }
 }

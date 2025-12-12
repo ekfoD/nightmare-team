@@ -1,4 +1,4 @@
-using Point_of_Sale_System.Server.Models;
+using Point_of_Sale_System.Server.Models.Entities.ServiceBased;
 
 namespace Point_of_Sale_System.Server.Interfaces
 {

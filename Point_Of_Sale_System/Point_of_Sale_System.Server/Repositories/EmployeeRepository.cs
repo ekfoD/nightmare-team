@@ -7,15 +7,18 @@ public class EmployeeRepository : IEmployeeRepository
 
     public IEnumerable<Employee> GetEmployees(Guid organizationId)
     {
-        return null;
-            // _employees.Where(e => e.OrganizationId == organizationId);
+        return _employees
+            .Where(e => e.Organizations.Any(o => o.Id == organizationId));
     }
 
     public Task<IEnumerable<Employee>> GetEmployeesAsync(Guid organizationId)
     {
-        var result = _employees.Where(e => e.OrganizationId == organizationId);
+        var result = _employees
+            .Where(e => e.Organizations.Any(o => o.Id == organizationId));
+
         return Task.FromResult(result);
     }
+
     public Employee GetById(Guid id)
     {
         return _employees.FirstOrDefault(e => e.Id == id);
