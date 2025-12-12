@@ -67,7 +67,7 @@ namespace Point_of_Sale_System.Server.Services
             if (svc.OrganizationId != dto.OrganizationId)
                 throw new Exception("Service does not belong to this organization.");
 
-            var duration = svc.Duration.ToTimeSpan();
+            var duration = TimeSpan.FromMinutes(svc.Duration);
             var end = dto.StartTime.Add(duration);
 
             var appt = new Appointment

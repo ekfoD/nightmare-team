@@ -3,8 +3,8 @@ import axios from 'axios';
 import { Container, Card, Button, Form, Modal } from 'react-bootstrap';
 import NewAppointmentPopup from './NewAppointmentPopup';
 import EditAppointmentPopup from './EditAppointmentPopup';
-import SuccessNotifier from "./SuccessNotifier";
 import Calendar from './Calendar';
+import SuccessNotifier from "../../utilities/SuccessNotifier";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../styles/Schedule.css';

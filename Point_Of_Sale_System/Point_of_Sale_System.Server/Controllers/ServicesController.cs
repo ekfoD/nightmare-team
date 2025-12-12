@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Point_of_Sale_System.Server.Interfaces;
 using Point_of_Sale_System.Server.Models.Entities.ServiceBased;
-using Point_of_Sale_System.Server.DTOs;
 using Point_of_Sale_System.Server.Dtos;
 
 namespace Point_of_Sale_System.Server.Controllers
@@ -32,22 +31,35 @@ namespace Point_of_Sale_System.Server.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("full/{organizationId}")]
+        public async Task<IActionResult> GetFullServices(Guid organizationId)
+        {
+            var services = await _services.GetAllForOrganizationAsync(organizationId);
+
+            var result = services.Select(s => new MenuServiceDto
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Duration = s.Duration, 
+                Price = s.Price,
+                Description = s.Description,
+                Status = s.Status
+            }).ToList();
+
+            return Ok(result);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateService([FromBody] CreateMenuServiceDto dto)
         {
-            // convert string duration "HH:MM" -> TimeOnly
-            if (!TimeOnly.TryParse(dto.Duration, out var duration))
-            {
-                return BadRequest("Invalid duration format. Must be HH:MM.");
-            }
-
             var org = _orgRepo.GetOrganizationById(dto.OrganizationId);
             if (org == null) return BadRequest("Invalid organization");
 
             var service = new MenuService
             {
                 Name = dto.Name,
-                Duration = duration,
+                Duration = dto.Duration,
                 Price = dto.Price,
                 Description = dto.Description,
                 Status = dto.Status,

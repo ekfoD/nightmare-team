@@ -5,7 +5,7 @@ namespace Point_of_Sale_System.Server.Dtos
     public class CreateMenuServiceDto
     {
         public required string Name { get; set; }
-        public required string Duration { get; set; } // Will parse to TimeOnly
+        public required int Duration { get; set; }
         public required decimal Price { get; set; }
         public required string Description { get; set; }
         public required StatusEnum Status { get; set; }
