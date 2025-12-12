@@ -10,6 +10,7 @@ namespace Point_of_Sale_System.Server.Models.Entities.Business
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
+
         public required string Name { get; set; }
         public required string Address { get; set; }
         public required string EmailAddress { get; set; }

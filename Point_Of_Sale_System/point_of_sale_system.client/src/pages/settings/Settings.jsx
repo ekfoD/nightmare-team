@@ -1,63 +1,95 @@
 import { Container, Row, Col, Card, ListGroup } from "react-bootstrap";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from 'axios';
 import EditAccount from "./EditAccount";
 import EditOrganization from "./EditOrganization";
 
 function Settings() {
     const [activeTab, setActiveTab] = useState("organization");
+    const [business, setBusiness] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const bussines = {
-        name: "VACKACKA INDUSTRY",
-        address: "Lithuania Kaunas Vilniaus g. 15",
-        emailAddress: "danieliukas67@gmail.com",
-        phoneNumber: "+37012345678",
-        bussinesType: "service",
-        currency: "€",
-    };
+    useEffect(() => {
+        async function loadOrg() {
+            try {
+                const response = await axios.get('/api/Organizations/36f11d11-b412-4154-b288-056f258e6920');
+                console.log("Loaded:", response.data);
 
-    function handleFormSubmit(updatedData) {
-        console.log("Updated business:", updatedData);
+                setBusiness(response.data);
+            } catch (err) {
+                console.log(err);
+                setError("Failed to load organization.");
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        loadOrg();
+    }, []);
+
+    async function handleFormSubmit(updatedData) {
+        try {
+            const response = await axios.put(
+                `/api/Organizations/${business.organizationId}`,
+                updatedData
+            );
+
+            console.log("Update result:", response.data);
+
+            setBusiness(response.data);
+
+            alert("Saved successfully!");
+        } catch (error) {
+            console.error("Update failed:", error);
+            alert("Failed to save!");
+        }
     }
 
     return (
-        <Container fluid className="p-4">
-            <Row>
-                <Col md={3}>
-                    <Card className="shadow-sm">
-                        <ListGroup variant="flush">
-                            <ListGroup.Item
-                                action
-                                active={activeTab === "organization"}
-                                onClick={() => setActiveTab("organization")}
-                            >
-                                Organization
-                            </ListGroup.Item>
+    <Container fluid className="p-4">
+        <Row>
+            <Col md={3}>
+                <Card className="shadow-sm">
+                    <ListGroup variant="flush">
+                        <ListGroup.Item
+                            action
+                            active={activeTab === "organization"}
+                            onClick={() => setActiveTab("organization")}
+                        >
+                            Organization
+                        </ListGroup.Item>
 
-                            <ListGroup.Item
-                                action
-                                active={activeTab === "profile"}
-                                onClick={() => setActiveTab("profile")}
-                            >
-                                Profile
-                            </ListGroup.Item>
-                        </ListGroup>
-                    </Card>
-                </Col>
+                        <ListGroup.Item
+                            action
+                            active={activeTab === "profile"}
+                            onClick={() => setActiveTab("profile")}
+                        >
+                            Profile
+                        </ListGroup.Item>
+                    </ListGroup>
+                </Card>
+            </Col>
 
-                <Col md={9}>
-                    {activeTab === "organization" && (
-                        <EditOrganization
-                            business={bussines}
-                            onSubmit={handleFormSubmit}
-                        />
-                    )}
+            <Col md={9}>
+                {activeTab === "organization" && (
+                    <>
+                        {loading && <p>Loading organization...</p>}
+                        {error && <p style={{ color: "red" }}>{error}</p>}
 
-                    {activeTab === "profile" && (
-                        <EditAccount username="test" />
-                    )}
-                </Col>
-            </Row>
-        </Container>
+                        {!loading && business && (
+                            <EditOrganization
+                                business={business}
+                                onSubmit={handleFormSubmit}
+                            />
+                        )}
+                    </>
+                )}
+
+                {activeTab === "profile" && <EditAccount username="test" />}
+            </Col>
+        </Row>
+    </Container>
     );
 }
 
