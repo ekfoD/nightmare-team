@@ -1,16 +1,23 @@
 ﻿using Point_of_Sale_System.Server.Interfaces;
 using Point_of_Sale_System.Server.Models.Entities.Business;
 
-public class InMemoryEmployeeRepository : IEmployeeRepository
+public class EmployeeRepository : IEmployeeRepository
 {
-    private static readonly List<Employee> _employees = new();
+    public static readonly List<Employee> _employees = new();
 
     public IEnumerable<Employee> GetEmployees(Guid organizationId)
     {
-        return null;
-            // _employees.Where(e => e.OrganizationId == organizationId);
+        return _employees
+            .Where(e => e.Organizations.Any(o => o.Id == organizationId));
     }
 
+    public Task<IEnumerable<Employee>> GetEmployeesAsync(Guid organizationId)
+    {
+        var result = _employees
+            .Where(e => e.Organizations.Any(o => o.Id == organizationId));
+
+        return Task.FromResult(result);
+    }
 
     public Employee GetById(Guid id)
     {
@@ -50,5 +57,9 @@ public class InMemoryEmployeeRepository : IEmployeeRepository
 
         _employees.Remove(existing);
         return true;
+    }
+    public Task<Employee?> GetByIdAsync(Guid id)
+    {
+        return Task.FromResult(_employees.FirstOrDefault(e => e.Id == id));
     }
 }
