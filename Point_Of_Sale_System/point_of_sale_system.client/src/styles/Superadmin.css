@@ -1,0 +1,14 @@
+#superadminTable {
+    white-space: nowrap;
+}
+
+#superadminTable {
+    border-collapse: separate; 
+    border-spacing: 0;
+    border: 1px solid #dee2e6; 
+}
+
+    #superadminTable th,
+    #superadminTable td {
+        border: none; 
+    }
