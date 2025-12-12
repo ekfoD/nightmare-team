@@ -76,7 +76,6 @@ const Schedule = () => {
 
       const mappedAppts = apptsRes.data.map(a => {
         const start = new Date(a.startTime);
-        const end = new Date(a.endTime);
         return {
           ...a,
           date: start.toISOString().split("T")[0],
