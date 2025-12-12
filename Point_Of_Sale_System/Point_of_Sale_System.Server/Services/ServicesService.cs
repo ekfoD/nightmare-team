@@ -4,6 +4,12 @@ using Point_of_Sale_System.Server.Repositories;
 
 public class ServicesService : IServicesService
 {
+    private readonly IMenuServiceRepository _repo;
+
+    public ServicesService(IMenuServiceRepository repo)
+    {
+        _repo = repo;
+    }
     public Task<IEnumerable<MenuService>> GetAllAsync()
     {
         var all = MenuServiceRepository._services.AsEnumerable();
@@ -16,5 +22,10 @@ public class ServicesService : IServicesService
                           .Where(s => s.OrganizationId == organizationId)
                           .AsEnumerable();
         return Task.FromResult(filtered);
+    }
+        public async Task<MenuService> CreateAsync(MenuService service)
+    {
+        await _repo.AddAsync(service);
+        return service;
     }
 }

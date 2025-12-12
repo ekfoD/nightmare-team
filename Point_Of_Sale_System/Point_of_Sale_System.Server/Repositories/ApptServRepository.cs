@@ -40,13 +40,17 @@ namespace Point_of_Sale_System.Server.Repositories
     }
     public class MenuServiceRepository : IMenuServiceRepository
     {
-        // temporary in-memory storage
         public static readonly List<MenuService> _services = new();
 
         public Task<IEnumerable<MenuService>> GetAllForOrganizationAsync(Guid organizationId)
         {
             var result = _services.Where(s => s.OrganizationId == organizationId);
             return Task.FromResult(result);
+        }
+            public Task AddAsync(MenuService service)
+        {
+            _services.Add(service);
+            return Task.CompletedTask;
         }
     }
 }
