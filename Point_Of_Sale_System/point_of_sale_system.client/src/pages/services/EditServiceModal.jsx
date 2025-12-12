@@ -11,19 +11,28 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
 
   // Prefill form when modal opens or service changes
   useEffect(() => {
-    if (service) {
-      setName(service.name);
-      const hours = Math.floor(service.duration / 60).toString().padStart(2, "0");
-      const minutes = (service.duration % 60).toString().padStart(2, "0");
-      setDuration(`${hours}:${minutes}`);
-      setPrice(service.price.toString());
-      setDescription(service.description);
-      setIsActive(service.status);
-      setError("");
-    } else if (!show) {
-      resetForm();
-    }
-  }, [show, service]);
+  if (service) {
+    setName(service.name);
+
+    const hours = Math.floor(service.duration / 60)
+      .toString()
+      .padStart(2, "0");
+    const minutes = (service.duration % 60)
+      .toString()
+      .padStart(2, "0");
+    setDuration(`${hours}:${minutes}`);
+
+    setPrice(service.price.toString());
+    setDescription(service.description);
+
+    // Ensure status is exactly "Active" or "Inactive"
+    setIsActive(service.status === "Inactive" ? "Inactive" : "Active");
+
+    setError("");
+  } else if (!show) {
+    resetForm();
+  }
+}, [show, service]);
 
   const resetForm = () => {
     setName("");

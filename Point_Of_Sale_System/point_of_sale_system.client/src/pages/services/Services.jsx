@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import '../../styles/Services.css';
 import CreateServiceModal from "./CreateServiceModal";
-import EditServiceModal from "./EditServiceModal"; // import new modal
+import EditServiceModal from "./EditServiceModal";
+import SuccessNotifier from "../../utilities/SuccessNotifier";
 import axios from "axios";
 
 const ORGANIZATION_ID = "8bbb7afb-d664-492a-bcd2-d29953ab924e";
@@ -14,9 +15,13 @@ function formatDuration(minutes) {
 
 export default function Services() {
   const [services, setServices] = useState([]);
-  const [selected, setSelected] = useState(null); 
+  const [selected, setSelected] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false); // edit modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  // Notifier state
+  const [showNotifier, setShowNotifier] = useState(false);
+  const [notifierMessage, setNotifierMessage] = useState("");
 
   const fetchServices = async () => {
     try {
@@ -32,7 +37,7 @@ export default function Services() {
     fetchServices();
   }, []);
 
-  // Create service
+  // CREATE
   const handleCreateService = async (service) => {
     try {
       const payload = {
@@ -46,12 +51,15 @@ export default function Services() {
       await axios.post("/api/services", payload);
       setShowCreateModal(false);
       fetchServices();
+      // Show success notifier
+      setNotifierMessage(`Service "${service.name}" created successfully!`);
+      setShowNotifier(true);
     } catch (error) {
       console.error("Failed to create service:", error);
     }
   };
 
-  // Update service
+  // UPDATE
   const handleUpdateService = async (service) => {
     try {
       const payload = {
@@ -65,12 +73,16 @@ export default function Services() {
       await axios.put(`/api/services/${service.id}`, payload);
       setShowEditModal(false);
       fetchServices();
+      // Show success notifier
+      setNotifierMessage(`Service "${service.name}" updated successfully!`);
+      setShowNotifier(true);
     } catch (error) {
       console.error("Failed to update service:", error);
       alert("Failed to update service. See console for details.");
     }
   };
 
+  // DELETE
   const handleDeleteService = async (service) => {
     const confirmed = window.confirm(`Are you sure you want to delete "${service.name}"?`);
     if (!confirmed) return;
@@ -79,6 +91,9 @@ export default function Services() {
       await axios.delete(`/api/services/${service.id}`);
       setServices(prev => prev.filter(s => s.id !== service.id));
       if (selected.id === service.id) setSelected(services.length > 1 ? services[0] : null);
+      // Show success notifier
+      setNotifierMessage(`Service "${service.name}" deleted successfully!`);
+      setShowNotifier(true);
     } catch (error) {
       console.error("Failed to delete service:", error);
       alert("Failed to delete service. See console for details.");
@@ -94,15 +109,18 @@ export default function Services() {
       <div className="services-list">
         <div className="services-list-header">Services</div>
         <div className="services-list-scroll">
-          {services.map(service => (
-            <div
-              key={service.id}
-              onClick={() => setSelected(service)}
-              className={`service-item ${selected.id === service.id ? 'selected' : ''}`}
-            >
-              <div className="service-name">{service.name}</div>
-              <div className="service-duration">{formatDuration(service.duration)}</div>
-            </div>
+          {services
+            .slice()
+            .sort((a, b) => (a.status === b.status ? 0 : a.status === "Active" ? -1 : 1))
+            .map(service => (
+              <div
+                key={service.id}
+                onClick={() => setSelected(service)}
+                className={`service-item ${selected.id === service.id ? 'selected' : ''} ${service.status.toLowerCase() === "inactive" ? 'inactive' : ''}`}
+              >
+                <div className="service-name">{service.name}</div>
+                <div className="service-duration">{formatDuration(service.duration)}</div>
+              </div>
           ))}
         </div>
       </div>
@@ -143,6 +161,13 @@ export default function Services() {
           onClose={() => setShowEditModal(false)}
           onUpdate={handleUpdateService}
           service={selected}
+        />
+
+        {/* Success Notifier */}
+        <SuccessNotifier
+          show={showNotifier}
+          message={notifierMessage}
+          onClose={() => setShowNotifier(false)}
         />
       </div>
     </div>
