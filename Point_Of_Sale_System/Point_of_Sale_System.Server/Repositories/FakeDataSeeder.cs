@@ -79,6 +79,7 @@ namespace Point_of_Sale_System.Server.Repositories
                 Name = "Brow Shaping",
                 Duration = new TimeOnly(0, 30),
                 Price = 25,
+                Description = "Professional eyebrow shaping service",
                 OrganizationId = org.Id,
                 Organization = org
             };
@@ -89,6 +90,7 @@ namespace Point_of_Sale_System.Server.Repositories
                 Name = "Lash Lift",
                 Duration = new TimeOnly(1, 0),
                 Price = 45,
+                Description = "Enhance your natural lashes with a lash lift",
                 OrganizationId = org.Id,
                 Organization = org
             };
