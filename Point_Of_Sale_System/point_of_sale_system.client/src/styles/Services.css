@@ -21,6 +21,7 @@
   flex-direction: column;
 }
 
+
 .services-list-header {
   padding: 12px 16px;
   border-bottom: 1px solid #ddd;
@@ -38,6 +39,17 @@
   border-bottom: 1px solid #eee;
   transition: 0.15s;
 }
+
+.service-item.inactive {
+  background-color: #e0e0e0; /* darker gray background */
+  color: #666; /* optional: lighter text */
+}
+
+.service-item.inactive.selected {
+  background-color: #c0c0c0; /* slightly darker when selected */
+  color: #000;
+}
+
 
 .service-item.selected {
   background: #e8eefc;
