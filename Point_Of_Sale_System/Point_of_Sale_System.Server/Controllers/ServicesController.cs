@@ -73,5 +73,47 @@ namespace Point_of_Sale_System.Server.Controllers
             return Ok(new { message = "Service created successfully" });
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateService(Guid id, [FromBody] CreateMenuServiceDto dto)
+        {
+            var existing = (await _services.GetAllForOrganizationAsync(dto.OrganizationId))
+                        .FirstOrDefault(s => s.Id == id);
+
+            if (existing == null) return NotFound("Service not found.");
+
+            existing.Name = dto.Name;
+            existing.Duration = dto.Duration;
+            existing.Price = dto.Price;
+            existing.Description = dto.Description;
+            existing.Status = dto.Status;
+            existing.DiscountId = dto.DiscountId ?? Guid.Empty;
+
+            await _services.UpdateAsync(existing);
+
+            var result = new MenuServiceDto
+            {
+                Id = existing.Id,
+                Name = existing.Name,
+                Duration = existing.Duration,
+                Price = existing.Price,
+                Description = existing.Description,
+                Status = existing.Status
+            };
+
+            return Ok(result);
+        }
+
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteService(Guid id)
+        {
+            var deleted = await _services.DeleteAsync(id);
+            if (!deleted)
+                return NotFound("Service not found.");
+
+            return NoContent();
+        }
+
+
     }
 }

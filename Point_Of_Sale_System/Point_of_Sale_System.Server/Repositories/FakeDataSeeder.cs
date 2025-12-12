@@ -79,6 +79,7 @@ namespace Point_of_Sale_System.Server.Repositories
                 Name = "Brow Shaping",
                 Duration = 30,
                 Price = 25,
+                Status = StatusEnum.active,
                 Description = "Professional eyebrow shaping service",
                 OrganizationId = org.Id,
                 Organization = org
@@ -90,6 +91,7 @@ namespace Point_of_Sale_System.Server.Repositories
                 Name = "Lash Lift",
                 Duration = 60,
                 Price = 45,
+                Status = StatusEnum.active,
                 Description = "Enhance your natural lashes with a lash lift",
                 OrganizationId = org.Id,
                 Organization = org
