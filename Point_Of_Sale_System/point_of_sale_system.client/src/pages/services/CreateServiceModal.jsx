@@ -3,11 +3,10 @@ import { Modal, Button, Form, Alert } from "react-bootstrap";
 
 export default function CreateServiceModal({ show, onClose, onCreate }) {
   const [name, setName] = useState("");
-  const [duration, setDuration] = useState("");
+  const [duration, setDuration] = useState(""); // "HH:MM" input
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState("Active");
-
   const [error, setError] = useState("");
 
   const resetForm = () => {
@@ -20,9 +19,7 @@ export default function CreateServiceModal({ show, onClose, onCreate }) {
   };
 
   useEffect(() => {
-    if (!show) {
-      resetForm();
-    }
+    if (!show) resetForm();
   }, [show]);
 
   const handleCreate = () => {
@@ -33,20 +30,21 @@ export default function CreateServiceModal({ show, onClose, onCreate }) {
       return;
     }
 
+    // Validate HH:MM format
     const durationRegex = /^([0-1]\d|2[0-3]):([0-5]\d)$/;
     if (!durationRegex.test(duration)) {
       setError("Duration must be in HH:MM format.");
       return;
     }
 
+    // Convert HH:MM to total minutes
     const [hours, minutes] = duration.split(":").map(Number);
     const totalMinutes = hours * 60 + minutes;
 
     if (totalMinutes <= 0) {
-      setError("Duration must be greater than 0.");
+      setError("Duration must be greater than 0 minutes.");
       return;
     }
-
     if (totalMinutes > 16 * 60) {
       setError("Duration cannot exceed 16 hours.");
       return;
@@ -60,16 +58,16 @@ export default function CreateServiceModal({ show, onClose, onCreate }) {
 
     // ---- VALIDATED: CREATE OBJECT ----
     const newService = {
-      id: "TEMP-ID",
+      id: "TEMP-ID", // optional, only for frontend display
       name,
-      duration,
+      durationMinutes: totalMinutes, // <-- send minutes to backend
       price: priceNumber,
       description,
       status: isActive,
     };
 
     onCreate(newService);
-    resetForm(); // optional, since closing triggers reset too
+    resetForm(); // optional
     onClose();
   };
 
@@ -112,7 +110,7 @@ export default function CreateServiceModal({ show, onClose, onCreate }) {
               type="number"
               placeholder="0.00"
               required
-              step={undefined}
+              step="0.01"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
             />
@@ -145,12 +143,8 @@ export default function CreateServiceModal({ show, onClose, onCreate }) {
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button variant="success" onClick={handleCreate}>
-          Create
-        </Button>
+        <Button variant="secondary" onClick={onClose}>Cancel</Button>
+        <Button variant="success" onClick={handleCreate}>Create</Button>
       </Modal.Footer>
     </Modal>
   );

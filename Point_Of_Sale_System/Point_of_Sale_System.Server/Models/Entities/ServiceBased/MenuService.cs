@@ -11,7 +11,7 @@ namespace Point_of_Sale_System.Server.Models.Entities.ServiceBased
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
         public required string Name { get; set; }
-        public TimeOnly Duration { get; set; }
+        public int Duration { get; set; }
         public required decimal Price { get; set; }
         public required string Description { get; set; }
         public StatusEnum Status { get; set; }
