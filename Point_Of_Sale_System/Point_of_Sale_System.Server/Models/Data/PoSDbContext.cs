@@ -16,7 +16,6 @@ namespace Point_of_Sale_System.Server.Models.Data
 
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<Employee> Employees { get; set; }
-        public DbSet<Schedule> Schedules { get; set; }
         public DbSet<SuperAdmin> SuperAdmins { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<Discount> Discounts { get; set; }

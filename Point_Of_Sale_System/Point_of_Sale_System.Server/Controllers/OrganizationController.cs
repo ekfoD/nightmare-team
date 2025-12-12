@@ -12,11 +12,11 @@ namespace Point_of_Sale_System.Server.Controllers
     [Route("api/[controller]")]
     public class OrganizationController : ControllerBase
     {
-        private readonly IOrganizationrepository _organizationRepository;
+        private readonly IOrganizationRepository _organizationRepository;
 
         private readonly IOrganizationService _organizationService;
 
-        public OrganizationController(IOrganizationrepository organizationRepository, IOrganizationService organizationService)
+        public OrganizationController(IOrganizationRepository organizationRepository, IOrganizationService organizationService)
         {
             _organizationRepository = organizationRepository;
             _organizationService = organizationService;

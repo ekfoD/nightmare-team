@@ -1,6 +1,7 @@
 ﻿namespace Point_of_Sale_System.Server.DTOs;
 public class EmployeeRequest
 {
+    public Guid Id { get; set; }
     public string Username { get; set; }
     public string Password { get; set; }
     public int AccessFlag { get; set; }

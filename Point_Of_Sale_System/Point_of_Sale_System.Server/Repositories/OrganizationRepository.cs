@@ -1,13 +1,12 @@
-using Point_of_Sale_System.Server.Models;
 using Point_of_Sale_System.Server.Interfaces;
 using Point_of_Sale_System.Server.Enums;
 using Point_of_Sale_System.Server.Models.Entities.Business;
 
 
-public class OrganizationRepository : IOrganizationrepository
+public class OrganizationRepository : IOrganizationRepository
 {
 
-    private static readonly List<Organization> _organizations = new()
+    public static readonly List<Organization> _organizations = new()
     {
         new Organization
         {
