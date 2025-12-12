@@ -28,4 +28,14 @@ public class ServicesService : IServicesService
         await _repo.AddAsync(service);
         return service;
     }
+
+    public async Task UpdateAsync(MenuService service)
+    {
+        await _repo.UpdateAsync(service); // uses your repository's method
+   }
+
+    public Task<bool> DeleteAsync(Guid id)
+    {
+        return _repo.DeleteAsync(id);
+    }
 }

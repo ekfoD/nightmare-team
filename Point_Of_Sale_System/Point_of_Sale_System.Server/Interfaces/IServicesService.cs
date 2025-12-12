@@ -7,5 +7,7 @@ namespace Point_of_Sale_System.Server.Interfaces
         Task<IEnumerable<MenuService>> GetAllAsync();
         Task<IEnumerable<MenuService>> GetAllForOrganizationAsync(Guid organizationId);
         Task<MenuService> CreateAsync(MenuService service);
+        public Task UpdateAsync(MenuService service);
+        Task<bool> DeleteAsync(Guid id);
     }
 }

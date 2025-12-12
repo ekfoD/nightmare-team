@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import '../../styles/Services.css';
 import CreateServiceModal from "./CreateServiceModal";
+import EditServiceModal from "./EditServiceModal"; // import new modal
 import axios from "axios";
 
 const ORGANIZATION_ID = "8bbb7afb-d664-492a-bcd2-d29953ab924e";
@@ -15,6 +16,7 @@ export default function Services() {
   const [services, setServices] = useState([]);
   const [selected, setSelected] = useState(null); 
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false); // edit modal state
 
   const fetchServices = async () => {
     try {
@@ -43,9 +45,43 @@ export default function Services() {
       };
       await axios.post("/api/services", payload);
       setShowCreateModal(false);
-      fetchServices(); // refresh list after creation
+      fetchServices();
     } catch (error) {
       console.error("Failed to create service:", error);
+    }
+  };
+
+  // Update service
+  const handleUpdateService = async (service) => {
+    try {
+      const payload = {
+        name: service.name,
+        duration: service.duration,
+        price: service.price,
+        description: service.description,
+        status: service.status,
+        organizationId: ORGANIZATION_ID
+      };
+      await axios.put(`/api/services/${service.id}`, payload);
+      setShowEditModal(false);
+      fetchServices();
+    } catch (error) {
+      console.error("Failed to update service:", error);
+      alert("Failed to update service. See console for details.");
+    }
+  };
+
+  const handleDeleteService = async (service) => {
+    const confirmed = window.confirm(`Are you sure you want to delete "${service.name}"?`);
+    if (!confirmed) return;
+
+    try {
+      await axios.delete(`/api/services/${service.id}`);
+      setServices(prev => prev.filter(s => s.id !== service.id));
+      if (selected.id === service.id) setSelected(services.length > 1 ? services[0] : null);
+    } catch (error) {
+      console.error("Failed to delete service:", error);
+      alert("Failed to delete service. See console for details.");
     }
   };
 
@@ -90,15 +126,23 @@ export default function Services() {
         <div className="bottom-buttons">
           <button className="btn btn-success" onClick={() => setShowCreateModal(true)}>Create new</button>
           <div>
-            <button className="btn btn-primary me-2">Edit</button>
-            <button className="btn btn-danger">Delete</button>
+            <button className="btn btn-primary me-2" onClick={() => setShowEditModal(true)}>Edit</button>
+            <button className="btn btn-danger" onClick={() => handleDeleteService(selected)}>Delete</button>
           </div>
         </div>
 
+        {/* Modals */}
         <CreateServiceModal
           show={showCreateModal}
           onClose={() => setShowCreateModal(false)}
           onCreate={handleCreateService}
+        />
+
+        <EditServiceModal
+          show={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          onUpdate={handleUpdateService}
+          service={selected}
         />
       </div>
     </div>
