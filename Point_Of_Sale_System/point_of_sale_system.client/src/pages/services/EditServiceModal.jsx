@@ -2,51 +2,46 @@ import { useState, useEffect } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
 
 export default function EditServiceModal({ show, onClose, onUpdate, service }) {
+  // Always call hooks unconditionally
   const [name, setName] = useState("");
-  const [duration, setDuration] = useState(""); // "HH:MM"
+  const [duration, setDuration] = useState("00:00"); // "HH:MM"
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState("Active");
   const [error, setError] = useState("");
 
-  const currencySymbol = {
-  euro: "€",
-  dollar: "$"
-}[service.currency];
-
-  // Prefill form when modal opens or service changes
+  // Reset / prefill form when service or show changes
   useEffect(() => {
-  if (service) {
-    setName(service.name);
-
-    const hours = Math.floor(service.duration / 60)
-      .toString()
-      .padStart(2, "0");
-    const minutes = (service.duration % 60)
-      .toString()
-      .padStart(2, "0");
-    setDuration(`${hours}:${minutes}`);
-
-    setPrice(service.price.toString());
-    setDescription(service.description);
-
-    // Ensure status is exactly "Active" or "Inactive"
-    setIsActive(service.status === "inactive" ? "Inactive" : "Active");
-
-    setError("");
-  } else if (!show) {
-    resetForm();
-  }
-}, [show, service]);
+    if (service) {
+      setName(service.name || "");
+      const hours = Math.floor(service.duration / 60)
+        .toString()
+        .padStart(2, "0");
+      const minutes = (service.duration % 60).toString().padStart(2, "0");
+      setDuration(`${hours}:${minutes}`);
+      setPrice(service.price?.toString() || "");
+      setDescription(service.description || "");
+      setIsActive(service.status?.toLowerCase() === "inactive" ? "Inactive" : "Active");
+      setError("");
+    } else if (!show) {
+      // Only reset if modal is closed
+      resetForm();
+    }
+  }, [service, show]);
 
   const resetForm = () => {
     setName("");
-    setDuration("");
+    setDuration("00:00");
     setPrice("");
     setDescription("");
     setIsActive("Active");
     setError("");
   };
+
+  const currencySymbol = {
+    euro: "€",
+    dollar: "$",
+  }[service?.currency] || "$";
 
   const handleUpdate = () => {
     setError("");
@@ -80,17 +75,14 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
       return;
     }
 
-    // ---- VALIDATED: UPDATE OBJECT ----
-    const updatedService = {
+    onUpdate({
       ...service,
       name,
       duration: totalMinutes,
       price: priceNumber,
       description,
       status: isActive,
-    };
-
-    onUpdate(updatedService);
+    });
     onClose();
   };
 

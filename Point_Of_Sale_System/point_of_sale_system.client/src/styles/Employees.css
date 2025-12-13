@@ -9,6 +9,8 @@
     overflow-y: auto; 
     overflow-x: hidden; 
 
+    margin-left: 0 !important;
+
     flex: 2;
     height: 100%;
     padding-right: 8px;
@@ -19,25 +21,13 @@
     place-items: center;
 }
 
-#employeeEditField {
-    flex: 1;
-    padding: 25px;
-    border: solid;
-    border-radius: 10px;
-    
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
 #employeePageContent{
     display:flex;
     flex-direction:row;
 }
 
-#employeeEditField form {
-    display:flex;
-    flex-direction: column;
-    align-items: center;
+#employeeEditField{
+    min-width: 400px;
 }
 
 .employeeBox {

@@ -21,6 +21,13 @@ function Navbar() {
         <BootstrapNavbar.Toggle aria-controls="basic-navbar-nav" />
         <BootstrapNavbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto">
+            {/* Admin only */}
+            {hasRole('admin') && <Nav.Link as={NavLink} to="/superadmin">Superadmin</Nav.Link>}
+            {/* Manager and up */}
+            {hasRole('manager') && <Nav.Link as={NavLink} to="/employees">Employees</Nav.Link>}
+            {hasRole('manager') && <Nav.Link as={NavLink} to="/inventory">Inventory</Nav.Link>}
+            {hasRole('manager') && <Nav.Link as={NavLink} to="/settings">Settings</Nav.Link>}
+            {hasRole('manager') && <Nav.Link as={NavLink} to="/menuManagement">Menu Management</Nav.Link>}
             {/* Employee and up */}
             {hasRole('employee') && <Nav.Link as={NavLink} to="/" end>About</Nav.Link>}
             {hasRole('employee') && <Nav.Link as={NavLink} to="/orderHistory">Order History</Nav.Link>}
@@ -28,9 +35,7 @@ function Navbar() {
             {hasRole('employee') && <Nav.Link as={NavLink} to="/schedule">Schedule</Nav.Link>}
             {hasRole('employee') && <Nav.Link as={NavLink} to="/appAbout">App About</Nav.Link>}
             {hasRole('employee') && <Nav.Link as={NavLink} to="/appHistory">App History</Nav.Link>}
-            {/* Manager and up */}
-            {hasRole('manager') && <Nav.Link as={NavLink} to="/employees">Employees</Nav.Link>}
-            {hasRole('manager') && <Nav.Link as={NavLink} to="/settings">Settings</Nav.Link>}
+            {hasRole('employee') && <Nav.Link as={NavLink} to="/orders">Orders</Nav.Link>}
             {/* Show role info */}
             {roles.length > 0 && (
               <span style={{ color: 'white', marginLeft: '1rem' }}>

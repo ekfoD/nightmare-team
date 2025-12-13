@@ -10,6 +10,7 @@ import AuthLayout from './layouts/AuthLayout.jsx';
 import Register from './pages/login/Register.jsx';
 import Login from './pages/login/Login.jsx';
 import RequireAuth from './utilities/RequireAuth.jsx';
+import Superadmin from './pages/superadmin/Superadmin.jsx'
 
 import About from './pages/about/About.jsx';
 import Orders from './pages/orders/orders.jsx';
@@ -44,6 +45,7 @@ function App() {
                     <Route path="/employees" element={<RequireAuth authLevel="manager"><Employees /></RequireAuth>} />
                     <Route path="/inventory" element={<RequireAuth authLevel="manager"><Inventory /></RequireAuth>} />
                     <Route path="/settings" element={<RequireAuth authLevel="manager"><Settings /></RequireAuth>} />
+                    <Route path="/menuManagement" element={<RequireAuth authLevel="manager"><MenuManagement /></RequireAuth>} />
                     {/* Employee specific routes */}
                     <Route path="/" element={<RequireAuth authLevel="employee"><About /></RequireAuth>} />
                     <Route path="/orderHistory" element={<RequireAuth authLevel="employee"><OrderHistory /></RequireAuth>} />
@@ -51,6 +53,7 @@ function App() {
                     <Route path="/schedule" element={<RequireAuth authLevel="employee"><Schedule /></RequireAuth>} />
                     <Route path="/appAbout" element={<RequireAuth authLevel="employee"><AppAbout /></RequireAuth>} />
                     <Route path="/appHistory" element={<RequireAuth authLevel="employee"><AppHistory /></RequireAuth>} />
+                    <Route path="/orders" element={<RequireAuth authLevel="employee"><Orders /></RequireAuth>} />
                 </Route>
             </Routes>
         </div>
