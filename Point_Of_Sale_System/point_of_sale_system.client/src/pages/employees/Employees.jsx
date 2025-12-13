@@ -1,15 +1,9 @@
 import '../../styles/Employees.css';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-//const EMPLOYEE_API = "api/employees/"
+
 const EMPLOYEE_API = "https://localhost:7079/api/employees/"
 const organizationId = "d02480ac-e381-4428-a3ed-b43334f71edd" // cia random guid
-
-const StatusEnum = {
-    active: 1,
-    inactive: 2,
-    unavailable: 3
-};
 
 function Employees() {
 
@@ -24,11 +18,14 @@ function Employees() {
     const fetchEmployees = async () => {
         try {
             const response = await axios.get("https://localhost:7079/api/Employees/" + organizationId);
-            setEmployees(response.data);
+            // Make sure we always set an array
+            setEmployees(Array.isArray(response.data) ? response.data : []);
         } catch (e) {
             setErrMsg(e.response?.data?.message || e.message);
+            setEmployees([]); // fallback
         }
     };
+
 
     useEffect(() => {
         fetchEmployees();

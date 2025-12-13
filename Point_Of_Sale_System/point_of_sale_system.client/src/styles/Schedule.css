@@ -1,3 +1,6 @@
+/* ---------------------
+   Schedule container
+---------------------- */
 .schedule-container {
   height: calc(100vh - 16px);
   padding: 16px;
@@ -15,9 +18,12 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: calc(100% - 45px);
+  height: calc(100% - 55px);
 }
 
+/* ---------------------
+   Schedule grid & columns
+---------------------- */
 .schedule-grid {
   display: flex;
   overflow-x: auto;
@@ -35,31 +41,36 @@
 }
 
 .time-slot {
-  height: 39px;
+  height: 40px;
   border-bottom: 1px dashed #ccc;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-end;     
+  justify-content: center; 
+  padding-bottom: 30px;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 1.2rem;
 }
 
 .employees-wrapper {
   display: flex;
   min-width: max-content;
+  
 }
 
 .employee-column {
-  width: 180px;
+  width: 220px;
   border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
   position: relative;
+  flex-direction: column;
+  height: 200%;
 }
 
 .employee-header {
-  height: 91px;
+  height: 90px;
   text-align: center;
   border-bottom: 1px solid #ccc;
-  background-color: #f0f4f7;
+  background-color: #e8e4ff;
   position: sticky;
   top: 0;
   z-index: 3;
@@ -69,17 +80,25 @@
   justify-content: center;
 }
 
-.time-slot-empty {
-  height: 39px;
-  border-bottom: 1px dashed #ccc;
+.employee-name {
+  font-size: 1.3rem;
+  font-weight: 400;
+  text-align: center;
 }
 
+.time-slot-empty {
+  height: 40px;
+  border-bottom: 1px dashed #919191;
+  flex: 1;
+}
+
+/* ---------------------
+   Appointment blocks
+---------------------- */
 .appointment-block {
   position: absolute;
   left: 5px;
   right: 5px;
-  height: 39px;
-  background-color: #d3d3d3;
   border-radius: 6px;
   display: flex;
   align-items: center;
@@ -88,11 +107,23 @@
   cursor: pointer;
 }
 
-.appointment-block span {
-  color: #0d6efd;
-  user-select: none;
+.appointment-block-content {
+  pointer-events: none;
+  text-align: center;
+  color: #000;
 }
 
+.appointment-service {
+  font-weight: 700;
+}
+
+.appointment-details {
+  font-size: 12px;
+}
+
+/* ---------------------
+   Sidebar
+---------------------- */
 .schedule-sidebar {
   width: 250px;
   display: flex;
@@ -105,10 +136,11 @@
   text-align: center;
   font-weight: bold;
   margin-bottom: 8px;
-  font-size: 2rem;
+  font-size: 3rem;
 }
 
-.sidebar-button, .sidebar-add-button {
+.sidebar-button,
+.sidebar-add-button {
   width: 100%;
 }
 
@@ -116,7 +148,14 @@
   margin-bottom: 8px;
 }
 
-.modal-body > * {
-  all: unset; 
-  display: block;
+/* ---------------------
+   Calendar variables
+---------------------- */
+:root {
+  --calendar-day-bg: #ffffff;
+  --calendar-day-hover: #f1f1f1;
+  --calendar-border: #cccccc;
+  --calendar-weekend-text: #b00;
+  --calendar-selected: #90caf9;
+  --calendar-has-appointments: #c8e6c9;
 }

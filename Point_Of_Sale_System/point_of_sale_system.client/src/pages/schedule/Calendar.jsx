@@ -1,17 +1,22 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Button, Card } from "react-bootstrap";
 
-export default function Calendar() {
+export default function Calendar({ onDaySelect, appointmentDates = [] }) {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
+  const [selectedDate, setSelectedDate] = useState(today);
+
+  const appointmentSet = new Set(
+  appointmentDates.map(d => new Date(d).toISOString().split("T")[0])
+  );
 
   const monthNames = [
     "January","February","March","April","May","June",
     "July","August","September","October","November","December"
   ];
 
-  const buttonSize = 80;
+  //const buttonSize = 80;
   const fontSize = 20;
 
   const daysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
@@ -23,58 +28,65 @@ export default function Calendar() {
   };
 
   const generateCalendar = () => {
-    const numDays = daysInMonth(currentMonth, currentYear);
-    const startDay = firstDayOfMonth(currentMonth, currentYear);
+  const numDays = daysInMonth(currentMonth, currentYear);
+  const startDay = firstDayOfMonth(currentMonth, currentYear);
 
-    const totalCells = 5 * 7;
-    const cells = [];
+  const totalCells = 5 * 7;
+  const cells = [];
 
-    for (let i = 0; i < totalCells; i++) {
-      const dayNumber = i - startDay + 1;
-      const isWeekend = i % 7 === 5 || i % 7 === 6; // Saturday=5, Sunday=6
+  for (let i = 0; i < totalCells; i++) {
+    const dayNumber = i - startDay + 1;
 
-      if (i >= startDay && dayNumber <= numDays) {
-        cells.push(
-          <Col key={i} className="p-1 d-flex justify-content-center">
-            <Button
-              variant="light"
-              style={{
-                width: buttonSize,
-                height: buttonSize,
-                fontSize: fontSize,
-                backgroundColor: "var(--calendar-day-bg)",
-                borderColor: "var(--calendar-border)",
-                color: isWeekend ? "var(--calendar-weekend-text)" : "black",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
-                transition: "0.2s ease",
-              }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = "var(--calendar-day-hover)"}
-              onMouseLeave={(e) => e.target.style.backgroundColor = "var(--calendar-day-bg)"}
-            >
-              {dayNumber}
-            </Button>
-          </Col>
-        );
-      } else {
-        cells.push(
-          <Col key={i} className="p-1 d-flex justify-content-center">
-            <div style={{ width: buttonSize, height: buttonSize }}></div>
-          </Col>
-        );
-      }
-    }
+    if (i >= startDay && dayNumber <= numDays) {
 
-    const weeks = [];
-    for (let i = 0; i < 5; i++) {
-      weeks.push(
-        <Row key={i} className="mb-1">
-          {cells.slice(i * 7, (i + 1) * 7)}
-        </Row>
+      const fullDate = new Date(currentYear, currentMonth, dayNumber);
+      const dateStr = fullDate.toISOString().split("T")[0];
+
+      const isSelected =
+        selectedDate.toDateString() === fullDate.toDateString();
+
+      const hasAppointments = appointmentSet.has(dateStr);
+
+      cells.push(
+        <Col key={i} className="p-1 d-flex justify-content-center">
+          <Button
+            variant="light"
+            onClick={() => {
+              setSelectedDate(fullDate);
+              onDaySelect(fullDate);
+            }}
+            style={{
+              width: 80,
+              height: 80,
+              fontSize: 20,
+              backgroundColor: isSelected
+                ? "var(--calendar-selected)"
+                : hasAppointments
+                ? "var(--calendar-has-appointments)"
+                : "var(--calendar-day-bg)",
+              borderColor: "var(--calendar-border)",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+            }}
+          >
+            {dayNumber}
+          </Button>
+        </Col>
       );
+    } else {
+      cells.push(<Col key={i} className="p-1"></Col>);
     }
+  }
 
-    return weeks;
-  };
+  const weeks = [];
+  for (let i = 0; i < 5; i++) {
+    weeks.push(
+      <Row key={i} className="mb-1">{cells.slice(i * 7, (i + 1) * 7)}</Row>
+    );
+  }
+
+  return weeks;
+};
+
 
   const handlePrevMonth = () => {
     if (currentMonth === 0) {

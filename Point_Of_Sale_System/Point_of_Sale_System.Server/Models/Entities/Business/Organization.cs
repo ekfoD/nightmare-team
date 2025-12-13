@@ -21,12 +21,12 @@ namespace Point_of_Sale_System.Server.Models.Entities.Business
         public DateTime Timestamp { get; set; } = DateTime.Now;
 
         //navigation to FK's
-        public virtual ICollection<Employee> Employees { get; set; }
-        public virtual ICollection<Appointment> Appointments { get; set; }
-        public virtual ICollection<Payment> Payments { get; set; }
-        public virtual ICollection<Order> Orders { get; set; }
-        public virtual ICollection<InventoryItem> InventoryItems { get; set; }
-        public virtual ICollection<MenuItem> MenuItems { get; set; }
-        public virtual ICollection<MenuService> MenuServices { get; set; }
+        public virtual ICollection<Employee> Employees { get; set; } = new List<Employee>();
+        public virtual ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+        public virtual ICollection<Payment> Payments { get; set; }  = new List<Payment>();
+        public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+        public virtual ICollection<InventoryItem> InventoryItems { get; set; } = new List<InventoryItem>();
+        public virtual ICollection<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
+        public virtual ICollection<MenuService> MenuServices { get; set; } = new List<MenuService>();
     }
 }
