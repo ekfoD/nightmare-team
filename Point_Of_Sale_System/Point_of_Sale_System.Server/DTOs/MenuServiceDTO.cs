@@ -11,5 +11,6 @@ namespace Point_of_Sale_System.Server.Dtos
         public decimal Price { get; set; }
         public required string Description { get; set; }
         public StatusEnum Status { get; set; }
+        public CurrencyEnum Currency { get; set; }
     }
 }

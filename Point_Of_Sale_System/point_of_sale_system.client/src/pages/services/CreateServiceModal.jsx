@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
 
-export default function CreateServiceModal({ show, onClose, onCreate }) {
+export default function CreateServiceModal({ show, onClose, onCreate, currency }) {
   const [name, setName] = useState("");
   const [duration, setDuration] = useState(""); // "HH:MM" input
   const [price, setPrice] = useState("");
@@ -17,6 +17,13 @@ export default function CreateServiceModal({ show, onClose, onCreate }) {
     setIsActive("Active");
     setError("");
   };
+
+  const currencySymbolMap = {
+    euro: "€",
+    dollar: "$",
+  };
+
+const currencySymbol = currencySymbolMap[currency] ?? "";
 
   useEffect(() => {
     if (!show) resetForm();
@@ -105,7 +112,7 @@ export default function CreateServiceModal({ show, onClose, onCreate }) {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Price (€)</Form.Label>
+            <Form.Label>Price ({currencySymbol})</Form.Label>
             <Form.Control
               type="number"
               placeholder="0.00"
