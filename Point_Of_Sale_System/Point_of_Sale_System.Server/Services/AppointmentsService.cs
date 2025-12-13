@@ -7,20 +7,14 @@ namespace Point_of_Sale_System.Server.Services
     public class AppointmentService : IAppointmentService
     {
         private readonly IAppointmentRepository _apptRepo;
-        private readonly IEmployeeRepository _employeeRepo;
         private readonly IMenuServiceRepository _serviceRepo;
-        private readonly IOrganizationRepository _organizationRepo;
 
         public AppointmentService(
             IAppointmentRepository apptRepo,
-            IEmployeeRepository employeeRepo,
-            IMenuServiceRepository serviceRepo,
-            IOrganizationRepository organizationRepo)
+            IMenuServiceRepository serviceRepo)
         {
             _apptRepo = apptRepo;
-            _employeeRepo = employeeRepo;
             _serviceRepo = serviceRepo;
-            _organizationRepo = organizationRepo;
         }
 
         public async Task<List<AppointmentDto>> GetAppointmentsForDateAsync(Guid organizationId, DateTime date)

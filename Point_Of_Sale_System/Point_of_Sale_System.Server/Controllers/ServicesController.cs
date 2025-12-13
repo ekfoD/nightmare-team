@@ -10,32 +10,30 @@ namespace Point_of_Sale_System.Server.Controllers
     public class ServicesController : ControllerBase
     {
         private readonly IServicesService _services;
-        private readonly IOrganizationRepository _orgRepo;
 
 
-        public ServicesController(IServicesService services, IOrganizationRepository orgRepo)
+        public ServicesController(IServicesService services)
         {
             _services = services;
-            _orgRepo = orgRepo;
         }
 
-[HttpGet("{organizationId}")]
-public async Task<IActionResult> GetServices(Guid organizationId)
-{
-    var items = await _services.GetAllForOrganizationAsync(organizationId);
-
-    // Filter only active services
-    var activeItems = items
-        .Where(s => s.Status == Enums.StatusEnum.active)
-        .Select(s => new 
+        [HttpGet("{organizationId}")]
+        public async Task<IActionResult> GetServices(Guid organizationId)
         {
-            name = s.Name,
-            duration = s.Duration
-        })
-        .ToList();
+            var items = await _services.GetAllForOrganizationAsync(organizationId);
 
-    return Ok(activeItems);
-}
+            // Filter only active services
+            var activeItems = items
+                .Where(s => s.Status == Enums.StatusEnum.active)
+                .Select(s => new 
+                {
+                    name = s.Name,
+                    duration = s.Duration
+                })
+                .ToList();
+
+            return Ok(activeItems);
+        }
 
 
         [HttpGet("full/{organizationId}")]
