@@ -12,31 +12,33 @@ namespace Point_of_Sale_System.Server.Models.Entities.ServiceBased
         public Guid Id { get; set; } = Guid.NewGuid();
         public required string CustomerName { get; set; }
         public required string CustomerPhone { get; set; }
+        public string? ExtraInfo { get; set; }
         public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.Now;
 
         //navigation to FK's
-        public virtual ICollection<Payment> Payments { get; set; }
+        public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
-        // foreign key to emploee
+        // foreign key to employee
         [Required]
-        public Guid EmploeeId { get; set; }
+        public Guid EmployeeId { get; set; }
 
-        [ForeignKey("EmploeeId")]
-        public virtual Employee Employee { get; set; }
+        [ForeignKey("EmployeeId")]
+        public required virtual Employee Employee { get; set; }
 
         // foreign key to Organization
         [Required]
         public Guid OrganizationId { get; set; }
 
         [ForeignKey("OrganizationId")]
-        public virtual Organization Organization { get; set; }
+        public required virtual Organization Organization { get; set; }
 
         // foreign key to MenuService
         [Required]
         public Guid MenuServiceId { get; set; }
 
         [ForeignKey("MenuServiceId")]
-        public virtual MenuService MenuService { get; set; }
+        public required virtual MenuService MenuService { get; set; }
     }
 }

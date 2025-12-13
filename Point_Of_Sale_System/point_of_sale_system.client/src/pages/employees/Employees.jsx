@@ -28,11 +28,14 @@ function Employees() {
     const fetchEmployees = async () => {
         try {
             const response = await axios.get("https://localhost:7079/api/Employees/" + organizationId);
-            setEmployees(response.data);
+            // Make sure we always set an array
+            setEmployees(Array.isArray(response.data) ? response.data : []);
         } catch (e) {
             setErrMsg(e.response?.data?.message || e.message);
+            setEmployees([]); // fallback
         }
     };
+
 
     useEffect(() => {
         fetchEmployees();

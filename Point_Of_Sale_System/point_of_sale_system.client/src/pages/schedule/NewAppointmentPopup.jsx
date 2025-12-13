@@ -1,142 +1,130 @@
-import React, { useState } from "react";
-import { Modal, Button, Form, Row, Col } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Modal, Button, Form } from "react-bootstrap";
+import axios from "axios";
+import {workStart, workEnd, isWithinWorkHours, parseDurationToMinutes, doesOverlap } from './utils/ScheduleHelpers';
 
-const NewAppointmentPopup = ({ show, handleClose, workers, services, timeSlots, onSuccess }) => {
-  const [service, setService] = useState("");
-  const [worker, setWorker] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [extraInfo, setExtraInfo] = useState("");
+const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, selectedDate, allAppointments, organizationId }) => {
+  const [form, setForm] = useState({
+    service: services[0] || null,
+    employeeId: workers[0]?.id || "",
+    date: selectedDate?.toISOString().slice(0,10) || "",
+    time: "",
+    customerName: "",
+    customerPhone: "",
+    extraInfo: ""
+  });
 
-  // Clears all fields
-  const resetFields = () => {
-    setService("");
-    setWorker("");
-    setDate("");
-    setTime("");
-    setExtraInfo("");
+  // Initialize defaults when popup opens
+  useEffect(() => {
+    setForm(f => ({
+      ...f,
+      service: services[0] || null,
+      employeeId: workers[0]?.id || "",
+      date: selectedDate?.toISOString().slice(0,10) || "",
+      time: ""
+    }));
+  }, [show, services, workers, selectedDate]);
+
+  const handleChange = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }));
+
+  const computeEndTime = () => {
+    if (!form.service || !form.time || !form.date) return "";
+    const start = new Date(`${form.date}T${form.time}:00`);
+    const end = new Date(start.getTime() + parseDurationToMinutes(form.service.duration) * 60000);
+    return end.toTimeString().substring(0,5);
   };
 
-  // Close button clears fields + closes
-  const onClose = () => {
-    resetFields();
-    handleClose();
-  };
+  const resetForm = () => setForm({
+    service: services[0] || null,
+    employeeId: workers[0]?.id || "",
+    date: selectedDate?.toISOString().slice(0,10) || "",
+    time: "",
+    customerName: "",
+    customerPhone: "",
+    extraInfo: ""
+  });
 
-  // Save button now checks all required fields
-  const onSave = () => {
-    if (!date || !time || !service || !worker) {
-      alert("Please fill in all required fields.");
-      return;
+  const handleSave = async () => {
+    const { service, employeeId, date, time, customerName, customerPhone, extraInfo } = form;
+    if (!service || !employeeId || !time || !customerName || !date) return alert("Fill required fields.");
+
+    const start = new Date(`${date}T${time}:00`);
+    const end = new Date(start.getTime() + parseDurationToMinutes(service.duration)*60000);
+
+      if (!isWithinWorkHours(time)) {
+        return alert(`Time must be between ${workStart} and ${workEnd}.`);
+      }
+
+    if (doesOverlap(start, end, employeeId, allAppointments)) 
+      return alert("This appointment overlaps with an existing appointment for this employee.");
+
+    try {
+      await axios.post("https://localhost:7079/api/appointments/create", {
+        employeeId,
+        employeeName: workers.find(w => w.id === employeeId)?.name,
+        serviceName: service.name,
+        startTime: start.toISOString(),
+        customerName,
+        customerPhone,
+        extraInfo,
+        organizationId
+      });
+      onSuccess && onSuccess("Appointment created");
+      resetForm();
+      handleClose();
+    } catch (err) {
+      console.error(err);
+      alert(err?.response?.data?.error || "Failed to create appointment");
     }
-
-    console.log("Saving appointment:");
-    console.log({ service, worker, date, time, extraInfo });
-
-    
-    resetFields();
-    handleClose();
-
-    if (onSuccess) onSuccess("Appointment created successfully!");
   };
 
   return (
-    <Modal show={show} onHide={onClose} centered size="lg">
+    <Modal show={show} onHide={() => { resetForm(); handleClose(); }} centered size="lg">
       <Modal.Header closeButton>
-        <Modal.Title style={{ fontSize: "1.8rem" }}>
-          New Appointment
-        </Modal.Title>
+        <Modal.Title>New Appointment</Modal.Title>
       </Modal.Header>
 
-      <Modal.Body style={{ padding: "25px" }}>
-        {/* Date */}
+      <Modal.Body>
         <Form.Group className="mb-3">
-          <Form.Label style={{ fontSize: "1.3rem", fontWeight: "600" }}>
-            Date *
-          </Form.Label>
-          <Form.Control
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-          />
-        </Form.Group>
-
-        {/* TIME SLOT */}
-        <Form.Group className="mb-3">
-          <Form.Label>Time Slot *</Form.Label>
-          <Form.Select
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            required
-          >
-            <option value="">Select a time</option>
-            {timeSlots.map((t, idx) => (
-              <option key={idx} value={t}>
-                {t}
-              </option>
-            ))}
+          <Form.Label>Service *</Form.Label>
+          <Form.Select value={form.service?.name || ""} onChange={e => setForm(f => ({ ...f, service: services.find(s => s.name === e.target.value) }))}>
+            <option value="">Select service</option>
+            {services.map((s, idx) => <option key={idx} value={s.name}>{s.name}</option>)}
           </Form.Select>
         </Form.Group>
 
-        {/* Service + Worker side-by-side */}
-        <Row>
-          <Col>
-            <Form.Group className="mb-3">
-              <Form.Label>Service Type *</Form.Label>
-              <Form.Select
-                value={service}
-                onChange={(e) => setService(e.target.value)}
-                required
-              >
-                <option value="">Select a service</option>
-                {services.map((s, idx) => (
-                  <option key={idx} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
-
-          <Col>
-            <Form.Group className="mb-3">
-              <Form.Label>Worker *</Form.Label>
-              <Form.Select
-                value={worker}
-                onChange={(e) => setWorker(e.target.value)}
-                required
-              >
-                <option value="">Select a worker</option>
-                {workers.map((w, idx) => (
-                  <option key={idx} value={w.name}>
-                    {w.name}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
-        </Row>
-
-        {/* Extra info (NOT required) */}
         <Form.Group className="mb-3">
-          <Form.Label>Extra Information (optional)</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={2}
-            value={extraInfo}
-            onChange={(e) => setExtraInfo(e.target.value)}
-          />
+          <Form.Label>Employee *</Form.Label>
+          <Form.Select value={form.employeeId} onChange={handleChange("employeeId")}>
+            <option value="">Select employee</option>
+            {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+          </Form.Select>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Date & Time *</Form.Label>
+          <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+            <Form.Control type="date" value={form.date} onChange={handleChange("date")} style={{flex:1}} />
+            <Form.Control type="time" value={form.time} onChange={handleChange("time")} style={{flex:1}} />
+            <Form.Control type="text" value={computeEndTime()} readOnly placeholder="End time" style={{width:'90px', fontSize:'0.85rem', textAlign:'center', backgroundColor:'#f0f0f0'}} />
+          </div>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <div style={{ display:'flex', gap:8 }}>
+            <Form.Control placeholder="Customer Name *" value={form.customerName} onChange={handleChange("customerName")} style={{flex:2}} />
+            <Form.Control placeholder="Phone" value={form.customerPhone} onChange={handleChange("customerPhone")} style={{flex:1}} />
+          </div>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Control as="textarea" rows={2} placeholder="Extra Info" value={form.extraInfo} onChange={handleChange("extraInfo")} />
         </Form.Group>
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button variant="primary" onClick={onSave}>
-          Save Appointment
-        </Button>
+        <Button variant="secondary" onClick={() => { resetForm(); handleClose(); }}>Cancel</Button>
+        <Button variant="primary" onClick={handleSave}>Save Appointment</Button>
       </Modal.Footer>
     </Modal>
   );
