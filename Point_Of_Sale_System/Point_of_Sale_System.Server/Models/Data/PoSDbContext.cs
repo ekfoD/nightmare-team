@@ -24,7 +24,7 @@ namespace Point_of_Sale_System.Server.Models.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Tax> Taxes { get; set; }
-        public DbSet<InventoryItem> InventoryItems { get; set; }
+        public DbSet<InventoryItem> InventoryItems { get; set; }    
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<Variation> Variations { get; set; }
         public DbSet<MenuService> MenuServices { get; set; }
