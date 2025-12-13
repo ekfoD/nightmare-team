@@ -25,6 +25,7 @@ public class ServicesService : IServicesService
     public async Task<IEnumerable<MenuServiceDto>> GetFullDtosForOrganizationAsync(Guid organizationId)
     {
         return await _db.MenuServices
+            .Include(s => s.Organization)
             .Where(s => s.OrganizationId == organizationId)
             .Select(s => new MenuServiceDto
             {
@@ -34,7 +35,7 @@ public class ServicesService : IServicesService
                 Price = s.Price,
                 Description = s.Description,
                 Status = s.Status,
-                Currency = s.Organization.Currency
+                Currency = s.Organization != null ? s.Organization.Currency : CurrencyEnum.dollar
             })
             .ToListAsync();
     }
@@ -52,7 +53,8 @@ public class ServicesService : IServicesService
             Status = dto.Status,
             OrganizationId = dto.OrganizationId,
             Organization = org!,
-            DiscountId = dto.DiscountId ?? Guid.Empty
+            DiscountId = dto.DiscountId,
+            TaxId = dto.TaxId
         };
 
         _db.MenuServices.Add(service);
