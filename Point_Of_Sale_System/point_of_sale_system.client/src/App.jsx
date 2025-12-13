@@ -35,22 +35,22 @@ function App() {
                     <Route path="/register" element={<Register />} />
                 </Route>
 
-                <Route element={<RequireAuth />}>
-                    <Route element={<MainLayout />}> {/* Route kad atsirastu navbar, jo nereikia login ir register page'ui*/}
-                        <Route path="/" element={<About />} />
-                        <Route path="/orderHistory" element={<OrderHistory /> }/>
-                        <Route path="/menu" element={<MenuManagement />} />
-                        <Route path="/orders" element={<Orders />} />
-                        <Route path="/inventory" element={<Inventory />} />
-                        <Route path="/employees" element={<Employees />} />
-                        <Route path="/settings" element={<Settings/>} />
-                    </Route>
-                    <Route element={<AppLayout />}>
-                        <Route path="/appAbout" element={<AppAbout />} /> 
-                        <Route path="/appHistory" element={<AppHistory /> }/>
-                        <Route path="/services" element={<Services /> }/>
-                        <Route path="/schedule" element={<Schedule />} />
-                    </Route>
+                <Route element={<AppLayout />}>
+                    {/* Admin specific routes */}
+                    <Route path="/superadmin" element={<RequireAuth authLevel="admin"><Superadmin /></RequireAuth>} />
+                    {/* Owner specific routes */}
+                    {/* <Route path="/owner" element={<RequireAuth authLevel="owner"><OwnerPage /></RequireAuth>} /> */}
+                    {/* Manager specific routes */}
+                    <Route path="/employees" element={<RequireAuth authLevel="manager"><Employees /></RequireAuth>} />
+                    <Route path="/inventory" element={<RequireAuth authLevel="manager"><Inventory /></RequireAuth>} />
+                    <Route path="/settings" element={<RequireAuth authLevel="manager"><Settings /></RequireAuth>} />
+                    {/* Employee specific routes */}
+                    <Route path="/" element={<RequireAuth authLevel="employee"><About /></RequireAuth>} />
+                    <Route path="/orderHistory" element={<RequireAuth authLevel="employee"><OrderHistory /></RequireAuth>} />
+                    <Route path="/services" element={<RequireAuth authLevel="employee"><Services /></RequireAuth>} />
+                    <Route path="/schedule" element={<RequireAuth authLevel="employee"><Schedule /></RequireAuth>} />
+                    <Route path="/appAbout" element={<RequireAuth authLevel="employee"><AppAbout /></RequireAuth>} />
+                    <Route path="/appHistory" element={<RequireAuth authLevel="employee"><AppHistory /></RequireAuth>} />
                 </Route>
             </Routes>
         </div>

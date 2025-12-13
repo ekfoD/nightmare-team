@@ -1,10 +1,10 @@
 import { Outlet } from "react-router-dom";
-import AppNavbar from "../pages/navbars/AppWorkerNavbar";
+import Navbar from "../pages/navbars/Navbar";
 
 export default function AppLayout() {
     return (
         <>
-            <AppNavbar />
+            <Navbar />
             <Outlet />
         </>
     )
