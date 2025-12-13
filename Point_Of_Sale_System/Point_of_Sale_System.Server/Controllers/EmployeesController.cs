@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Point_of_Sale_System.Server.DTOs;
 using Point_of_Sale_System.Server.Enums;
 using Point_of_Sale_System.Server.Interfaces;
-using Point_of_Sale_System.Server.Models;
+using Point_of_Sale_System.Server.Repositories;
 using Point_of_Sale_System.Server.Models.Entities.Business;
 
 
@@ -14,16 +13,34 @@ namespace Point_of_Sale_System.Server.Controllers
     public class EmployeesController : ControllerBase
     {
         private readonly IEmployeeRepository _employeeRepository;
+        private readonly IOrganizationRepository _orgRepo;
 
-        public EmployeesController(IEmployeeRepository employeeRepository)
+        public EmployeesController(IEmployeeRepository employeeRepository, IOrganizationRepository orgRepo)
         {
             _employeeRepository = employeeRepository;
+            _orgRepo = orgRepo;
         }
 
+        // [HttpGet("{organizationId}")]
+        // public ActionResult<IEnumerable<Employee>> Get(Guid organizationId)
+        // {
+        //     var employees = _employeeRepository.GetEmployees(organizationId);
+            
+        //     return Ok(employees);
+        // }
+
         [HttpGet("{organizationId}")]
-        public ActionResult<IEnumerable<Employee>> Get(Guid organizationId)
+        public ActionResult<IEnumerable<EmployeeRequest>> Get(Guid organizationId)
         {
-            var employees = _employeeRepository.GetEmployees(organizationId);
+            var employees = _employeeRepository.GetEmployees(organizationId)
+                .Select(e => new EmployeeRequest
+                {
+                    Id = e.Id,
+                    Username = e.Username,
+                    AccessFlag = e.AccessFlag,
+                    Status = e.Status.ToString()
+                });
+
             return Ok(employees);
         }
 
@@ -36,6 +53,9 @@ namespace Point_of_Sale_System.Server.Controllers
             var salt = BCrypt.Net.BCrypt.GenerateSalt();
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password + salt);
 
+            var org = _orgRepo.GetOrganizationById(request.OrganizationId);
+            if (org == null) return BadRequest("Invalid organization");
+
             var newEmployee = new Employee
             {
                 Username = request.Username,
@@ -45,7 +65,8 @@ namespace Point_of_Sale_System.Server.Controllers
                 Status = Enum.TryParse<StatusEnum>(request.Status, true, out var statusEnum)
                     ? statusEnum
                     : StatusEnum.inactive,
-                Timestamp = DateTime.UtcNow
+                Timestamp = DateTime.UtcNow,
+                Organizations = new List<Organization> { org }
             };
             
 
