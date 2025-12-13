@@ -1,45 +1,47 @@
-using Point_of_Sale_System.Server.Interfaces;
-using Point_of_Sale_System.Server.Models.Entities.ServiceBased;
+using Microsoft.EntityFrameworkCore;
 using Point_of_Sale_System.Server.Dtos;
-using Point_of_Sale_System.Server.Repositories;
 using Point_of_Sale_System.Server.Enums;
+using Point_of_Sale_System.Server.Models.Data;
+using Point_of_Sale_System.Server.Models.Entities.Business;
+using Point_of_Sale_System.Server.Models.Entities.ServiceBased;
+using Point_of_Sale_System.Server.Interfaces;
 
 public class ServicesService : IServicesService
 {
-    private readonly IMenuServiceRepository _repo;
-    private readonly IOrganizationRepository _organizationRepo;
+    private readonly PoSDbContext _db;
 
-    public ServicesService(IMenuServiceRepository repo, IOrganizationRepository organizationRepo)
+    public ServicesService(PoSDbContext db)
     {
-        _repo = repo;
-        _organizationRepo = organizationRepo;
+        _db = db;
     }
 
-    public Task<IEnumerable<MenuService>> GetAllForOrganizationAsync(Guid organizationId)
+    public async Task<IEnumerable<MenuService>> GetAllForOrganizationAsync(Guid organizationId)
     {
-        return _repo.GetAllForOrganizationAsync(organizationId);
+        return await _db.MenuServices
+            .Where(s => s.OrganizationId == organizationId)
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<MenuServiceDto>> GetFullDtosForOrganizationAsync(Guid organizationId)
     {
-        var services = await _repo.GetAllForOrganizationAsync(organizationId);
-        var organization = _organizationRepo.GetOrganizationById(organizationId);
-
-        return services.Select(s => new MenuServiceDto
-        {
-            Id = s.Id,
-            Name = s.Name,
-            Duration = s.Duration,
-            Price = s.Price,
-            Description = s.Description,
-            Status = s.Status,
-            Currency = organization.Currency
-        });
+        return await _db.MenuServices
+            .Where(s => s.OrganizationId == organizationId)
+            .Select(s => new MenuServiceDto
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Duration = s.Duration,
+                Price = s.Price,
+                Description = s.Description,
+                Status = s.Status,
+                Currency = s.Organization.Currency
+            })
+            .ToListAsync();
     }
 
     public async Task CreateAsync(CreateMenuServiceDto dto)
     {
-        var org = _organizationRepo.GetOrganizationById(dto.OrganizationId);
+        Organization? org = await _db.Organizations.FindAsync(dto.OrganizationId);
         var service = new MenuService
         {
             Id = Guid.NewGuid(),
@@ -49,57 +51,64 @@ public class ServicesService : IServicesService
             Description = dto.Description,
             Status = dto.Status,
             OrganizationId = dto.OrganizationId,
-            Organization = org,
+            Organization = org!,
             DiscountId = dto.DiscountId ?? Guid.Empty
         };
 
-        await _repo.AddAsync(service);
+        _db.MenuServices.Add(service);
+        await _db.SaveChangesAsync();
     }
 
     public async Task<MenuServiceDto?> UpdateAsync(Guid id, CreateMenuServiceDto dto)
     {
-        var services = await _repo.GetAllForOrganizationAsync(dto.OrganizationId);
-        var existing = services.FirstOrDefault(s => s.Id == id);
+        var service = await _db.MenuServices
+            .Include(s => s.Organization)
+            .FirstOrDefaultAsync(s => s.Id == id && s.OrganizationId == dto.OrganizationId);
 
-        if (existing == null)
+        if (service == null)
             return null;
 
-        // ALL assignments here
-        existing.Name = dto.Name;
-        existing.Duration = dto.Duration;
-        existing.Price = dto.Price;
-        existing.Description = dto.Description;
-        existing.Status = dto.Status;
-        existing.DiscountId = dto.DiscountId ?? Guid.Empty;
+        service.Name = dto.Name;
+        service.Duration = dto.Duration;
+        service.Price = dto.Price;
+        service.Description = dto.Description;
+        service.Status = dto.Status;
+        service.DiscountId = dto.DiscountId ?? Guid.Empty;
 
-        await _repo.UpdateAsync(existing);
+        await _db.SaveChangesAsync();
 
         return new MenuServiceDto
         {
-            Id = existing.Id,
-            Name = existing.Name,
-            Duration = existing.Duration,
-            Price = existing.Price,
-            Description = existing.Description,
-            Status = existing.Status
+            Id = service.Id,
+            Name = service.Name,
+            Duration = service.Duration,
+            Price = service.Price,
+            Description = service.Description,
+            Status = service.Status,
+            Currency = service.Organization.Currency
         };
     }
 
-    public Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
-        return _repo.DeleteAsync(id);
+        var service = await _db.MenuServices.FindAsync(id);
+        if (service == null)
+            return false;
+
+        _db.MenuServices.Remove(service);
+        await _db.SaveChangesAsync();
+        return true;
     }
 
     public async Task<IEnumerable<object>> GetActiveForOrganizationAsync(Guid organizationId)
     {
-        var services = await _repo.GetAllForOrganizationAsync(organizationId);
-
-        return services
-            .Where(s => s.Status == StatusEnum.active)
+        return await _db.MenuServices
+            .Where(s => s.OrganizationId == organizationId && s.Status == StatusEnum.active)
             .Select(s => new
             {
                 name = s.Name,
                 duration = s.Duration
-            });
+            })
+            .ToListAsync();
     }
 }

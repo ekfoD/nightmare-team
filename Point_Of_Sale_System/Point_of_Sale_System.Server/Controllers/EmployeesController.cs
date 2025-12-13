@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Point_of_Sale_System.Server.DTOs;
 using Point_of_Sale_System.Server.Enums;
-using Point_of_Sale_System.Server.Interfaces;
-using Point_of_Sale_System.Server.Repositories;
+using Point_of_Sale_System.Server.Models.Data;
 using Point_of_Sale_System.Server.Models.Entities.Business;
-
 
 namespace Point_of_Sale_System.Server.Controllers
 {
@@ -12,52 +11,46 @@ namespace Point_of_Sale_System.Server.Controllers
     [Route("api/[controller]")]
     public class EmployeesController : ControllerBase
     {
-        private readonly IEmployeeRepository _employeeRepository;
-        private readonly IOrganizationRepository _orgRepo;
+        private readonly PoSDbContext _db;
 
-        public EmployeesController(IEmployeeRepository employeeRepository, IOrganizationRepository orgRepo)
+        public EmployeesController(PoSDbContext db)
         {
-            _employeeRepository = employeeRepository;
-            _orgRepo = orgRepo;
+            _db = db;
         }
 
-        // [HttpGet("{organizationId}")]
-        // public ActionResult<IEnumerable<Employee>> Get(Guid organizationId)
-        // {
-        //     var employees = _employeeRepository.GetEmployees(organizationId);
-            
-        //     return Ok(employees);
-        // }
-
         [HttpGet("{organizationId}")]
-        public ActionResult<IEnumerable<EmployeeRequest>> Get(Guid organizationId)
+        public async Task<IActionResult> Get(Guid organizationId)
         {
-            var employees = _employeeRepository.GetEmployees(organizationId)
+            var employees = await _db.Employees
+                .Where(e => e.Organizations.Any(o => o.Id == organizationId))
                 .Select(e => new EmployeeRequest
                 {
                     Id = e.Id,
                     Username = e.Username,
                     AccessFlag = e.AccessFlag,
                     Status = e.Status.ToString()
-                });
+                })
+                .ToListAsync();
 
             return Ok(employees);
         }
 
         [HttpPost("add")]
-        public IActionResult AddEmployee([FromBody] EmployeeRequest request)
+        public async Task<IActionResult> AddEmployee([FromBody] EmployeeRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            var org = await _db.Organizations.FindAsync(request.OrganizationId);
+            if (org == null)
+                return BadRequest("Invalid organization");
+
             var salt = BCrypt.Net.BCrypt.GenerateSalt();
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password + salt);
 
-            var org = _orgRepo.GetOrganizationById(request.OrganizationId);
-            if (org == null) return BadRequest("Invalid organization");
-
-            var newEmployee = new Employee
+            var employee = new Employee
             {
+                Id = Guid.NewGuid(),
                 Username = request.Username,
                 PasswordHash = hashedPassword,
                 PasswordSalt = salt,
@@ -68,48 +61,49 @@ namespace Point_of_Sale_System.Server.Controllers
                 Timestamp = DateTime.UtcNow,
                 Organizations = new List<Organization> { org }
             };
-            
 
-            _employeeRepository.AddEmployee(newEmployee);
+            _db.Employees.Add(employee);
+            await _db.SaveChangesAsync();
 
-            return Ok(newEmployee);
+            return Ok(employee);
         }
 
-
-
         [HttpPut("{employeeId}/edit")]
-        public IActionResult EditEmployee(Guid employeeId, [FromBody] EmployeeRequest request)
+        public async Task<IActionResult> EditEmployee(Guid employeeId, [FromBody] EmployeeRequest request)
         {
-            var existing = _employeeRepository.GetById(employeeId);
-            if (existing == null)
+            var employee = await _db.Employees
+                .Include(e => e.Organizations)
+                .FirstOrDefaultAsync(e => e.Id == employeeId);
+
+            if (employee == null)
                 return NotFound(new { message = "Employee not found" });
 
-            existing.Username = request.Username;
-            existing.AccessFlag = request.AccessFlag;
-            existing.Status = Enum.TryParse<StatusEnum>(request.Status, true, out var statusEnum)
-                    ? statusEnum
-                    : StatusEnum.inactive;
+            employee.Username = request.Username;
+            employee.AccessFlag = request.AccessFlag;
+            employee.Status = Enum.TryParse<StatusEnum>(request.Status, true, out var statusEnum)
+                ? statusEnum
+                : StatusEnum.inactive;
 
-            // Update password only if supplied
             if (!string.IsNullOrWhiteSpace(request.Password))
             {
-                var newSalt = BCrypt.Net.BCrypt.GenerateSalt();
-                existing.PasswordSalt = newSalt;
-                existing.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password + newSalt);
+                var salt = BCrypt.Net.BCrypt.GenerateSalt();
+                employee.PasswordSalt = salt;
+                employee.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password + salt);
             }
 
-            _employeeRepository.UpdateEmployee(existing);
-
-            return Ok(existing);
+            await _db.SaveChangesAsync();
+            return Ok(employee);
         }
 
         [HttpDelete("{employeeId}/delete")]
-        public IActionResult DeleteEmployee(Guid employeeId)
+        public async Task<IActionResult> DeleteEmployee(Guid employeeId)
         {
-            var deleted = _employeeRepository.DeleteEmployee(employeeId);
-
-            if (!deleted)
+            var employee = await _db.Employees.FindAsync(employeeId);
+            if (employee == null)
                 return NotFound(new { message = "Employee not found" });
+
+            _db.Employees.Remove(employee);
+            await _db.SaveChangesAsync();
 
             return Ok(new { message = "Employee deleted successfully" });
         }

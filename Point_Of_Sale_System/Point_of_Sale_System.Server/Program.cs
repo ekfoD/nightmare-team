@@ -1,7 +1,6 @@
 using Point_of_Sale_System.Server.Interfaces;
 using System.Text.Json.Serialization;
 using Point_of_Sale_System.Server.Services;
-using Point_of_Sale_System.Server.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,9 +12,6 @@ builder.Services.AddDbContext<Point_of_Sale_System.Server.Models.Data.PoSDbConte
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-builder.Services.AddScoped<IMenuServiceRepository, MenuServiceRepository>();
-builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IServicesService, ServicesService>();
