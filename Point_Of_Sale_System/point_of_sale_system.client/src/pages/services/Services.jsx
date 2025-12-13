@@ -23,6 +23,8 @@ export default function Services() {
   const [showNotifier, setShowNotifier] = useState(false);
   const [notifierMessage, setNotifierMessage] = useState("");
 
+  
+
   const fetchServices = async () => {
     try {
       const response = await axios.get(`/api/services/full/${ORGANIZATION_ID}`);
@@ -31,6 +33,7 @@ export default function Services() {
     } catch (error) {
       console.error("Failed to fetch services:", error);
     }
+    
   };
 
   useEffect(() => {
@@ -103,6 +106,7 @@ export default function Services() {
   if (!selected) return <div>Loading...</div>;
 
   return (
+    
     <div className="services-container">
 
       {/* LEFT — SERVICES LIST */}
@@ -134,7 +138,7 @@ export default function Services() {
               <strong>Description:</strong>
               <p>{selected.description}</p>
             </div>
-            <div style={{ fontWeight: 600, marginBottom: "8px" }}>Price: {selected.price} €</div>
+            <div style={{ fontWeight: 600, marginBottom: "8px" }}>Price: {selected.price} {selected.currency === "euro" ? "€" : "$"}</div>
             <div style={{ fontWeight: 600 }}>Duration: {formatDuration(selected.duration)}</div>
             <div>Status: {selected.status}</div>
           </div>
@@ -154,6 +158,7 @@ export default function Services() {
           show={showCreateModal}
           onClose={() => setShowCreateModal(false)}
           onCreate={handleCreateService}
+          currency={selected?.currency}
         />
 
         <EditServiceModal
