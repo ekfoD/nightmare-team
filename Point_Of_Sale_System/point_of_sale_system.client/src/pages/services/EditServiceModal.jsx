@@ -9,6 +9,11 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
   const [isActive, setIsActive] = useState("Active");
   const [error, setError] = useState("");
 
+  const currencySymbol = {
+  euro: "€",
+  dollar: "$"
+}[service.currency];
+
   // Prefill form when modal opens or service changes
   useEffect(() => {
   if (service) {
@@ -122,7 +127,7 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Price (€)</Form.Label>
+            <Form.Label>Price ({currencySymbol})</Form.Label>
             <Form.Control
               type="number"
               placeholder="0.00"

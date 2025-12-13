@@ -25,7 +25,7 @@ namespace Point_of_Sale_System.Server.Repositories
                 EmailAddress = "studio@example.com",
                 PhoneNumber = "+37060000001",
                 Plan = PlanEnum.service,
-                Currency = CurrencyEnum.euro,
+                Currency = CurrencyEnum.dollar,
                 Status = StatusEnum.active,
                 Employees = new List<Employee>(),
                 Appointments = new List<Appointment>(),
