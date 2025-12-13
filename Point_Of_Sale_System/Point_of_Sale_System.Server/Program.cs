@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Point_of_Sale_System.Server.Interfaces;
 using System.Text.Json.Serialization;
 using Point_of_Sale_System.Server.Services;
+using Point_of_Sale_System.Server.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IEmployeeRepository, InMemoryEmployeeRepository>();
 builder.Services.AddScoped<IOrganizationrepository, OrganizationRepository>();
 builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+builder.Services.AddScoped<IMenuRepository, MenuRepository>();
+builder.Services.AddScoped<IVariationRepository, VariationRepository>();
 
 builder.Services.AddCors(options =>
 {
