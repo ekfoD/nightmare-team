@@ -3,8 +3,8 @@ import axios from 'axios';
 import { Container, Card, Button, Form, Modal } from 'react-bootstrap';
 import NewAppointmentPopup from './NewAppointmentPopup';
 import EditAppointmentPopup from './EditAppointmentPopup';
-import SuccessNotifier from "./SuccessNotifier";
 import Calendar from './Calendar';
+import SuccessNotifier from "../../utilities/SuccessNotifier";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../styles/Schedule.css';
@@ -76,7 +76,6 @@ const Schedule = () => {
 
       const mappedAppts = apptsRes.data.map(a => {
         const start = new Date(a.startTime);
-        const end = new Date(a.endTime);
         return {
           ...a,
           date: start.toISOString().split("T")[0],

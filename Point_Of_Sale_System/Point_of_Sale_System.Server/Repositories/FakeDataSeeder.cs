@@ -25,7 +25,7 @@ namespace Point_of_Sale_System.Server.Repositories
                 EmailAddress = "studio@example.com",
                 PhoneNumber = "+37060000001",
                 Plan = PlanEnum.service,
-                Currency = CurrencyEnum.euro,
+                Currency = CurrencyEnum.dollar,
                 Status = StatusEnum.active,
                 Employees = new List<Employee>(),
                 Appointments = new List<Appointment>(),
@@ -77,8 +77,10 @@ namespace Point_of_Sale_System.Server.Repositories
             {
                 Id = Guid.NewGuid(),
                 Name = "Brow Shaping",
-                Duration = new TimeOnly(0, 30),
+                Duration = 30,
                 Price = 25,
+                Status = StatusEnum.active,
+                Description = "Professional eyebrow shaping service",
                 OrganizationId = org.Id,
                 Organization = org
             };
@@ -87,8 +89,10 @@ namespace Point_of_Sale_System.Server.Repositories
             {
                 Id = Guid.NewGuid(),
                 Name = "Lash Lift",
-                Duration = new TimeOnly(1, 0),
+                Duration = 60,
                 Price = 45,
+                Status = StatusEnum.active,
+                Description = "Enhance your natural lashes with a lash lift",
                 OrganizationId = org.Id,
                 Organization = org
             };
