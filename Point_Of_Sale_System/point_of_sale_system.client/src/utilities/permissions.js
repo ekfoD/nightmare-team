@@ -3,8 +3,10 @@ import { ROLE_HIERARCHY } from "../config/access";
 export const hasAccess = ({
   userRole,
   businessType,
+  businessId,
   minRole,
   allowedBusiness,
+  requireBusiness = false,
 }) => {
   if (!userRole) return false;
 
@@ -12,6 +14,8 @@ export const hasAccess = ({
   const requiredLevel = ROLE_HIERARCHY.indexOf(minRole.toLowerCase());
 
   if (userLevel < requiredLevel) return false;
+
+  if (requireBusiness && !businessId) return false;
 
   if (
     allowedBusiness &&

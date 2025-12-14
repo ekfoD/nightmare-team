@@ -5,17 +5,24 @@ import { hasAccess } from "../../utilities/permissions.js";
 import { ROLES, BUSINESS_TYPES } from "../../config/access.js";
 
 function Navbar() {
-  const { auth } = useAuth();
+  const { auth, setAuth } = useAuth();
   const role = auth?.role;
   const businessType = auth?.businessType;
+  const businessId = auth?.businessId;
 
   const canSee = (minRole, allowedBusiness) =>
     hasAccess({
       userRole: role,
       businessType,
+      businessId,
       minRole,
       allowedBusiness,
+      requireBusiness: true,
     });
+
+  const logout = () => {
+    setAuth({});       // clear auth state
+  };
 
   return (
     <BootstrapNavbar bg="dark" variant="dark" expand="lg" sticky="top">
@@ -28,57 +35,62 @@ function Navbar() {
         <BootstrapNavbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto">
 
-            {/* admin */}
-            {canSee(ROLES.ADMIN, [BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]) && (
+            {/* admin + CAN SEE THIS ALWAYS */}
+            {canSee(ROLES.ADMIN) && (
               <Nav.Link as={NavLink} to="/superadmin">
                 Superadmin
               </Nav.Link>
             )}
 
-            {/* manager (common) */}
-            {canSee(ROLES.MANAGER, [BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]) && (
+            {/* pages stay hidden until admin selects a business */}
+            {businessId && (
               <>
-                <Nav.Link as={NavLink} to="/employees">Employees</Nav.Link>
-                <Nav.Link as={NavLink} to="/settings">Settings</Nav.Link>
-              </>
-            )}
+                {/* manager (common) */}
+                {canSee(ROLES.MANAGER, [BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]) && (
+                  <>
+                    <Nav.Link as={NavLink} to="/employees">Employees</Nav.Link>
+                    <Nav.Link as={NavLink} to="/settings">Settings</Nav.Link>
+                  </>
+                )}
 
-            {/* manager restaurant */}
-            {canSee(ROLES.MANAGER, [BUSINESS_TYPES.RESTAURANT]) && (
-              <>
-                <Nav.Link as={NavLink} to="/inventory">Inventory</Nav.Link>
-                <Nav.Link as={NavLink} to="/menuManagement">Menu Management</Nav.Link>
-                <Nav.Link as={NavLink} to="/orderHistory">History</Nav.Link>
-              </>
-            )}
+                {/* manager restaurant */}
+                {canSee(ROLES.MANAGER, [BUSINESS_TYPES.RESTAURANT]) && (
+                  <>
+                    <Nav.Link as={NavLink} to="/inventory">Inventory</Nav.Link>
+                    <Nav.Link as={NavLink} to="/menuManagement">Menu Management</Nav.Link>
+                    <Nav.Link as={NavLink} to="/orderHistory">History</Nav.Link>
+                  </>
+                )}
 
-            {/* manager service */}
-            {canSee(ROLES.MANAGER, [BUSINESS_TYPES.SERVICE]) && (
-              <>
-                <Nav.Link as={NavLink} to="/services">Services</Nav.Link>
-                <Nav.Link as={NavLink} to="/appHistory">History</Nav.Link>
-              </>
-            )}
+                {/* manager service */}
+                {canSee(ROLES.MANAGER, [BUSINESS_TYPES.SERVICE]) && (
+                  <>
+                    <Nav.Link as={NavLink} to="/services">Services</Nav.Link>
+                    <Nav.Link as={NavLink} to="/appHistory">History</Nav.Link>
+                  </>
+                )}
 
-            {/* employee common */}
-            {canSee(ROLES.EMPLOYEE, [BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]) && (
-              <>
-                <Nav.Link as={NavLink} to="/orders">Orders</Nav.Link>
-              </>
-            )}
+                {/* employee common */}
+                {canSee(ROLES.EMPLOYEE, [BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]) && (
+                  <>
+                    <Nav.Link as={NavLink} to="/orders">Orders</Nav.Link>
+                  </>
+                )}
 
-            {/* employee service-only */}
-            {canSee(ROLES.EMPLOYEE, [BUSINESS_TYPES.SERVICE]) && (
-              <>
-                <Nav.Link as={NavLink} to="/schedule">Schedule</Nav.Link>
-              </>
-            )}
+                {/* employee service-only */}
+                {canSee(ROLES.EMPLOYEE, [BUSINESS_TYPES.SERVICE]) && (
+                  <>
+                    <Nav.Link as={NavLink} to="/schedule">Schedule</Nav.Link>
+                  </>
+                )}
 
-            {/* role display */}
-            {role && (
-              <span style={{ color: "white", marginLeft: "1rem" }}>
-                Role: {role}
-              </span>
+                {/* logout */}
+                {role && (
+                  <Nav.Link onClick={logout}>
+                    Logout
+                  </Nav.Link>
+                )}
+              </>
             )}
 
           </Nav>

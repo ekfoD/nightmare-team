@@ -28,7 +28,8 @@ function Login() {
                     withCredentials: true
                 }
             );
-            setAuth({ role: response.data.role, businessType: response.data.businessType });
+            setAuth({ role: response.data.role, businessType: response.data.businessType, businessId: response.data.businessId });
+            // setAuth({ role: response.data.role, businessType: response.data.businessType });
             setUser('');
             setPwd('');
             navigate(from, { replace: true });

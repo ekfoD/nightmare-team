@@ -36,7 +36,7 @@ function App() {
         <Route element={<MainLayout />}>
 
             {/* admin */}
-            <Route element={<RequireAuth minRole={ROLES.ADMIN} business={[BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]} />}>
+            <Route element={<RequireAuth minRole={ROLES.ADMIN} business={[BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]} requireBusiness={false} />}>
                 <Route path="/superadmin" element={<Superadmin />} />
             </Route>
 
