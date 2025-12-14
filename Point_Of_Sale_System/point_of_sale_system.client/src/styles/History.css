@@ -124,6 +124,21 @@
   font-weight: 600;
 }
 
+.price-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.price-label {
+  flex: 1;
+}
+
+.price-value {
+  width: 80px;
+  text-align: right;
+}
+
+
 .order-summary {
   position: sticky;
   bottom: 0;
@@ -145,13 +160,14 @@
 .summary-row,
 .summary-total {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .summary-total {
   margin-top: 8px;
-  font-weight: 700;
-  font-size: 18px;
+  font-weight: 500;
+  font-size: 16px;
 }
 
 .payment-actions {
