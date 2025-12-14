@@ -59,7 +59,11 @@ app.MapFallbackToFile("/index.html");
 
 app.Run();
 
-
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<PoSDbContext>();
+    DatabaseSeeder.Seed(db);
+}
 
 
 // kas turi prieiga prie employees edit?
