@@ -5,7 +5,7 @@ function AppNavbar() {
   return (
     <BootstrapNavbar bg="dark" variant="dark" expand="lg" sticky="top">
       <Container fluid>
-        <BootstrapNavbar.Brand as={Link} to="/appAbout"> Someone's app </BootstrapNavbar.Brand>
+        <BootstrapNavbar.Brand as={Link} to="/appAbout"> PoS </BootstrapNavbar.Brand>
         
         <BootstrapNavbar.Toggle aria-controls="basic-navbar-nav" />
         
@@ -13,6 +13,7 @@ function AppNavbar() {
           <Nav className="ms-auto">
             <Nav.Link as={NavLink} to="/appAbout" end>Home</Nav.Link>
             <Nav.Link as={NavLink} to="/appHistory">History</Nav.Link>
+            <Nav.Link as={NavLink} to="/appPayment">Payment</Nav.Link>
             <Nav.Link as={NavLink} to="/services">Services</Nav.Link>
             <Nav.Link as={NavLink} to="/schedule">Schedule</Nav.Link>
             <Nav.Link as={NavLink} to="/" end>Back</Nav.Link>
