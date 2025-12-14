@@ -3,6 +3,8 @@ using System.Text.Json.Serialization;
 using Point_of_Sale_System.Server.Services;
 using Point_of_Sale_System.Server.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Point_of_Sale_System.Server.Models.Data;
+using Point_of_Sale_System.Server.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,7 +64,14 @@ app.MapFallbackToFile("/index.html");
 
 FakeDataSeeder.Seed();
 
+// using (var scope = app.Services.CreateScope())
+// {
+//     var context = scope.ServiceProvider.GetRequiredService<PoSDbContext>();
+//     DatabaseSeeder.Seed(context);
+// }
+
 app.Run();
+
 
 
 

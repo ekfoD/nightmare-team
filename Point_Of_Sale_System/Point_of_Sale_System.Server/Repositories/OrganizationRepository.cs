@@ -43,7 +43,21 @@ public class OrganizationRepository : IOrganizationRepository
             Currency = CurrencyEnum.euro,
             Status = StatusEnum.active,
             Timestamp = DateTime.Now
+        },
+
+        new Organization
+        {
+            Id = Guid.Parse("8bbb7afb-d664-492a-bcd2-d29953ab924e"),
+            Name = "Acme Corporation",
+            Address = "123 Market Street, Springfield",
+            EmailAddress = "info@acme.com",
+            PhoneNumber = "+15551234567",
+            Plan = PlanEnum.service,
+            Currency = CurrencyEnum.dollar,
+            Status = StatusEnum.active,
+            Timestamp = DateTime.UtcNow
         }
+
     };
 
     public Organization GetOrganizationById(Guid OrganizationId)

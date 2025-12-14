@@ -1,125 +1,157 @@
-import React, { useState } from "react";
-import { Container, Table, Button } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Container, Table, Button, Spinner } from "react-bootstrap";
 import GiftcardModal from "./GiftcardModal";
 
+const API_URL = "https://localhost:7079/api/Giftcard";
+const ORGANIZATION_ID = "8bbb7afb-d664-492a-bcd2-d29953ab924e"; // fixed for now
+
 const GiftcardManagement = () => {
-
-    const [giftcards, setGiftcards] = useState([
-        {
-            id: "1",
-            balance: 50.00,
-            currency: 2,
-            validUntil: "2025-12-31",
-        },
-        {
-            id: "2",
-            balance: 100.00,
-            currency: 1,
-            validUntil: "2026-06-15",
-        },
-        {
-            id: "3",
-            balance: 25.00,
-            currency: 1,
-            validUntil: "2024-09-01",
-        }
-    ]);
-
-
-
-    function formatCurrency(value) {
-    switch (value) {
-        case 1: return "€";
-        case 2: return "$";
-        default: return "";
-    }
-}
+    const [giftcards, setGiftcards] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const [showModal, setShowModal] = useState(false);
     const [selectedGiftcard, setSelectedGiftcard] = useState(null);
 
-    const handleModify = (giftcard) => {
-        setSelectedGiftcard(giftcard);
-        setShowModal(true);
-    };
+    // =========================
+    // LOAD DATA
+    // =========================
+    useEffect(() => {
+        loadGiftcards();
+    }, []);
 
-    const handleAdd = () => {
-        setSelectedGiftcard(null);
-        setShowModal(true);
-    };
-
-    const handleSave = (updatedCard) => {
-        if (updatedCard.id) {
-            setGiftcards(giftcards.map(g => (g.id === updatedCard.id ? updatedCard : g)));
-        } else {
-            updatedCard.id = crypto.randomUUID();
-            setGiftcards([...giftcards, updatedCard]);
+    const loadGiftcards = async () => {
+        try {
+            const res = await axios.get(`${API_URL}/organization/${ORGANIZATION_ID}`);
+            setGiftcards(res.data);
+        } catch (err) {
+            console.error("Failed to load giftcards", err);
+        } finally {
+            setLoading(false);
         }
-        setShowModal(false);
     };
 
-    const handleDelete = (id) => {
-        setGiftcards(giftcards.filter(g => g.id !== id));
+    // =========================
+    // ADD / EDIT
+    // =========================
+    const handleSave = async (card) => {
+        try {
+            if (card.id) {
+                await axios.put(`${API_URL}/${card.id}`, {
+                    balance: card.balance,
+                    validUntil: card.validUntil
+                });
+            } else {
+                await axios.post(`${API_URL}/organization/${ORGANIZATION_ID}`, {
+                    balance: card.balance,
+                    validUntil: card.validUntil
+                });
+            }
+
+            await loadGiftcards();
+            setShowModal(false);
+        } catch (err) {
+            console.error("Save failed", err);
+            alert("Failed to save giftcard");
+        }
     };
+
+    // =========================
+    // DELETE
+    // =========================
+    const handleDelete = async (id) => {
+        if (!window.confirm("Delete this giftcard?")) return;
+
+        try {
+            await axios.delete(`${API_URL}/${id}`);
+            setGiftcards(giftcards.filter(g => g.id !== id));
+        } catch (err) {
+            console.error("Delete failed", err);
+            alert("Failed to delete giftcard");
+        }
+    };
+
+    // =========================
+    // UI
+    // =========================
+    if (loading) {
+        return (
+            <div className="d-flex justify-content-center mt-5">
+                <Spinner animation="border" />
+            </div>
+        );
+    }
 
     return (
-        <Container fluid className="p-4" style={{ backgroundColor: '#aac2fdff', minHeight: '100vh' }}>
-            <div className="d-flex flex-column align-items-center" style={{ height: 'calc(100vh - 100px)' }}>
+        <Container fluid className="p-4" style={{ backgroundColor: "#aac2fdff", minHeight: "100vh" }}>
+            <div className="d-flex flex-column align-items-center">
+
                 <div style={{
-                    backgroundColor: 'white',
-                    padding: '20px',
-                    borderRadius: '8px',
-                    width: '100%',
-                    maxWidth: '1200px',
-                    marginBottom: '30px',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    maxHeight: 'calc(100vh - 200px)'
+                    backgroundColor: "white",
+                    padding: "20px",
+                    borderRadius: "8px",
+                    width: "100%",
+                    maxWidth: "1200px",
+                    marginBottom: "30px"
                 }}>
-                    <div style={{ overflowY: 'auto', flex: 1 }}>
-                        <Table hover style={{ marginBottom: 0 }}>
-                            <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 1 }}>
-                                <tr style={{ backgroundColor: '#f8f9fa' }}>
-                                    <th style={{ border: '2px solid #333', padding: '15px' }}>Balance</th>
-                                    <th style={{ border: '2px solid #333', padding: '15px' }}>Currency</th>
-                                    <th style={{ border: '2px solid #333', padding: '15px' }}>Valid Until</th>
-                                    <th style={{ border: '2px solid #333', padding: '15px' }}>Actions</th>
+                    <Table hover>
+                        <thead>
+                            <tr>
+                                <th>Giftcard ID</th>
+                                <th>Balance</th>
+                                <th>Valid Until</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {giftcards.map(g => (
+                                <tr key={g.id}>
+                                    <td
+                                        style={{
+                                            fontFamily: "monospace",
+                                            fontSize: "0.75rem",
+                                            color: "#555",
+                                            wordBreak: "break-all"
+                                        }}
+                                    >
+                                        {g.id}
+                                    </td>
+
+                                    <td>{g.balance.toFixed(2)}</td>
+                                    <td>{g.validUntil}</td>
+                                    <td>
+                                        <Button
+                                            size="sm"
+                                            variant="warning"
+                                            className="me-2"
+                                            onClick={() => {
+                                                setSelectedGiftcard(g);
+                                                setShowModal(true);
+                                            }}
+                                        >
+                                            Edit
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="danger"
+                                            onClick={() => handleDelete(g.id)}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {giftcards.map((g, index) => (
-                                    <tr key={g.id} style={{ backgroundColor: index % 2 === 0 ? '#f8f9fa' : '#e9ecef' }}>
-                                        <td style={{ padding: '15px', color: '#666' }}>{g.balance.toFixed(2)}</td>
-                                        <td style={{ padding: '15px', color: '#666' }}>{formatCurrency(g.currency)}</td>
-                                        <td style={{ padding: '15px', color: '#666' }}>{g.validUntil}</td>
-                                        <td style={{ padding: '15px' }}>
-                                            <div className="d-flex justify-content-center gap-2">
-                                                <Button size="sm" variant="warning" onClick={() => handleModify(g)}>
-                                                    Edit
-                                                </Button>
-                                                <Button size="sm" variant="danger" onClick={() => handleDelete(g.id)}>
-                                                    Delete
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
-                    </div>
+                            ))}
+                        </tbody>
+
+                    </Table>
                 </div>
 
                 <Button
                     variant="primary"
                     size="lg"
-                    onClick={handleAdd}
-                    style={{
-                        borderRadius: '8px',
-                        border: '2px solid #0d6efd',
-                        fontWeight: '500',
-                        padding: '12px 50px',
-                        minWidth: '200px'
+                    onClick={() => {
+                        setSelectedGiftcard(null);
+                        setShowModal(true);
                     }}
                 >
                     Add Giftcard

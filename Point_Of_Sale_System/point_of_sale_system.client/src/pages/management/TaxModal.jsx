@@ -3,29 +3,39 @@ import { Modal, Button, Form } from "react-bootstrap";
 
 const TaxModal = ({ show, tax, onSave, onCancel }) => {
 
+    const NUMBER_TYPE = {
+        FLAT: 1,
+        PERCENTAGE: 2
+    };
+
+    const NUMBER_TYPE_LABEL = {
+        1: "Flat",
+        2: "Percentage"
+    };
+
     const [name, setName] = useState("");
     const [amount, setAmount] = useState("");
-    const [numberType, setNumberType] = useState("Flat");
+    const [numberType, setNumberType] = useState(NUMBER_TYPE.FLAT);
     const [status, setStatus] = useState(1);
     const [error, setError] = useState(null); // State for general submission error
 
     useEffect(() => {
-        if (show) { // Reset state only when the modal opens/changes context
-            if (tax) {
-                // Initialize state from existing tax object, converting amount to string for input
-                setName(tax.name || "");
-                setAmount(String(tax.amount) || "");
-                setNumberType(tax.numberType || "Flat");
-                setStatus(tax.status || 1);
-            } else {
-                // Initialize state for a new tax
-                setName("");
-                setAmount("");
-                setNumberType("Flat");
-                setStatus(1);
-            }
-            setError(null); // Clear errors on context change
+        if (!show) return;
+
+        if (tax) {
+            setName(tax.name ?? "");
+            setAmount(String(tax.amount ?? ""));
+            setNumberType(tax.numberType ?? NUMBER_TYPE.FLAT);
+            setStatus(tax.status ?? 1);
+        } else {
+            // ADD MODE (tax === null)
+            setName("");
+            setAmount("");
+            setNumberType(NUMBER_TYPE.FLAT);
+            setStatus(1);
         }
+
+        setError(null);
     }, [tax, show]);
 
     const isFormValid = () => {
@@ -36,7 +46,7 @@ const TaxModal = ({ show, tax, onSave, onCancel }) => {
         }
 
         const numericAmount = parseFloat(amount);
-        
+
         // 2. Check for Amount (required and numeric)
         if (amount === "" || isNaN(numericAmount)) {
             setError("Amount is required and must be a number.");
@@ -57,13 +67,12 @@ const TaxModal = ({ show, tax, onSave, onCancel }) => {
 
         // Enforce non-negative amount using Math.max(0, X)
         const finalAmount = Math.max(0, parseFloat(amount));
-
         onSave({
             id: tax?.id,
             name: name.trim(),
-            amount: finalAmount, // Use the corrected, non-negative amount
-            numberType,
-            status: parseInt(status)
+            amount: finalAmount,
+            numberType: numberType,
+            status: Number(status)
         });
     };
 
@@ -73,7 +82,7 @@ const TaxModal = ({ show, tax, onSave, onCancel }) => {
     // Determine invalid state for input fields
     const isNameInvalid = !name.trim() && show;
     const isAmountInvalid = (amount === "" || isNaN(parseFloat(amount))) && show;
-    
+
     return (
         <Modal show={show} onHide={onCancel} centered>
             <Modal.Header closeButton>
@@ -91,8 +100,8 @@ const TaxModal = ({ show, tax, onSave, onCancel }) => {
                 <Form>
                     <Form.Group className="mb-3">
                         <Form.Label>Tax Name <span className="text-danger">*</span></Form.Label>
-                        <Form.Control 
-                            value={name} 
+                        <Form.Control
+                            value={name}
                             onChange={(e) => {
                                 setName(e.target.value);
                                 setError(null);
@@ -128,10 +137,10 @@ const TaxModal = ({ show, tax, onSave, onCancel }) => {
                         <Form.Label>Number Type</Form.Label>
                         <Form.Select
                             value={numberType}
-                            onChange={(e) => setNumberType(e.target.value)}
+                            onChange={(e) => setNumberType(parseInt(e.target.value))}
                         >
-                            <option value="Flat">Flat</option>
-                            <option value="Percentage">Percentage</option>
+                            <option value={NUMBER_TYPE.FLAT}>Flat</option>
+                            <option value={NUMBER_TYPE.PERCENTAGE}>Percentage</option>
                         </Form.Select>
                     </Form.Group>
 
@@ -148,9 +157,9 @@ const TaxModal = ({ show, tax, onSave, onCancel }) => {
 
             <Modal.Footer className="d-flex justify-content-center gap-3">
                 <Button variant="secondary" onClick={onCancel} style={{ minWidth: "120px" }}>Cancel</Button>
-                <Button 
-                    variant="primary" 
-                    onClick={handleSubmit} 
+                <Button
+                    variant="primary"
+                    onClick={handleSubmit}
                     style={{ minWidth: "120px" }}
                     disabled={isSaveDisabled} // Disable button if fields are incomplete
                 >
