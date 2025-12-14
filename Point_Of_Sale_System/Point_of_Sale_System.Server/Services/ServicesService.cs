@@ -75,7 +75,7 @@ public class ServicesService : IServicesService
         service.Price = dto.Price;
         service.Description = dto.Description;
         service.Status = dto.Status;
-        service.DiscountId = dto.DiscountId ?? Guid.Empty;
+        service.DiscountId = dto.DiscountId;
 
         await _db.SaveChangesAsync();
 
