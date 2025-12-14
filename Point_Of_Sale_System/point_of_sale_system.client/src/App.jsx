@@ -24,6 +24,7 @@ import AppAbout from './pages/about/AppAbout.jsx';
 import Schedule from './pages/schedule/Schedule.jsx';
 import AppHistory from './pages/history/AppHistory.jsx';
 import Services from './pages/services/Services.jsx';
+import Management from './pages/management/management.jsx';
 import AppointmentPayments from './pages/processing/AppointmentPayments.jsx';
 
 const BASE_URL = "http://localhost:5098"
@@ -46,6 +47,7 @@ function App() {
                         <Route path="/orders" element={<Orders />} />
                         <Route path="/inventory" element={<Inventory />} />
                         <Route path="/employees" element={<Employees />} />
+                        <Route path="/management" element={<Management />} />
                         <Route path="/settings" element={<Settings/>} />
                     </Route>
                     <Route element={<AppLayout />}>
