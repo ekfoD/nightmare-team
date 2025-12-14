@@ -10,6 +10,7 @@ import AuthLayout from './layouts/AuthLayout.jsx';
 import Register from './pages/login/Register.jsx';
 import Login from './pages/login/Login.jsx';
 import RequireAuth from './utilities/RequireAuth.jsx';
+import Superadmin from './pages/superadmin/Superadmin.jsx'
 
 import About from './pages/about/About.jsx';
 import Orders from './pages/orders/orders.jsx';
@@ -23,6 +24,7 @@ import OrderHistory from './pages/history/OrderHistory.jsx';
 import Settings from './pages/settings/Settings.jsx';
 import AppHistory from './pages/history/AppHistory.jsx';
 import Services from './pages/services/Services.jsx';
+import Management from './pages/management/management.jsx';
 
 const BASE_URL = "http://localhost:5098"
 
@@ -38,11 +40,13 @@ function App() {
                 <Route element={<RequireAuth />}>
                     <Route element={<MainLayout />}> {/* Route kad atsirastu navbar, jo nereikia login ir register page'ui*/}
                         <Route path="/" element={<About />} />
+                        <Route path="/superadmin" element={<Superadmin /> } />
                         <Route path="/orderHistory" element={<OrderHistory /> }/>
                         <Route path="/menu" element={<MenuManagement />} />
                         <Route path="/orders" element={<Orders />} />
                         <Route path="/inventory" element={<Inventory />} />
                         <Route path="/employees" element={<Employees />} />
+                        <Route path="/management" element={<Management />} />
                         <Route path="/settings" element={<Settings/>} />
                     </Route>
                     <Route element={<AppLayout />}>

@@ -35,9 +35,9 @@ namespace Point_of_Sale_System.Server.Models.Entities.ServiceBased
         public virtual Tax Tax { get; set; } = null!;
 
         // foreign key to Discount
-        public Guid DiscountId { get; set; }
+        public Guid? DiscountId { get; set; }
 
         [ForeignKey("DiscountId")]
-        public virtual Discount Discount { get; set; } = null!;
+        public virtual Discount? Discount { get; set; } = null!;
     }
 }
