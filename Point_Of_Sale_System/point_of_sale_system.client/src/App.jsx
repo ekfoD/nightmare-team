@@ -2,10 +2,9 @@ import { Routes, Route } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./styles/App.css";
 
-import AppLayout from "./layouts/AppLayout.jsx";
 import AuthLayout from "./layouts/AuthLayout.jsx";
+import MainLayout from "./layouts/MainLayout.jsx";
 
-import Register from "./pages/login/Register.jsx";
 import Login from "./pages/login/Login.jsx";
 import RequireAuth from "./utilities/RequireAuth.jsx";
 
@@ -31,11 +30,10 @@ function App() {
         {/* public routes */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
         </Route>
 
         {/* protected app */}
-        <Route element={<AppLayout />}>
+        <Route element={<MainLayout />}>
 
             {/* admin */}
             <Route element={<RequireAuth minRole={ROLES.ADMIN} business={[BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]} />}>

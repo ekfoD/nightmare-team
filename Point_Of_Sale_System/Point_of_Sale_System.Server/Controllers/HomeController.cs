@@ -14,7 +14,13 @@ public class HomeController : ControllerBase
             return BadRequest("Missing username or password");
 
         // Always return "admin" for demo
-        return Ok(new { role = "admin" });
+        return Ok(new { role = "manager", businessType = "service", businessId = "123" });
     }
 }
 
+
+// Owneris -> organization -> businessId
+
+// Admin -> list organizations
+
+// authContext -> user information (role, businessType, etc.)

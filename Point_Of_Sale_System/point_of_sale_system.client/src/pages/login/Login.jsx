@@ -5,6 +5,7 @@ import axios from "axios";
 import "../../styles/Register.css";
 
 const LOGIN_URL = 'http://localhost:5098/api/login';
+
 function Login() {
     const { setAuth } = useAuth();
     const navigate = useNavigate();
@@ -27,8 +28,7 @@ function Login() {
                     withCredentials: true
                 }
             );
-            // Example: { user: { username, roles: [...] }, token: ... }
-            setAuth({ role: response.data.role });
+            setAuth({ role: response.data.role, businessType: response.data.businessType });
             setUser('');
             setPwd('');
             navigate(from, { replace: true });
@@ -46,21 +46,12 @@ function Login() {
         }
     }
 
-    const handleSubmitTemp = async (e) => {
-        e.preventDefault();
-        setErrMsg("");
-        setAuth({ role: "manager", businessType: "restaurant" });
-        setUser("");
-        setPwd("");
-        navigate(from, { replace: true });
-    }
-
     return (
 
         <section className="container">
             <h1>Sign In</h1>
             <h2 ref={errRef} className={errMsg.length ? "errorMessage" : "hide"}>{errMsg}</h2>
-            <form onSubmit={handleSubmitTemp}>
+            <form onSubmit={handleSubmit}>
                 <label htmlFor="username">Username:</label>
                 <input
                     type="text"
