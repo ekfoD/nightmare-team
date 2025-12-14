@@ -11,6 +11,10 @@ export default function AppointmentPayments() {
   const [sortKey, setSortKey] = useState("date");
   const [loading, setLoading] = useState(true);
 
+  const [giftcards, setGiftcards] = useState([]);
+  const [appliedGiftcards, setAppliedGiftcards] = useState([]);
+  const [giftcardError, setGiftcardError] = useState("");
+
   useEffect(() => {
     fetch(`/api/Appointments/pending/${ORGANIZATION_ID}`)
       .then((res) => res.ok ? res.json() : Promise.reject())
@@ -31,6 +35,14 @@ export default function AppointmentPayments() {
       })
       .catch(() => setMenuServices({}))
       .finally(() => setLoading(false));
+  }, []);
+
+  // Fetch giftcards for organization
+  useEffect(() => {
+    fetch(`/api/Giftcard/organization/${ORGANIZATION_ID}`)
+      .then((res) => res.ok ? res.json() : Promise.reject())
+      .then((data) => setGiftcards(data))
+      .catch(() => setGiftcards([]));
   }, []);
 
   const filteredAppointments = useMemo(() => {
@@ -63,6 +75,40 @@ export default function AppointmentPayments() {
     return { breakdown, totalTaxes: totalTaxes.toFixed(2) };
   };
 
+  const applyGiftcard = () => {
+    const inputId = prompt("Enter Giftcard ID to apply:");
+    if (!inputId) return;
+
+    const giftcard = giftcards.find(g => g.id === inputId);
+    if (!giftcard) {
+      setGiftcardError("Giftcard does not exist.");
+      return;
+    }
+
+    if (appliedGiftcards.find(g => g.id === giftcard.id)) {
+      setGiftcardError("This giftcard is already applied.");
+      return;
+    }
+
+    const today = new Date();
+    const validUntil = new Date(giftcard.validUntil);
+    if (validUntil < today) {
+      setGiftcardError("Giftcard has expired.");
+      return;
+    }
+
+    setGiftcardError("");
+    setAppliedGiftcards([...appliedGiftcards, giftcard]);
+  };
+
+  const calculateFinalPrice = (service) => {
+    const { totalTaxes } = calculateTaxes(service);
+    let totalPrice = service.price + parseFloat(totalTaxes);
+    const giftcardTotal = appliedGiftcards.reduce((sum, g) => sum + g.balance, 0);
+    totalPrice = Math.max(0, totalPrice - giftcardTotal); // cannot go below 0
+    return totalPrice.toFixed(2);
+  };
+
   const handlePay = () => {
     alert(`Proceeding to payment for ${selected.id}`);
   };
@@ -92,7 +138,11 @@ export default function AppointmentPayments() {
           {filteredAppointments.map((app) => (
             <div
               key={app.id}
-              onClick={() => setSelected(app)}
+              onClick={() => {
+                setSelected(app);
+                setAppliedGiftcards([]); // reset applied giftcards when selecting new appointment
+                setGiftcardError("");
+              }}
               className={`list-item ${selected?.id === app.id ? "selected" : ""}`}
             >
               <div className="item-id">{formatTime(app.startTime)} – {formatTime(app.endTime)}</div>
@@ -109,72 +159,72 @@ export default function AppointmentPayments() {
 
       {/* RIGHT */}
       <div className="order-details">
-        {selected && (
-          <>
-            <div className="details-title">Appointment — {selected.customerName}</div>
+        {selected && menuServices[selected.menuServiceId] && (() => {
+          const service = menuServices[selected.menuServiceId];
+          const { breakdown } = calculateTaxes(service);
+          const currencySymbol = service.currency === "euro" ? "€" : "$";
 
-            <div className="details-scroll">
-              <div><strong>Employee:</strong> {selected.employeeName}</div>
-              <div><strong>Time:</strong> {formatTime(selected.startTime)} – {formatTime(selected.endTime)}</div>
-              <div><strong>Service:</strong> {selected.serviceName}</div>
-              <div><strong>Customer:</strong> {selected.customerName}</div>
-              <div><strong>Phone:</strong> {selected.customerPhone}</div>
-              {selected.extraInfo && <div><strong>Extra Info:</strong> {selected.extraInfo}</div>}
-            </div>
+          return (
+            <>
+              <div className="details-title">Appointment — {selected.customerName}</div>
 
-            {/* PRICE SUMMARY */}
-            {menuServices[selected.menuServiceId] && (() => {
-              const service = menuServices[selected.menuServiceId];
-              const { breakdown, totalTaxes } = calculateTaxes(service);
-              const totalPrice = (service.price + parseFloat(totalTaxes)).toFixed(2);
-              const currencySymbol = service.currency === "euro" ? "€" : "$";
+              <div className="details-scroll">
+                <div><strong>Employee:</strong> {selected.employeeName}</div>
+                <div><strong>Time:</strong> {formatTime(selected.startTime)} – {formatTime(selected.endTime)}</div>
+                <div><strong>Service:</strong> {selected.serviceName}</div>
+                <div><strong>Customer:</strong> {selected.customerName}</div>
+                <div><strong>Phone:</strong> {selected.customerPhone}</div>
+                {selected.extraInfo && <div><strong>Extra Info:</strong> {selected.extraInfo}</div>}
+              </div>
 
-              return (
-                <div className="order-summary">
-                  <div className="summary-total">
-                    <div className="price-row">
-                      <span className="price-label">Base Price:</span>
-                      <span className="price-value">{currencySymbol} {service.price.toFixed(2)}</span>
+              {/* PRICE SUMMARY */}
+              <div className="order-summary">
+                <div className="summary-total">
+                  <div className="price-row">
+                    <span className="price-label">Base Price:</span>
+                    <span className="price-value">{currencySymbol} {service.price.toFixed(2)}</span>
+                  </div>
+
+                  {breakdown.map((t) => (
+                    <div className="price-row" key={t.id}>
+                      <span className="price-label">+ {t.name} ({t.numberType === "percentage" ? t.amount + "%" : t.amount}):</span>
+                      <span className="price-value">{currencySymbol} {t.appliedAmount}</span>
                     </div>
+                  ))}
 
-                    {breakdown.map((t) => (
-                      <div className="price-row" key={t.id}>
-                        <span className="price-label">+ {t.name} ({t.numberType === "percentage" ? t.amount + "%" : t.amount}):</span>
-                        <span className="price-value">{currencySymbol} {t.appliedAmount}</span>
-                      </div>
-                    ))}
-
-                    {/* Giftcard example */}
-                    {/* <div className="price-row">
+                  {appliedGiftcards.map((g) => (
+                    <div className="price-row" key={g.id}>
                       <span className="price-label">- Giftcard:</span>
-                      <span className="price-value">{currencySymbol} 5.00</span>
-                    </div> */}
-
-                    <div className="price-row final-price">
-                      <span className="price-label"><strong>Final Price:</strong></span>
-                      <span className="price-value"><strong>{currencySymbol} {totalPrice}</strong></span>
+                      <span className="price-value">{currencySymbol} {g.balance.toFixed(2)}</span>
                     </div>
+                  ))}
+
+                  <div className="price-row final-price">
+                    <span className="price-label"><strong>Final Price:</strong></span>
+                    <span className="price-value"><strong>{currencySymbol} {calculateFinalPrice(service)}</strong></span>
                   </div>
 
-                  <div className="payment-actions">
-                    <div className="payment-left">
-                      <button className="secondary-action">Apply Discount</button>
-                      <button className="secondary-action">Use Giftcard</button>
-                    </div>
-
-                    <button
-                      className="payment-primary"
-                      onClick={handlePay}
-                      disabled={selected.paymentStatus !== "pending"}
-                    >
-                      Proceed to Payment
-                    </button>
-                  </div>
+                  {giftcardError && <div style={{ color: "red" }}>{giftcardError}</div>}
                 </div>
-              );
-            })()}
-          </>
-        )}
+
+                <div className="payment-actions">
+                  <div className="payment-left">
+                    <button className="secondary-action">Apply Discount</button>
+                    <button className="secondary-action" onClick={applyGiftcard}>Use Giftcard</button>
+                  </div>
+
+                  <button
+                    className="payment-primary"
+                    onClick={handlePay}
+                    disabled={selected.paymentStatus !== "pending"}
+                  >
+                    Proceed to Payment
+                  </button>
+                </div>
+              </div>
+            </>
+          );
+        })()}
       </div>
     </div>
   );
