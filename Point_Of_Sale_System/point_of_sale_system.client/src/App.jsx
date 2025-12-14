@@ -10,6 +10,7 @@ import AuthLayout from './layouts/AuthLayout.jsx';
 import Register from './pages/login/Register.jsx';
 import Login from './pages/login/Login.jsx';
 import RequireAuth from './utilities/RequireAuth.jsx';
+import Superadmin from './pages/superadmin/Superadmin.jsx'
 
 import About from './pages/about/About.jsx';
 import Orders from './pages/orders/orders.jsx';
@@ -39,6 +40,7 @@ function App() {
                 <Route element={<RequireAuth />}>
                     <Route element={<MainLayout />}> {/* Route kad atsirastu navbar, jo nereikia login ir register page'ui*/}
                         <Route path="/" element={<About />} />
+                        <Route path="/superadmin" element={<Superadmin /> } />
                         <Route path="/orderHistory" element={<OrderHistory /> }/>
                         <Route path="/menu" element={<MenuManagement />} />
                         <Route path="/orders" element={<Orders />} />
