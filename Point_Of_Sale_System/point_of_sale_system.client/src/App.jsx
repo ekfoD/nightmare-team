@@ -21,6 +21,8 @@ import Settings from "./pages/settings/Settings.jsx";
 import AppHistory from "./pages/history/AppHistory.jsx";
 import Services from "./pages/services/Services.jsx";
 
+import { ROLES, BUSINESS_TYPES } from "./config/access.js";
+
 function App() {
   return (
     <div className="app-container">
@@ -35,28 +37,38 @@ function App() {
         {/* protected app */}
         <Route element={<AppLayout />}>
 
-          {/* admin */}
-          <Route element={<RequireAuth authLevel="admin" />}>
-            <Route path="/superadmin" element={<Superadmin />} />
-          </Route>
+            {/* admin */}
+            <Route element={<RequireAuth minRole={ROLES.ADMIN} business={[BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]} />}>
+                <Route path="/superadmin" element={<Superadmin />} />
+            </Route>
 
-          {/* manager */}
-          <Route element={<RequireAuth authLevel="manager" />}>
-            <Route path="/employees" element={<Employees />} />
-            <Route path="/inventory" element={<Inventory />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/menuManagement" element={<MenuManagement />} />
-          </Route>
+            {/* manager */}
+            <Route element={<RequireAuth minRole={ROLES.MANAGER} business={[BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]} />}>
+                <Route path="/employees" element={<Employees />} />
+                <Route path="/settings" element={<Settings />} />
+            </Route>
 
-          {/* employee */}
-          <Route element={<RequireAuth authLevel="employee" />}>
-            <Route path="/" element={<About />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/orderHistory" element={<OrderHistory />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/schedule" element={<Schedule />} />
-            <Route path="/appHistory" element={<AppHistory />} />
-          </Route>
+            <Route element={<RequireAuth minRole={ROLES.MANAGER} business={[BUSINESS_TYPES.RESTAURANT]} />}>
+                <Route path="/inventory" element={<Inventory />} />
+                <Route path="/menuManagement" element={<MenuManagement />} />
+                <Route path="/orderHistory" element={<OrderHistory />} />
+            </Route>
+
+            <Route element={<RequireAuth minRole={ROLES.MANAGER} business={[BUSINESS_TYPES.SERVICE]} />}>
+                <Route path="/services" element={<Services />} />
+                <Route path="/schedule" element={<Schedule />} />
+                <Route path="/appHistory" element={<AppHistory />} />
+            </Route>
+
+            {/* employee */}
+            <Route element={<RequireAuth minRole={ROLES.EMPLOYEE} business={[BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]} />}>
+                <Route path="/" element={<About />} />
+                <Route path="/orders" element={<Orders />} />
+            </Route>
+
+            <Route element={<RequireAuth minRole={ROLES.EMPLOYEE} business={[BUSINESS_TYPES.SERVICE]} />}>
+                <Route path="/schedule" element={<Schedule />} />
+            </Route>
 
         </Route>
       </Routes>

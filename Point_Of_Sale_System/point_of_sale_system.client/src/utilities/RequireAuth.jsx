@@ -1,37 +1,25 @@
 import { useContext } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import AuthContext from "../context/AuthProvider";
+import AuthContext from "../context/AuthProvider.jsx";
+import { hasAccess } from "./permissions.js";
 
-// higher index = higher privilege
-const roleHierarchy = ["employee", "manager", "owner", "admin"];
-
-const RequireAuth = ({ authLevel, children }) => {
+const RequireAuth = ({ minRole, business, children }) => {
   const { auth } = useContext(AuthContext);
 
-  // not logged in
   if (!auth?.role) {
     return <Navigate to="/login" replace />;
   }
 
-  // only check login
-  if (!authLevel) {
-    return children ? children : <Outlet />;
-  }
+  const allowed = hasAccess({
+    userRole: auth.role,
+    businessType: auth.businessType,
+    minRole,
+    allowedBusiness: business,
+  });
 
-  const userLevel = roleHierarchy.indexOf(auth.role.toLowerCase());
-  const requiredLevel = roleHierarchy.indexOf(authLevel.toLowerCase());
+  if (!allowed) return <div>Unauthorized</div>;
 
-  // invalid role or requirement
-  if (userLevel === -1 || requiredLevel === -1) {
-    return <div>Unauthorized</div>;
-  }
-
-  // allow if role is high enough
-  if (userLevel >= requiredLevel) {
-    return children ? children : <Outlet />;
-  }
-
-  return <div>Unauthorized</div>;
+  return children ? children : <Outlet />;
 };
 
 export default RequireAuth;

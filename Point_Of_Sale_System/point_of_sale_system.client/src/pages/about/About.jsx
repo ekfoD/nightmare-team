@@ -1,7 +1,7 @@
 function About() {
     return (
         <>
-            <h1>ZJBS WEEBISTE</h1>
+            <h1>POS</h1>
         </>
     )
 }

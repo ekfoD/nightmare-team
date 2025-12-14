@@ -49,7 +49,7 @@ function Login() {
     const handleSubmitTemp = async (e) => {
         e.preventDefault();
         setErrMsg("");
-        setAuth({ role: "manager" });
+        setAuth({ role: "manager", businessType: "restaurant" });
         setUser("");
         setPwd("");
         navigate(from, { replace: true });
