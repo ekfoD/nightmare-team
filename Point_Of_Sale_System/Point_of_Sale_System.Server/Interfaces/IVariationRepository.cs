@@ -4,7 +4,7 @@ namespace Point_of_Sale_System.Server.Interfaces
 {
     public interface IVariationRepository
     {
-        Task<IEnumerable<Variation>> GetVariationsAsync();
+        Task<IEnumerable<Variation>> GetVariationsAsync(Guid menuItemId);
         Task<Variation?> GetVariationAsync(Guid id);
         Task<Variation> AddVariationAsync(Variation variation);
         Task UpdateVariationAsync(Variation variation);

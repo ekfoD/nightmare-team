@@ -4,7 +4,7 @@ namespace Point_of_Sale_System.Server.Interfaces
 {
     public interface IMenuRepository
     {
-        Task<IEnumerable<MenuItem>> GetMenuItemsAsync();
+        Task<IEnumerable<MenuItem>> GetMenuItemsAsync(Guid organizationId);
         Task<MenuItem?> GetMenuItemAsync(Guid id);
         Task<MenuItem> AddMenuItemAsync(MenuItem menuItem);
         Task UpdateMenuItemAsync(MenuItem menuItem);

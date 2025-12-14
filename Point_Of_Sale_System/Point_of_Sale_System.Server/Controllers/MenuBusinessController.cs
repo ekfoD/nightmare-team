@@ -23,15 +23,15 @@ namespace Point_of_Sale_System.Server.Controllers
         // ==========================================
 
         // Get all menu items for a specific business
-        [HttpGet("MenuItems/{businessId}")]
-        public async Task<ActionResult<IEnumerable<MenuItem>>> GetMenuItems(Guid businessId)
+        [HttpGet("{businessId}/GetMenuItems")]
+        public async Task<ActionResult<IEnumerable<MenuItem>>> GetMenuItems([FromRoute] Guid businessId)
         {
             var menuItems = await _menuRepository.GetMenuItemsAsync(businessId);
             return Ok(menuItems);
         }
 
         // Get a specific menu item
-        [HttpGet("MenuItems/{id}")]
+        [HttpGet("{id}/GetMenuItem")]
         public async Task<ActionResult<MenuItem>> GetMenuItem(Guid id)
         {
             var menuItem = await _menuRepository.GetMenuItemAsync(id);
@@ -45,8 +45,8 @@ namespace Point_of_Sale_System.Server.Controllers
         }
 
         // Create a new menu item
-        [HttpPost("MenuItems/{businessId}")]
-        public async Task<ActionResult<MenuItem>> PostMenuItem(Guid businessId, MenuItem menuItem)
+        [HttpPost("PostMenuItem")]
+        public async Task<ActionResult<MenuItem>> PostMenuItem(MenuItem menuItem)
         {
             if (!ModelState.IsValid)
             {
@@ -55,25 +55,20 @@ namespace Point_of_Sale_System.Server.Controllers
 
             await _menuRepository.AddMenuItemAsync(menuItem);
 
-            return CreatedAtAction(nameof(GetMenuItem), new { id = menuItem.Id }, menuItem);
+            return Ok(menuItem);
         }
 
         // Update a menu item
-        [HttpPut("MenuItems/{id}")]
-        public async Task<IActionResult> PutMenuItem(Guid id, MenuItem menuItem)
+        [HttpPut("PutMenuItem")]
+        public async Task<IActionResult> PutMenuItem(MenuItem menuItem)
         {
-            if (id != menuItem.Id)
-            {
-                return BadRequest();
-            }
-
             try
             {
                 await _menuRepository.UpdateMenuItemAsync(menuItem);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await _menuRepository.MenuItemExistsAsync(id))
+                if (!await _menuRepository.MenuItemExistsAsync(menuItem.Id))
                 {
                     return NotFound();
                 }
@@ -87,7 +82,7 @@ namespace Point_of_Sale_System.Server.Controllers
         }
 
         // Delete a menu item
-        [HttpDelete("MenuItems/{id}")]
+        [HttpDelete("{id}/DeleteMenuItem")]
         public async Task<IActionResult> DeleteMenuItem(Guid id)
         {
             var exists = await _menuRepository.MenuItemExistsAsync(id);
@@ -106,7 +101,7 @@ namespace Point_of_Sale_System.Server.Controllers
         // ==========================================
 
         // Get all variations for a specific menu item
-        [HttpGet("Variations/{menuItemId}")]
+        [HttpGet("{menuItemId}/GetVariations")]
         public async Task<ActionResult<IEnumerable<Variation>>> GetVariations(Guid menuItemId)
         {
             var variations = await _variationRepository.GetVariationsAsync(menuItemId);
@@ -114,7 +109,7 @@ namespace Point_of_Sale_System.Server.Controllers
         }
 
         // Get a specific variation
-        [HttpGet("Variations/{id}")]
+        [HttpGet("{id}/GetVariation")]
         public async Task<ActionResult<Variation>> GetVariation(Guid id)
         {
             var variation = await _variationRepository.GetVariationAsync(id);
@@ -128,8 +123,8 @@ namespace Point_of_Sale_System.Server.Controllers
         }
 
         // Create a new variation
-        [HttpPost("Variations/{menuItemId}")]
-        public async Task<ActionResult<Variation>> PostVariation(Guid menuItemId, Variation variation)
+        [HttpPost("PostVariations")]
+        public async Task<ActionResult<Variation>> PostVariation(Variation variation)
         {
              if (!ModelState.IsValid)
             {
@@ -142,21 +137,16 @@ namespace Point_of_Sale_System.Server.Controllers
         }
 
         // Update a variation
-        [HttpPut("Variations/{id}")]
-        public async Task<IActionResult> PutVariation(Guid id, Variation variation)
+        [HttpPut("PutVariations")]
+        public async Task<IActionResult> PutVariation(Variation variation)
         {
-            if (id != variation.Id)
-            {
-                return BadRequest();
-            }
-
             try
             {
                 await _variationRepository.UpdateVariationAsync(variation);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await _variationRepository.VariationExistsAsync(id))
+                if (!await _variationRepository.VariationExistsAsync(variation.Id))
                 {
                     return NotFound();
                 }
@@ -170,7 +160,7 @@ namespace Point_of_Sale_System.Server.Controllers
         }
 
         // Delete a variation
-        [HttpDelete("Variations/{id}")]
+        [HttpDelete("{id}/DeleteVariations")]
         public async Task<IActionResult> DeleteVariation(Guid id)
         {
             var exists = await _variationRepository.VariationExistsAsync(id);

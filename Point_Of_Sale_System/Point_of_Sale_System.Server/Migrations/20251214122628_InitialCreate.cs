@@ -30,7 +30,7 @@ namespace Point_of_Sale_System.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Emploees",
+                name: "Employees",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -43,7 +43,7 @@ namespace Point_of_Sale_System.Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Emploees", x => x.Id);
+                    table.PrimaryKey("PK_Employees", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -111,45 +111,23 @@ namespace Point_of_Sale_System.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Schedules",
+                name: "EmployeeOrganization",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Date = table.Column<DateOnly>(type: "date", nullable: false),
-                    StartTime = table.Column<TimeOnly>(type: "time", nullable: false),
-                    EndTime = table.Column<TimeOnly>(type: "time", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EmploeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Schedules", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Schedules_Emploees_EmploeeId",
-                        column: x => x.EmploeeId,
-                        principalTable: "Emploees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "EmploeeOrganization",
-                columns: table => new
-                {
-                    EmploeesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EmployeesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrganizationsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EmploeeOrganization", x => new { x.EmploeesId, x.OrganizationsId });
+                    table.PrimaryKey("PK_EmployeeOrganization", x => new { x.EmployeesId, x.OrganizationsId });
                     table.ForeignKey(
-                        name: "FK_EmploeeOrganization_Emploees_EmploeesId",
-                        column: x => x.EmploeesId,
-                        principalTable: "Emploees",
+                        name: "FK_EmployeeOrganization_Employees_EmployeesId",
+                        column: x => x.EmployeesId,
+                        principalTable: "Employees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_EmploeeOrganization_Organizations_OrganizationsId",
+                        name: "FK_EmployeeOrganization_Organizations_OrganizationsId",
                         column: x => x.OrganizationsId,
                         principalTable: "Organizations",
                         principalColumn: "Id",
@@ -209,7 +187,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
                     OrganizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TaxId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DiscountId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    DiscountId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -240,10 +218,9 @@ namespace Point_of_Sale_System.Server.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Category = table.Column<int>(type: "int", nullable: false),
-                    ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Duration = table.Column<TimeOnly>(type: "time", nullable: false),
+                    Duration = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
                     OrganizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -302,9 +279,11 @@ namespace Point_of_Sale_System.Server.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CustomerPhone = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ExtraInfo = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EmploeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EmployeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrganizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     MenuServiceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
@@ -312,9 +291,9 @@ namespace Point_of_Sale_System.Server.Migrations
                 {
                     table.PrimaryKey("PK_Appointments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Appointments_Emploees_EmploeeId",
-                        column: x => x.EmploeeId,
-                        principalTable: "Emploees",
+                        name: "FK_Appointments_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "Employees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -418,9 +397,9 @@ namespace Point_of_Sale_System.Server.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Appointments_EmploeeId",
+                name: "IX_Appointments_EmployeeId",
                 table: "Appointments",
-                column: "EmploeeId");
+                column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Appointments_MenuServiceId",
@@ -433,8 +412,8 @@ namespace Point_of_Sale_System.Server.Migrations
                 column: "OrganizationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_EmploeeOrganization_OrganizationsId",
-                table: "EmploeeOrganization",
+                name: "IX_EmployeeOrganization_OrganizationsId",
+                table: "EmployeeOrganization",
                 column: "OrganizationsId");
 
             migrationBuilder.CreateIndex(
@@ -518,11 +497,6 @@ namespace Point_of_Sale_System.Server.Migrations
                 column: "OrganizationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Schedules_EmploeeId",
-                table: "Schedules",
-                column: "EmploeeId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Variations_MenuItemId",
                 table: "Variations",
                 column: "MenuItemId");
@@ -532,7 +506,7 @@ namespace Point_of_Sale_System.Server.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "EmploeeOrganization");
+                name: "EmployeeOrganization");
 
             migrationBuilder.DropTable(
                 name: "InventoryItems");
@@ -542,9 +516,6 @@ namespace Point_of_Sale_System.Server.Migrations
 
             migrationBuilder.DropTable(
                 name: "Payments");
-
-            migrationBuilder.DropTable(
-                name: "Schedules");
 
             migrationBuilder.DropTable(
                 name: "SuperAdmins");
@@ -565,7 +536,7 @@ namespace Point_of_Sale_System.Server.Migrations
                 name: "MenuItems");
 
             migrationBuilder.DropTable(
-                name: "Emploees");
+                name: "Employees");
 
             migrationBuilder.DropTable(
                 name: "MenuServices");

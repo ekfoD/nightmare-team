@@ -12,8 +12,8 @@ using Point_of_Sale_System.Server.Models.Data;
 namespace Point_of_Sale_System.Server.Migrations
 {
     [DbContext(typeof(PoSDbContext))]
-    [Migration("20251203140847_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251214124608_AddedPriceToMenu")]
+    partial class AddedPriceToMenu
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,22 +25,22 @@ namespace Point_of_Sale_System.Server.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("EmploeeOrganization", b =>
+            modelBuilder.Entity("EmployeeOrganization", b =>
                 {
-                    b.Property<Guid>("EmploeesId")
+                    b.Property<Guid>("EmployeesId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("OrganizationsId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("EmploeesId", "OrganizationsId");
+                    b.HasKey("EmployeesId", "OrganizationsId");
 
                     b.HasIndex("OrganizationsId");
 
-                    b.ToTable("EmploeeOrganization");
+                    b.ToTable("EmployeeOrganization");
                 });
 
-            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.Buisness.Emploee", b =>
+            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.Business.Employee", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -69,10 +69,10 @@ namespace Point_of_Sale_System.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Emploees");
+                    b.ToTable("Employees");
                 });
 
-            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.Buisness.Organization", b =>
+            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.Business.Organization", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -111,35 +111,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.ToTable("Organizations");
                 });
 
-            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.Buisness.Schedule", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
-                    b.Property<Guid>("EmploeeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<TimeOnly>("EndTime")
-                        .HasColumnType("time");
-
-                    b.Property<TimeOnly>("StartTime")
-                        .HasColumnType("time");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmploeeId");
-
-                    b.ToTable("Schedules");
-                });
-
-            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.Buisness.SuperAdmin", b =>
+            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.Business.SuperAdmin", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -200,7 +172,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Property<int>("Category")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("DiscountId")
+                    b.Property<Guid?>("DiscountId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ImagePath")
@@ -212,6 +184,9 @@ namespace Point_of_Sale_System.Server.Migrations
 
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -463,8 +438,14 @@ namespace Point_of_Sale_System.Server.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("EmploeeId")
+                    b.Property<Guid>("EmployeeId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ExtraInfo")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("MenuServiceId")
                         .HasColumnType("uniqueidentifier");
@@ -480,7 +461,7 @@ namespace Point_of_Sale_System.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmploeeId");
+                    b.HasIndex("EmployeeId");
 
                     b.HasIndex("MenuServiceId");
 
@@ -495,17 +476,15 @@ namespace Point_of_Sale_System.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Category")
-                        .HasColumnType("int");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("DiscountId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<TimeOnly>("Duration")
-                        .HasColumnType("time");
-
-                    b.Property<string>("ImagePath")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Duration")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -537,35 +516,24 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.ToTable("MenuServices");
                 });
 
-            modelBuilder.Entity("EmploeeOrganization", b =>
+            modelBuilder.Entity("EmployeeOrganization", b =>
                 {
-                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Buisness.Emploee", null)
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Employee", null)
                         .WithMany()
-                        .HasForeignKey("EmploeesId")
+                        .HasForeignKey("EmployeesId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Buisness.Organization", null)
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", null)
                         .WithMany()
                         .HasForeignKey("OrganizationsId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.Buisness.Schedule", b =>
-                {
-                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Buisness.Emploee", "Emploee")
-                        .WithMany("Schedules")
-                        .HasForeignKey("EmploeeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Emploee");
-                });
-
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.MenuBased.InventoryItem", b =>
                 {
-                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Buisness.Organization", "Organization")
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany("InventoryItems")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -579,10 +547,9 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Discount", "Discount")
                         .WithMany("MenuItems")
                         .HasForeignKey("DiscountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Buisness.Organization", "Organization")
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany("MenuItems")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -614,7 +581,7 @@ namespace Point_of_Sale_System.Server.Migrations
 
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Order", b =>
                 {
-                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Buisness.Organization", "Organization")
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany("Orders")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -672,7 +639,7 @@ namespace Point_of_Sale_System.Server.Migrations
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Buisness.Organization", "Organization")
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany("Payments")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -689,9 +656,9 @@ namespace Point_of_Sale_System.Server.Migrations
 
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.ServiceBased.Appointment", b =>
                 {
-                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Buisness.Emploee", "Emploee")
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Employee", "Employee")
                         .WithMany("Appointments")
-                        .HasForeignKey("EmploeeId")
+                        .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -701,13 +668,13 @@ namespace Point_of_Sale_System.Server.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Buisness.Organization", "Organization")
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany("Appointments")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Emploee");
+                    b.Navigation("Employee");
 
                     b.Navigation("MenuService");
 
@@ -722,7 +689,7 @@ namespace Point_of_Sale_System.Server.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Buisness.Organization", "Organization")
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany("MenuServices")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -741,14 +708,12 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Navigation("Tax");
                 });
 
-            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.Buisness.Emploee", b =>
+            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.Business.Employee", b =>
                 {
                     b.Navigation("Appointments");
-
-                    b.Navigation("Schedules");
                 });
 
-            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.Buisness.Organization", b =>
+            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.Business.Organization", b =>
                 {
                     b.Navigation("Appointments");
 

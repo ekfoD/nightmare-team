@@ -14,9 +14,9 @@ namespace Point_of_Sale_System.Server.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Variation>> GetVariationsAsync()
+        public async Task<IEnumerable<Variation>> GetVariationsAsync(Guid menuItemId)
         {
-            return await _context.Variations.ToListAsync();
+            return await _context.Variations.Where(x => x.MenuItemId == menuItemId).ToListAsync();
         }
 
         public async Task<Variation?> GetVariationAsync(Guid id)
