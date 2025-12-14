@@ -8,3 +8,6 @@
 - One Tax can be applied to a lot of Menu items
 - One Tax can be applied to a lot of Menu services
 - TAXES ARE MENDATORY, I'LL REPORT THE GUYS WHO TRY TO AVOID IT (-1 million social points)
+
+- Added OrganizationId key to tax and giftcard table
+- Removed currency enum from giftcard
