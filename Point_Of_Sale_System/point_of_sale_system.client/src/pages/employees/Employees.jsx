@@ -1,9 +1,17 @@
 import '../../styles/Employees.css';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 
+//const EMPLOYEE_API = "api/employees/"
 const EMPLOYEE_API = "https://localhost:7079/api/employees/"
-const organizationId = "a886c4f8-bbdb-4151-b1b6-679fbd5f4a2e" // cia random guid
+const organizationId = "6a0c37bc-6245-492c-b1ec-108cfd6f8f66" // cia random guid
+
+const StatusEnum = {
+    active: 1,
+    inactive: 2,
+    unavailable: 3
+};
 
 function Employees() {
 
@@ -14,6 +22,8 @@ function Employees() {
     const [password, setPassword] = useState('');
     const [access, setAccess] = useState(0);
     const [status, setStatus] = useState("Active");
+
+    const isCreate = selectedEmployee === null;
 
     const fetchEmployees = async () => {
         try {
@@ -41,25 +51,16 @@ function Employees() {
             return;
         }
 
-        setSelectedEmployee(employee);
         setUsername(employee.username);
         setAccess(employee.accessFlag);
-        switch (employee.status) {
-            case 1:
-                setStatus("Active");
-                break;
-            case 2:
-                setStatus("Inactive");
-                break;
-            default:
-                setStatus("Unavailable");
-        }
+        setStatus(employee.status);
+        setSelectedEmployee(employee);
     }
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            const response = await axios.post(EMPLOYEE_API + "add", {
+            await axios.post(EMPLOYEE_API + "add", {
                 username,
                 password,
                 accessFlag: access,
@@ -76,7 +77,7 @@ function Employees() {
     const handleEdit = async (event) => {
         event.preventDefault();
         try {
-            const response = await axios.put(EMPLOYEE_API + selectedEmployee.id + "/edit",
+            await axios.put(EMPLOYEE_API + selectedEmployee.employeeId + "/edit",
                 {
                     username,
                     password,
@@ -91,9 +92,9 @@ function Employees() {
         }
     }
 
-    const handleDelete = async (employee) => {
+    const handleDelete = async () => {
         try {
-            const response = await axios.delete(EMPLOYEE_API + selectedEmployee.id + "/delete");
+            await axios.delete(EMPLOYEE_API + selectedEmployee.employeeId + "/delete");
 
             handleSelect(null); // Just return the fields all to null if delete went well
             await fetchEmployees();
@@ -103,114 +104,134 @@ function Employees() {
         }
     }
 
+
+
     const contents = employees === undefined
         ? <h2>Loading the page...</h2>
-        : <div id="employeePageContent">
-            <section id="employeeGrid">
-                <>
-                    <div className="employeeBox" id="createEmployeeBox" onClick={() => {handleSelect(null)}}>
-                        Create Employee
-                    </div>
-                {employees.map(function (employee) {
-                    return (
-                        <div
-                            key={employee.id}
-                            className="employeeBox"
-                            onClick={() => { handleSelect(employee) }}
+        : <div id="employeePageContent" className="d-flex p-4 m-0">
+            <Container id="employeeGrid" className="me-auto mt-0 ml-0">
+                <Row className="g-3">
+
+                    {/* Create Employee Card */}
+                    <Col xs={12} sm={6} md={4} lg={3}>
+                        <Card
+                            className="text-center shadow-sm h-100"
+                            onClick={() => handleSelect(null)}
+                            style={{ cursor: "pointer" }}
                         >
-                            <img src="https://www.nicepng.com/png/full/277-2774775_potato-png-images-potato-png.png" />
-                            {employee.username}
-                        </div>
-                    )
-                })}
-                </>
-            </section>
+                            <Card.Body className="d-flex justify-content-center">
+                                <Card.Title className="align-self-center">Create Employee</Card.Title>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+
+                    {/* Employee Cards */}
+                    {employees.map(employee => (
+                        <Col key={employee.employeeId} xs={12} sm={6} md={4} lg={3}>
+                            <Card
+                                className="text-center shadow-sm h-100"
+                                onClick={() => handleSelect(employee)}
+                                style={{ cursor: "pointer" }}
+                            >
+                                <Card.Img
+                                    variant="top"
+                                    src="https://www.nicepng.com/png/full/277-2774775_potato-png-images-potato-png.png"
+                                    style={{ width: "100%", height: "150px", objectFit: "contain" }}
+                                />
+                                <Card.Body>
+                                    <Card.Title>{employee.username}</Card.Title>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    ))}
+
+                </Row>
+            </Container>
+
             <section id="employeeEditField">
-                {
-                    selectedEmployee === null
-                        ?
-                        <form onSubmit={handleSubmit}>
-                            <img src="../../public/Placeholder_view_vector.svg" />
-                            <label htmlFor="username">Username:</label>
-                            <input
-                                type="text"
-                                id="username"
-                                onChange={(e) => setUsername(e.target.value)}
-                                value={username}
-                                required
+                <Card className="p-4 shadow-sm">
+                    <Card.Body>
+                        <div className="text-center mb-3">
+                            <img
+                                src="/Placeholder_view_vector.svg"
+                                alt="employee placeholder"
+                                style={{ width: "120px", opacity: 0.8 }}
                             />
-                            <label htmlFor="password">Password:</label>
-                            <input
-                                type="password"
-                                id="password"
-                                onChange={(e) => setPassword(e.target.value)}
-                                value={password}
-                                required
-                            />
-                            <label htmlFor="status">Set Status:</label>
-                            <select
-                                value={status}
-                                onChange={(e) => setStatus(e.target.value)}
-                            >
-                                <option value="Active">Active</option>
-                                <option value="Inactive">Inactive</option>
-                                <option value="Unavailable">Unavailable</option>
-                            </select>
-                            <label htmlFor="access">Access level:</label>
-                            <input
-                                type="number"
-                                id="accessFlag"
-                                onChange={(e) => setAccess(e.target.value)}
-                                value={access}
-                                required
-                            />
-                            <button>Create User</button>
-                        </form>
-                        :
-                        <form onSubmit={handleEdit}>
-                            <img src="../../public/Placeholder_view_vector.svg" />
-                            <label htmlFor="username">Username:</label>
-                            <input
-                                type="text"
-                                id="username"
-                                onChange={(e) => setUsername(e.target.value)}
-                                value={username}
-                                required
-                            />
-                            <label htmlFor="password">New Password:</label>
-                            <input
-                                type="password"
-                                id="password"
-                                onChange={(e) => setPassword(e.target.value)}
-                                value={password}
-                            />
-                            <label htmlFor="status">Set Status:</label>
-                            <select
-                                value={status}
-                                onChange={(e) => setStatus(e.target.value)}
-                            >
-                                <option value="Active">Active</option>
-                                <option value="Inactive">Inactive</option>
-                                <option value="Unavailable">Unavailable</option>
-                            </select>
-                            <label htmlFor="access">Access level:</label>
-                            <input
-                                type="number"
-                                id="accessFlag"
-                                onChange={(e) => setAccess(e.target.value)}
-                                value={access}
-                                required
-                            />
-                            <button type="submit">Edit</button>
-                            <button type="button" onClick={() => handleDelete(selectedEmployee)}>FIRE</button>
-                        </form>
-                }
+                        </div>
+
+                        <Form onSubmit={isCreate ? handleSubmit : handleEdit}>
+
+                            <Form.Group className="mb-3">
+                                <Form.Label>Username</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={username}
+                                    onChange={e => setUsername(e.target.value)}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group className="mb-3">
+                                <Form.Label>{isCreate ? "Password" : "New Password"}</Form.Label>
+                                <Form.Control
+                                    type="password"
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                    placeholder={isCreate ? "" : "Leave blank to keep current password"}
+                                />
+                            </Form.Group>
+
+                            <Form.Group className="mb-3">
+                                <Form.Label>Status</Form.Label>
+                                <Form.Select
+                                    value={status}
+                                    onChange={e => setStatus(e.target.value)}
+                                >
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="unavailable">Unavailable</option>
+                                </Form.Select>
+                            </Form.Group>
+
+                            <Form.Group className="mb-3">
+                                <Form.Label>Access Level</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    value={access}
+                                    onChange={e => setAccess(e.target.value)}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Row className="mt-3">
+                                <Col>
+                                    <Button type="submit" variant={isCreate ? "primary" : "warning"} className="w-100">
+                                        {isCreate ? "Create User" : "Save"}
+                                    </Button>
+                                </Col>
+
+                                {!isCreate && (
+                                    <Col>
+                                        <Button
+                                            type="button"
+                                            variant="danger"
+                                            className="w-100"
+                                            onClick={handleDelete}
+                                        >
+                                            FIRE
+                                        </Button>
+                                    </Col>
+                                )}
+                            </Row>
+
+                        </Form>
+                    </Card.Body>
+                </Card>
             </section>
         </div>;
 
     return (
         <>
-            <h3>Employees</h3>
             <h3 className="w-50 mx-auto text-center text-warning">{errMsg}</h3>
             {contents}
         </>
