@@ -1,4 +1,5 @@
 namespace Point_of_Sale_System.Server.DTOs;
+using Point_of_Sale_System.Server.Enums;
 
 public class AppointmentDto
 {
@@ -12,4 +13,6 @@ public class AppointmentDto
         public required string CustomerName { get; set; }
         public string? CustomerPhone { get; set; }
         public string? ExtraInfo { get; set; }
+        public Guid OrganizationId { get; set; }
+        public PaymentEnum PaymentStatus { get; set; }
 }
