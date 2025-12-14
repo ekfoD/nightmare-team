@@ -28,12 +28,13 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy
-            .AllowAnyOrigin()
+            .WithOrigins("https://localhost:56689") // Use your frontend's URL
             .AllowAnyMethod()
-            .AllowAnyHeader();
+            .AllowAnyHeader()
+            .AllowCredentials();
     });
 });
-    
+
 var app = builder.Build();
 
 app.UseDefaultFiles();

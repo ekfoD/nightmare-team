@@ -1,21 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
 using Point_of_Sale_System.Server.Enums;
+using Point_of_Sale_System.Server.DTOs;
 
-[Route("[controller]/[action]")]
+[Route("api/")]
+[ApiController]
 public class HomeController : ControllerBase
 {
-    [HttpGet]
-    public IActionResult Items()
-    {
-        return Ok();
-    }
 
-    [HttpPost("{name}/{password}")]
-    public IActionResult Authenticate(string name, string password)
+    [HttpPost("login")]
+    public IActionResult Login([FromBody] LoginRequestDTO request)
     {
-        if (String.IsNullOrEmpty(name) || String.IsNullOrEmpty(password))
-        return BadRequest();
-        
-        return Ok(RoleEnum.Admin);
+        if (string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Password))
+            return BadRequest("Missing username or password");
+
+        // Always return "admin" for demo
+        return Ok(new { role = "admin" });
     }
 }
+
