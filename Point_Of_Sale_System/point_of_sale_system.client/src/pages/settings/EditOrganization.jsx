@@ -7,7 +7,7 @@ export default function EditOrganization({ onSubmit, business }) {
         address: "",
         emailAddress: "",
         phoneNumber: "",
-        currency: "",
+        currencyType: 0
     });
 
     useEffect(() => {
@@ -17,7 +17,7 @@ export default function EditOrganization({ onSubmit, business }) {
                 address: business.address || "",
                 emailAddress: business.emailAddress || "",
                 phoneNumber: business.phoneNumber || "",
-                currency: business.currency || "",
+                currencyType: business.currencyType || 0,
             });
         }
     }, [business]);
@@ -38,7 +38,7 @@ export default function EditOrganization({ onSubmit, business }) {
             address: business.address || "",
             emailAddress: business.emailAddress || "",
             phoneNumber: business.phoneNumber || "",
-            currency: business.currency || "",
+            currencyType: business.currencyType || 0,
         });
     }
 
@@ -50,7 +50,7 @@ export default function EditOrganization({ onSubmit, business }) {
     };
 
     return (
-        <Card className="p-4 shadow-sm w-50 ">
+        <Card className="p-4 shadow-sm w-50">
             <h3 className="mb-3">Organization settings</h3>
             <Form>
                 <Form.Group className="mb-3 w-50" controlId="formName">
@@ -97,12 +97,12 @@ export default function EditOrganization({ onSubmit, business }) {
                 <Form.Group className="mb-3 w-25" controlId="formCurrency">
                     <Form.Label>Choose currency</Form.Label>
                     <Form.Select
-                        value={formData.currency}
-                        name="currency"
+                        value={formData.currencyType}
+                        name="currencyType"
                         onChange={handleChange}
                     >
-                        <option value="dollar">USD - $</option>
-                        <option value="euro">EUR - €</option>
+                        <option value="1">USD - $</option>
+                        <option value="2">EUR - €</option>
                     </Form.Select>
                 </Form.Group>
 

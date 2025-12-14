@@ -12,8 +12,8 @@ using Point_of_Sale_System.Server.Models.Data;
 namespace Point_of_Sale_System.Server.Migrations
 {
     [DbContext(typeof(PoSDbContext))]
-    [Migration("20251214122628_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251213185321_DiscountNotRequired")]
+    partial class DiscountNotRequired
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -172,7 +172,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Property<int>("Category")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("DiscountId")
+                    b.Property<Guid>("DiscountId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ImagePath")
@@ -477,7 +477,7 @@ namespace Point_of_Sale_System.Server.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("DiscountId")
+                    b.Property<Guid?>("DiscountId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Duration")
@@ -544,7 +544,8 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Discount", "Discount")
                         .WithMany("MenuItems")
                         .HasForeignKey("DiscountId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany("MenuItems")
@@ -683,8 +684,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Discount", "Discount")
                         .WithMany("MenuServices")
                         .HasForeignKey("DiscountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany("MenuServices")

@@ -12,8 +12,13 @@ using Point_of_Sale_System.Server.Models.Data;
 namespace Point_of_Sale_System.Server.Migrations
 {
     [DbContext(typeof(PoSDbContext))]
+<<<<<<<< HEAD:Point_Of_Sale_System/Point_of_Sale_System.Server/Migrations/20251214124608_AddedPriceToMenu.Designer.cs
     [Migration("20251214124608_AddedPriceToMenu")]
     partial class AddedPriceToMenu
+========
+    [Migration("20251213212712_InitialCreate")]
+    partial class InitialCreate
+>>>>>>>> origin/main:Point_Of_Sale_System/Point_of_Sale_System.Server/Migrations/20251213212712_InitialCreate.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -278,8 +283,8 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Property<decimal>("Balance")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("Currency")
-                        .HasColumnType("int");
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
@@ -288,6 +293,8 @@ namespace Point_of_Sale_System.Server.Migrations
                         .HasColumnType("date");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
 
                     b.ToTable("Giftcards");
                 });
@@ -413,6 +420,9 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Property<int>("NumberType")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -420,6 +430,8 @@ namespace Point_of_Sale_System.Server.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
 
                     b.ToTable("Taxes");
                 });
@@ -579,6 +591,17 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Navigation("MenuItem");
                 });
 
+            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Giftcard", b =>
+                {
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Organization");
+                });
+
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Order", b =>
                 {
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
@@ -650,6 +673,17 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Navigation("Giftcard");
 
                     b.Navigation("Order");
+
+                    b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Tax", b =>
+                {
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Organization");
                 });

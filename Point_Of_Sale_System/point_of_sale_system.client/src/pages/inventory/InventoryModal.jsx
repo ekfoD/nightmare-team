@@ -64,7 +64,7 @@ const InventoryModal = ({ show, products, onSave, onCancel }) => {
       
       <Modal.Body style={{ maxHeight: '70vh', overflowY: 'auto' }}>
         <Table hover className="mb-0">
-          <thead style={{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: 'white', boxShadow: '0 2px 2px -1px rgba(0, 0, 0, 0.1)' }}>
+          <thead style={{ position: 'sticky', top: -16, zIndex: 10, backgroundColor: 'white', boxShadow: '0 2px 2px -1px rgba(0, 0, 0, 0.1)' }}>
             <tr>
               <th style={{ verticalAlign: 'middle' }}>Product Name</th>
               <th style={{ width: '250px', textAlign: 'center', verticalAlign: 'middle' }}>Stock</th>

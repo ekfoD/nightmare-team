@@ -44,6 +44,7 @@ namespace Point_of_Sale_System.Server.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Employees", x => x.Id);
+<<<<<<<< HEAD:Point_Of_Sale_System/Point_of_Sale_System.Server/Migrations/20251214122628_InitialCreate.cs
                 });
 
             migrationBuilder.CreateTable(
@@ -59,6 +60,8 @@ namespace Point_of_Sale_System.Server.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Giftcards", x => x.Id);
+========
+>>>>>>>> origin/main:Point_Of_Sale_System/Point_of_Sale_System.Server/Migrations/20251213212712_InitialCreate.cs
                 });
 
             migrationBuilder.CreateTable(
@@ -95,9 +98,10 @@ namespace Point_of_Sale_System.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Taxes",
+                name: "EmployeeOrganization",
                 columns: table => new
                 {
+<<<<<<<< HEAD:Point_Of_Sale_System/Point_of_Sale_System.Server/Migrations/20251214122628_InitialCreate.cs
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -114,6 +118,8 @@ namespace Point_of_Sale_System.Server.Migrations
                 name: "EmployeeOrganization",
                 columns: table => new
                 {
+========
+>>>>>>>> origin/main:Point_Of_Sale_System/Point_of_Sale_System.Server/Migrations/20251213212712_InitialCreate.cs
                     EmployeesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrganizationsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
@@ -129,6 +135,27 @@ namespace Point_of_Sale_System.Server.Migrations
                     table.ForeignKey(
                         name: "FK_EmployeeOrganization_Organizations_OrganizationsId",
                         column: x => x.OrganizationsId,
+                        principalTable: "Organizations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Giftcards",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ValidUntil = table.Column<DateOnly>(type: "date", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    OrganizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Giftcards", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Giftcards_Organizations_OrganizationId",
+                        column: x => x.OrganizationId,
                         principalTable: "Organizations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -169,6 +196,29 @@ namespace Point_of_Sale_System.Server.Migrations
                     table.PrimaryKey("PK_Orders", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Orders_Organizations_OrganizationId",
+                        column: x => x.OrganizationId,
+                        principalTable: "Organizations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Taxes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    NumberType = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    OrganizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Taxes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Taxes_Organizations_OrganizationId",
                         column: x => x.OrganizationId,
                         principalTable: "Organizations",
                         principalColumn: "Id",
@@ -417,6 +467,11 @@ namespace Point_of_Sale_System.Server.Migrations
                 column: "OrganizationsId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Giftcards_OrganizationId",
+                table: "Giftcards",
+                column: "OrganizationId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_InventoryItems_OrganizationId",
                 table: "InventoryItems",
                 column: "OrganizationId");
@@ -497,6 +552,14 @@ namespace Point_of_Sale_System.Server.Migrations
                 column: "OrganizationId");
 
             migrationBuilder.CreateIndex(
+<<<<<<<< HEAD:Point_Of_Sale_System/Point_of_Sale_System.Server/Migrations/20251214122628_InitialCreate.cs
+========
+                name: "IX_Taxes_OrganizationId",
+                table: "Taxes",
+                column: "OrganizationId");
+
+            migrationBuilder.CreateIndex(
+>>>>>>>> origin/main:Point_Of_Sale_System/Point_of_Sale_System.Server/Migrations/20251213212712_InitialCreate.cs
                 name: "IX_Variations_MenuItemId",
                 table: "Variations",
                 column: "MenuItemId");
@@ -545,10 +608,10 @@ namespace Point_of_Sale_System.Server.Migrations
                 name: "Discounts");
 
             migrationBuilder.DropTable(
-                name: "Organizations");
+                name: "Taxes");
 
             migrationBuilder.DropTable(
-                name: "Taxes");
+                name: "Organizations");
         }
     }
 }

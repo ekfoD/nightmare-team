@@ -12,5 +12,6 @@ namespace Point_of_Sale_System.Server.Dtos
         public required Guid OrganizationId { get; set; }
         //public required Guid TaxId { get; set; }
         public Guid? DiscountId { get; set; } // optional
+        public required Guid TaxId { get; set; }
     }
 }

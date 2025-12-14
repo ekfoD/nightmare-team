@@ -1,117 +1,157 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Azure.Core;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Point_of_Sale_System.Server.DTOs;
 using Point_of_Sale_System.Server.Enums;
 using Point_of_Sale_System.Server.Interfaces;
-using Point_of_Sale_System.Server.Repositories;
+using Point_of_Sale_System.Server.Models;
+using Point_of_Sale_System.Server.Models.Data;
 using Point_of_Sale_System.Server.Models.Entities.Business;
+using System.Threading.Tasks;
 
 
-namespace Point_of_Sale_System.Server.Controllers
+namespace Point_of_Sale_System.Server.Controllers;
+
+
+
+
+[ApiController]
+[Route("api/[controller]")]
+public class EmployeesController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class EmployeesController : ControllerBase
+    private readonly PoSDbContext _context;
+
+    public EmployeesController(PoSDbContext context)
     {
-        private readonly IEmployeeRepository _employeeRepository;
-        private readonly IOrganizationRepository _orgRepo;
-
-        public EmployeesController(IEmployeeRepository employeeRepository, IOrganizationRepository orgRepo)
-        {
-            _employeeRepository = employeeRepository;
-            _orgRepo = orgRepo;
-        }
-
-        // [HttpGet("{organizationId}")]
-        // public ActionResult<IEnumerable<Employee>> Get(Guid organizationId)
-        // {
-        //     var employees = _employeeRepository.GetEmployees(organizationId);
-            
-        //     return Ok(employees);
-        // }
-
-        [HttpGet("{organizationId}")]
-        public ActionResult<IEnumerable<EmployeeRequest>> Get(Guid organizationId)
-        {
-            var employees = _employeeRepository.GetEmployees(organizationId)
-                .Select(e => new EmployeeRequest
-                {
-                    Id = e.Id,
-                    Username = e.Username,
-                    AccessFlag = e.AccessFlag,
-                    Status = e.Status.ToString()
-                });
-
-            return Ok(employees);
-        }
-
-        [HttpPost("add")]
-        public IActionResult AddEmployee([FromBody] EmployeeRequest request)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var salt = BCrypt.Net.BCrypt.GenerateSalt();
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password + salt);
-
-            var org = _orgRepo.GetOrganizationById(request.OrganizationId);
-            if (org == null) return BadRequest("Invalid organization");
-
-            var newEmployee = new Employee
-            {
-                Username = request.Username,
-                PasswordHash = hashedPassword,
-                PasswordSalt = salt,
-                AccessFlag = request.AccessFlag,
-                Status = Enum.TryParse<StatusEnum>(request.Status, true, out var statusEnum)
-                    ? statusEnum
-                    : StatusEnum.inactive,
-                Timestamp = DateTime.UtcNow,
-                Organizations = new List<Organization> { org }
-            };
-            
-
-            _employeeRepository.AddEmployee(newEmployee);
-
-            return Ok(newEmployee);
-        }
-
-
-
-        [HttpPut("{employeeId}/edit")]
-        public IActionResult EditEmployee(Guid employeeId, [FromBody] EmployeeRequest request)
-        {
-            var existing = _employeeRepository.GetById(employeeId);
-            if (existing == null)
-                return NotFound(new { message = "Employee not found" });
-
-            existing.Username = request.Username;
-            existing.AccessFlag = request.AccessFlag;
-            existing.Status = Enum.TryParse<StatusEnum>(request.Status, true, out var statusEnum)
-                    ? statusEnum
-                    : StatusEnum.inactive;
-
-            // Update password only if supplied
-            if (!string.IsNullOrWhiteSpace(request.Password))
-            {
-                var newSalt = BCrypt.Net.BCrypt.GenerateSalt();
-                existing.PasswordSalt = newSalt;
-                existing.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password + newSalt);
-            }
-
-            _employeeRepository.UpdateEmployee(existing);
-
-            return Ok(existing);
-        }
-
-        [HttpDelete("{employeeId}/delete")]
-        public IActionResult DeleteEmployee(Guid employeeId)
-        {
-            var deleted = _employeeRepository.DeleteEmployee(employeeId);
-
-            if (!deleted)
-                return NotFound(new { message = "Employee not found" });
-
-            return Ok(new { message = "Employee deleted successfully" });
-        }
+        _context = context;
     }
+
+    [HttpGet("{organizationId}")]
+    public async Task<ActionResult<IEnumerable<EmployeeGetResponseDTO>>> GetAsync(Guid organizationId)
+    {
+        var employees = await _context.Employees
+            .Where(e => e.Organizations.Any(o => o.Id == organizationId))
+            .Select(e => new EmployeeGetResponseDTO
+            {
+                employeeId = e.Id.ToString(),
+                username = e.Username,
+                accessFlag = e.AccessFlag,
+                status = e.Status.ToString(),
+                timestamp = e.Timestamp.ToString("O") 
+            })
+            .ToListAsync();
+
+        return Ok(employees);
+    }
+
+    [HttpPost("add")]
+    public async Task<IActionResult> AddEmployeeAsync([FromBody] EmployeePostRequestDTO request)
+    {
+        if (request == null)
+            return BadRequest("Request body is null.");
+
+        var organization = await _context.Organizations
+            .FirstOrDefaultAsync(o => o.Id == request.OrganizationId);
+
+        if (organization == null)
+            return BadRequest("Invalid OrganizationId.");
+
+        string salt = BCrypt.Net.BCrypt.GenerateSalt();
+        string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password, salt);
+
+        var employee = new Employee
+        {
+            Username = request.Username,
+            PasswordHash = passwordHash,
+            PasswordSalt = salt,
+            AccessFlag = request.AccessFlag,
+            Status = Enum.TryParse<StatusEnum>(request.Status.ToLower(), out var status) ? status : StatusEnum.inactive,
+            Organizations = new List<Organization>()
+        };
+
+        // Ar reikia pas employee manually prideti ta organization?
+        employee.Organizations.Add(organization);
+
+
+        _context.Employees.Add(employee);
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            employee.Id,
+            employee.Username,
+            employee.AccessFlag,
+            employee.Status
+        });
+
+    }
+
+    [HttpPut("{employeeId}/edit")]
+    public async Task<IActionResult> PutEmployeeAsync(Guid employeeId, [FromBody] EmployeePutRequestDTO request)
+    {
+        if (request == null)
+            return BadRequest("Request body is null.");
+
+        var organization = await _context.Organizations
+            .FirstOrDefaultAsync(o => o.Id == request.OrganizationId);
+
+        if (organization == null)
+            return BadRequest("Invalid OrganizationId.");
+
+
+        var employee = await _context.Employees.FindAsync(employeeId);
+        if (employee == null)
+            return NotFound("No Employee Found");
+
+        if (request.Username != null)
+            employee.Username = request.Username;
+
+        if (request.Status != null)
+            employee.Status = Enum.TryParse<StatusEnum>(request.Status.ToLower(), out var status) ? status : StatusEnum.inactive;
+
+        if (request.AccessFlag != 0)
+            employee.AccessFlag = request.AccessFlag;
+
+        if (request.Password != null)
+        {
+            string salt = BCrypt.Net.BCrypt.GenerateSalt();
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password, salt);
+
+            employee.PasswordSalt = salt;
+            employee.PasswordHash = passwordHash;
+        }
+
+        _context.Employees.Update(employee);
+        await _context.SaveChangesAsync();
+
+        return Ok(new EmployeeGetResponseDTO
+        {
+            employeeId = employee.Id.ToString(),
+            username = employee.Username,
+            accessFlag = employee.AccessFlag,
+            status = employee.Status.ToString(),
+            timestamp = employee.Timestamp.ToString("O")
+        });
+    }
+
+    [HttpDelete("{employeeId}/delete")]
+    public async Task<IActionResult> DeleteEmployeeAsync(Guid employeeId)
+    {
+        var employee = await _context.Employees
+            .Include(e => e.Organizations) 
+            .FirstOrDefaultAsync(e => e.Id == employeeId);
+
+        if (employee == null)
+            return NotFound("Employee not found");
+
+        employee.Organizations.Clear();
+
+        _context.Employees.Remove(employee);
+        await _context.SaveChangesAsync();
+
+        return Ok("Successfully deleted employee");
+    }
+
+
 }

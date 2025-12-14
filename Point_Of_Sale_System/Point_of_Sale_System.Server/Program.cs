@@ -1,22 +1,19 @@
 using Point_of_Sale_System.Server.Interfaces;
 using System.Text.Json.Serialization;
 using Point_of_Sale_System.Server.Services;
-using Point_of_Sale_System.Server.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Point_of_Sale_System.Server.Models.Data;
+using Point_of_Sale_System.Server.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<Point_of_Sale_System.Server.Models.Data.PoSDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-builder.Services.AddScoped<IMenuServiceRepository, MenuServiceRepository>();
-builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
-builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
 
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IServicesService, ServicesService>();
@@ -72,10 +69,13 @@ app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
 
-FakeDataSeeder.Seed();
-
 app.Run();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<PoSDbContext>();
+    DatabaseSeeder.Seed(db);
+}
 
 
 // kas turi prieiga prie employees edit?
