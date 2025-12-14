@@ -4,6 +4,7 @@ using Point_of_Sale_System.Server.Services;
 using Microsoft.EntityFrameworkCore;
 using Point_of_Sale_System.Server.Models.Data;
 using Point_of_Sale_System.Server.Data;
+using Point_of_Sale_System.Server.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
