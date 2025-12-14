@@ -56,7 +56,6 @@ function App() {
 
             <Route element={<RequireAuth minRole={ROLES.MANAGER} business={[BUSINESS_TYPES.SERVICE]} />}>
                 <Route path="/services" element={<Services />} />
-                <Route path="/schedule" element={<Schedule />} />
                 <Route path="/appHistory" element={<AppHistory />} />
             </Route>
 

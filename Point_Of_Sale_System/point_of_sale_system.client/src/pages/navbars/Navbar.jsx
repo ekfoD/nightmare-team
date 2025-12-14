@@ -56,7 +56,6 @@ function Navbar() {
             {canSee(ROLES.MANAGER, [BUSINESS_TYPES.SERVICE]) && (
               <>
                 <Nav.Link as={NavLink} to="/services">Services</Nav.Link>
-                <Nav.Link as={NavLink} to="/schedule">Schedule</Nav.Link>
                 <Nav.Link as={NavLink} to="/appHistory">History</Nav.Link>
               </>
             )}
