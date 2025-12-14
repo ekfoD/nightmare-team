@@ -12,8 +12,8 @@ using Point_of_Sale_System.Server.Models.Data;
 namespace Point_of_Sale_System.Server.Migrations
 {
     [DbContext(typeof(PoSDbContext))]
-    [Migration("20251214162054_AddTaxGiftcardOrganization")]
-    partial class AddTaxGiftcardOrganization
+    [Migration("20251214202156_TaxToTaxes")]
+    partial class TaxToTaxes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,6 +38,21 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasIndex("OrganizationsId");
 
                     b.ToTable("EmployeeOrganization");
+                });
+
+            modelBuilder.Entity("MenuServiceTax", b =>
+                {
+                    b.Property<Guid>("MenuServicesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TaxesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("MenuServicesId", "TaxesId");
+
+                    b.HasIndex("TaxesId");
+
+                    b.ToTable("MenuServiceTax");
                 });
 
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.Business.Employee", b =>
@@ -457,6 +472,9 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("PaymentStatus")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
@@ -503,9 +521,6 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("TaxId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
@@ -514,8 +529,6 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasIndex("DiscountId");
 
                     b.HasIndex("OrganizationId");
-
-                    b.HasIndex("TaxId");
 
                     b.ToTable("MenuServices");
                 });
@@ -531,6 +544,21 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", null)
                         .WithMany()
                         .HasForeignKey("OrganizationsId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MenuServiceTax", b =>
+                {
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.ServiceBased.MenuService", null)
+                        .WithMany()
+                        .HasForeignKey("MenuServicesId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Tax", null)
+                        .WithMany()
+                        .HasForeignKey("TaxesId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -721,17 +749,9 @@ namespace Point_of_Sale_System.Server.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Tax", "Tax")
-                        .WithMany("MenuServices")
-                        .HasForeignKey("TaxId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Discount");
 
                     b.Navigation("Organization");
-
-                    b.Navigation("Tax");
                 });
 
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.Business.Employee", b =>
@@ -791,8 +811,6 @@ namespace Point_of_Sale_System.Server.Migrations
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Tax", b =>
                 {
                     b.Navigation("MenuItems");
-
-                    b.Navigation("MenuServices");
                 });
 
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.ServiceBased.Appointment", b =>

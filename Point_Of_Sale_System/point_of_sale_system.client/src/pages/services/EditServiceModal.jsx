@@ -1,32 +1,45 @@
 import { useState, useEffect } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
 
-export default function EditServiceModal({ show, onClose, onUpdate, service }) {
-  // Always call hooks unconditionally
+export default function EditServiceModal({
+  show,
+  onClose,
+  onUpdate,
+  service,
+  taxes = [],
+}) {
   const [name, setName] = useState("");
-  const [duration, setDuration] = useState("00:00"); // "HH:MM"
+  const [duration, setDuration] = useState("00:00");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState("Active");
+  const [selectedTaxIds, setSelectedTaxIds] = useState([]);
   const [error, setError] = useState("");
 
-  // Reset / prefill form when service or show changes
   useEffect(() => {
-    if (service) {
+    if (service && show) {
       setName(service.name || "");
+
       const hours = Math.floor(service.duration / 60)
         .toString()
         .padStart(2, "0");
-      const minutes = (service.duration % 60).toString().padStart(2, "0");
+      const minutes = (service.duration % 60)
+        .toString()
+        .padStart(2, "0");
       setDuration(`${hours}:${minutes}`);
+
       setPrice(service.price?.toString() || "");
       setDescription(service.description || "");
-      setIsActive(service.status?.toLowerCase() === "inactive" ? "Inactive" : "Active");
+      setIsActive(
+        service.status?.toLowerCase() === "inactive" ? "Inactive" : "Active"
+      );
+
+      // ✅ MAP TAX OBJECTS → IDS
+      setSelectedTaxIds(service.taxes?.map((t) => t.id) || []);
       setError("");
-    } else if (!show) {
-      // Only reset if modal is closed
-      resetForm();
     }
+
+    if (!show) resetForm();
   }, [service, show]);
 
   const resetForm = () => {
@@ -35,19 +48,27 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
     setPrice("");
     setDescription("");
     setIsActive("Active");
+    setSelectedTaxIds([]);
     setError("");
   };
 
-  const currencySymbol = {
-    euro: "€",
-    dollar: "$",
-  }[service?.currency] || "$";
+  const currencySymbol =
+    {
+      euro: "€",
+      dollar: "$",
+    }[service?.currency] || "$";
 
   const handleUpdate = () => {
     setError("");
 
     if (!name || !duration || !price || !description) {
       setError("All fields are required.");
+      return;
+    }
+
+    // ✅ TAX VALIDATION
+    if (selectedTaxIds.length === 0) {
+      setError("At least one tax must be selected.");
       return;
     }
 
@@ -82,7 +103,9 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
       price: priceNumber,
       description,
       status: isActive,
+      taxIds: selectedTaxIds, // ✅ BACKEND FORMAT
     });
+
     onClose();
   };
 
@@ -100,9 +123,7 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
             <Form.Label>Service Name</Form.Label>
             <Form.Control
               type="text"
-              placeholder="Enter service name"
               value={name}
-              required
               onChange={(e) => setName(e.target.value)}
             />
           </Form.Group>
@@ -111,8 +132,6 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
             <Form.Label>Duration (HH:MM)</Form.Label>
             <Form.Control
               type="text"
-              placeholder="00:30"
-              required
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
             />
@@ -122,9 +141,7 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
             <Form.Label>Price ({currencySymbol})</Form.Label>
             <Form.Control
               type="number"
-              placeholder="0.00"
               step="0.01"
-              required
               value={price}
               onChange={(e) => setPrice(e.target.value)}
             />
@@ -135,17 +152,41 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
             <Form.Control
               as="textarea"
               rows={3}
-              required
-              placeholder="Service description..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
           </Form.Group>
 
+          {/* ✅ TAX SELECTION */}
+          <Form.Group className="mb-3">
+            <Form.Label>Taxes *</Form.Label>
+            <Form.Control
+              as="select"
+              multiple
+              value={selectedTaxIds}
+              onChange={(e) =>
+                setSelectedTaxIds(
+                  Array.from(e.target.selectedOptions, (opt) => opt.value)
+                )
+              }
+            >
+              {taxes.map((tax) => (
+                <option key={tax.id} value={tax.id}>
+                  {tax.name} (
+                  {tax.amount?.parsedValue}
+                  {tax.numberType === "percentage" ? "%" : ""})
+                </option>
+              ))}
+            </Form.Control>
+            <Form.Text className="text-muted">
+              At least one tax is required. Hold Ctrl (Cmd on Mac) to select
+              multiple.
+            </Form.Text>
+          </Form.Group>
+
           <Form.Group>
             <Form.Label>Status</Form.Label>
             <Form.Select
-              required
               value={isActive}
               onChange={(e) => setIsActive(e.target.value)}
             >
@@ -157,8 +198,16 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={onClose}>Cancel</Button>
-        <Button variant="primary" onClick={handleUpdate}>Update</Button>
+        <Button variant="secondary" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button
+          variant="primary"
+          onClick={handleUpdate}
+          disabled={selectedTaxIds.length === 0}
+        >
+          Update
+        </Button>
       </Modal.Footer>
     </Modal>
   );
