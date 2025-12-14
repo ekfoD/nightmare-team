@@ -22,6 +22,10 @@ import Services from "./pages/services/Services.jsx";
 
 import { ROLES, BUSINESS_TYPES } from "./config/access.js";
 
+import Management from './pages/management/management.jsx';
+
+const BASE_URL = "http://localhost:5098"
+
 function App() {
   return (
     <div className="app-container">
@@ -38,6 +42,10 @@ function App() {
             {/* admin */}
             <Route element={<RequireAuth minRole={ROLES.ADMIN} business={[BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]} requireBusiness={false} />}>
                 <Route path="/superadmin" element={<Superadmin />} />
+            </Route>
+
+            <Route element={<RequireAuth minRole={ROLES.OWNER} business={[BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]} />}>
+                <Route path="/management" element={<Management />} />
             </Route>
 
             {/* manager */}

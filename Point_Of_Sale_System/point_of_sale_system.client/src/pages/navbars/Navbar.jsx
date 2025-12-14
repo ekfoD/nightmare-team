@@ -45,6 +45,12 @@ function Navbar() {
             {/* pages stay hidden until admin selects a business */}
             {businessId && (
               <>
+                {canSee(ROLES.OWNER) && (
+                  <>
+                    <Nav.Link as={NavLink} to="/management">Management</Nav.Link>
+                  </>
+                )}
+
                 {/* manager (common) */}
                 {canSee(ROLES.MANAGER, [BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]) && (
                   <>

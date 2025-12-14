@@ -2,6 +2,8 @@ using Point_of_Sale_System.Server.Interfaces;
 using System.Text.Json.Serialization;
 using Point_of_Sale_System.Server.Services;
 using Microsoft.EntityFrameworkCore;
+using Point_of_Sale_System.Server.Models.Data;
+using Point_of_Sale_System.Server.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,18 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IServicesService, ServicesService>();
 builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+builder.Services.AddScoped<IMenuRepository, MenuRepository>();
+builder.Services.AddScoped<IVariationRepository, VariationRepository>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin() // when prod phase, domain can be added
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -48,7 +62,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowFrontend");
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
@@ -58,6 +72,11 @@ app.MapFallbackToFile("/index.html");
 
 app.Run();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<PoSDbContext>();
+    DatabaseSeeder.Seed(db);
+}
 
 
 // kas turi prieiga prie employees edit?
