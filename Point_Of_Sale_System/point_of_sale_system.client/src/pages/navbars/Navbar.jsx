@@ -76,8 +76,8 @@ function Navbar() {
                   </>
                 )}
 
-                {/* employee common */}
-                {canSee(ROLES.EMPLOYEE, [BUSINESS_TYPES.ORDER, BUSINESS_TYPES.SERVICE]) && (
+                {/* employee ORDER */}
+                {canSee(ROLES.EMPLOYEE, [BUSINESS_TYPES.ORDER]) && (
                   <>
                     <Nav.Link as={NavLink} to="/orders">Orders</Nav.Link>
                   </>
@@ -86,6 +86,7 @@ function Navbar() {
                 {/* employee service-only */}
                 {canSee(ROLES.EMPLOYEE, [BUSINESS_TYPES.SERVICE]) && (
                   <>
+                    <Nav.Link as={NavLink} to="/appointmentPayment">Payment</Nav.Link>
                     <Nav.Link as={NavLink} to="/schedule">Schedule</Nav.Link>
                   </>
                 )}

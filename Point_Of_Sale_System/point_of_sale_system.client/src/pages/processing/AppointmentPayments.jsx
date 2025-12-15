@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
+import useAuth from "../../hooks/useAuth";
+import api from '../../api/axios.js';
 import "../../styles/History.css";
 
-const ORGANIZATION_ID = "a685b0d3-d465-4b02-8d66-5315e84f6cba";
-
 export default function AppointmentPayments() {
+
+  const { auth } = useAuth();
+  const organizationId = auth.businessId;
+
   const [appointments, setAppointments] = useState([]);
-  const [menuServices, setMenuServices] = useState({}); // services by id
+  const [menuServices, setMenuServices] = useState({});
   const [selected, setSelected] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortKey, setSortKey] = useState("date");
@@ -16,34 +20,30 @@ export default function AppointmentPayments() {
   const [giftcardError, setGiftcardError] = useState("");
 
   useEffect(() => {
-    fetch(`/api/Appointments/pending/${ORGANIZATION_ID}`)
-      .then((res) => res.ok ? res.json() : Promise.reject())
-      .then((data) => {
-        setAppointments(data);
-        setSelected(data[0] ?? null);
+    api.get(`/Appointments/pending/${organizationId}`)
+      .then(res => {
+        setAppointments(res.data);
+        setSelected(res.data[0] ?? null);
       })
       .catch(() => setAppointments([]));
-  }, []);
+  }, [organizationId]);
 
   useEffect(() => {
-    fetch(`/api/services/full/${ORGANIZATION_ID}`)
-      .then((res) => res.json())
-      .then((services) => {
+    api.get(`/services/full/${organizationId}`)
+      .then(res => {
         const map = {};
-        services.forEach((s) => map[s.id] = s);
+        res.data.forEach((s) => map[s.id] = s);
         setMenuServices(map);
       })
       .catch(() => setMenuServices({}))
       .finally(() => setLoading(false));
-  }, []);
+  }, [organizationId]);
 
-  // Fetch giftcards for organization
   useEffect(() => {
-    fetch(`/api/Giftcard/organization/${ORGANIZATION_ID}`)
-      .then((res) => res.ok ? res.json() : Promise.reject())
-      .then((data) => setGiftcards(data))
+    api.get(`/Giftcard/organization/${organizationId}`)
+      .then(res => setGiftcards(res.data))
       .catch(() => setGiftcards([]));
-  }, []);
+  }, [organizationId]);
 
   const filteredAppointments = useMemo(() => {
     let filtered = appointments.filter(
@@ -105,7 +105,7 @@ export default function AppointmentPayments() {
     const { totalTaxes } = calculateTaxes(service);
     let totalPrice = service.price + parseFloat(totalTaxes);
     const giftcardTotal = appliedGiftcards.reduce((sum, g) => sum + g.balance, 0);
-    totalPrice = Math.max(0, totalPrice - giftcardTotal); // cannot go below 0
+    totalPrice = Math.max(0, totalPrice - giftcardTotal);
     return totalPrice.toFixed(2);
   };
 
@@ -140,7 +140,7 @@ export default function AppointmentPayments() {
               key={app.id}
               onClick={() => {
                 setSelected(app);
-                setAppliedGiftcards([]); // reset applied giftcards when selecting new appointment
+                setAppliedGiftcards([]);
                 setGiftcardError("");
               }}
               className={`list-item ${selected?.id === app.id ? "selected" : ""}`}
@@ -150,10 +150,7 @@ export default function AppointmentPayments() {
               <div className="item-emp">{app.employeeName} | {app.serviceName}</div>
             </div>
           ))}
-
-          {filteredAppointments.length === 0 && (
-            <div className="no-orders">No pending payments</div>
-          )}
+          {filteredAppointments.length === 0 && <div className="no-orders">No pending payments</div>}
         </div>
       </div>
 

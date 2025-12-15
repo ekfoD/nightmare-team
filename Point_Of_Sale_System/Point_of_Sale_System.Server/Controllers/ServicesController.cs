@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Point_of_Sale_System.Server.Interfaces;
 using Point_of_Sale_System.Server.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Point_of_Sale_System.Server.Controllers
 {
+    [Authorize(Roles = "admin,owner,manager")]
     [ApiController]
     [Route("api/[controller]")]
     public class ServicesController : ControllerBase

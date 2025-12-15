@@ -19,11 +19,11 @@ import OrderHistory from "./pages/history/OrderHistory.jsx";
 import Settings from "./pages/settings/Settings.jsx";
 import AppHistory from "./pages/history/AppHistory.jsx";
 import Services from "./pages/services/Services.jsx";
+import AppointmentPayments from "./pages/processing/AppointmentPayments.jsx";
 
 import { ROLES, BUSINESS_TYPES } from "./config/access.js";
 
 import Management from './pages/management/management.jsx';
-import AppointmentPayments from './pages/processing/AppointmentPayments.jsx';
 
 const BASE_URL = "http://localhost:5098"
 
@@ -74,6 +74,7 @@ function App() {
 
             <Route element={<RequireAuth minRole={ROLES.EMPLOYEE} business={[BUSINESS_TYPES.SERVICE]} />}>
                 <Route path="/schedule" element={<Schedule />} />
+                <Route path="/appointmentPayment" element={<AppointmentPayments />} />
             </Route>
 
         </Route>
