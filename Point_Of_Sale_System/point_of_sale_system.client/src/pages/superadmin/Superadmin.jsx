@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
 import { Table, Container, Button, Modal, Form, Pagination } from 'react-bootstrap';
-import axios from 'axios';
 import api from '../../api/axios.js';
 import "../../styles/Superadmin.css";
 import useAuth from "../../hooks/useAuth.jsx"
@@ -45,7 +44,7 @@ function Superadmin() {
 
     const fetchOrganizations = async (page = 1) => {
         try {
-            const response = await axios.get(`${ORGANIZATIONS_API}?pageNumber=${page}&pageSize=10`);
+            const response = await api.get(`${ORGANIZATIONS_API}?pageNumber=${page}&pageSize=10`);
             const data = response.data;
 
             setOrganizations(data.items);
@@ -110,7 +109,7 @@ function Superadmin() {
         }
 
         try {
-            await axios.post(ORGANIZATIONS_API, newOrg);
+            await api.post(ORGANIZATIONS_API, newOrg);
             fetchOrganizations(currentPage);
         } catch (e) {
             console.log(e.message);
