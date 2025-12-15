@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Point_of_Sale_System.Server.DTOs;
 using Point_of_Sale_System.Server.Enums;
 using Point_of_Sale_System.Server.Models.Data;
-using Point_of_Sale_System.Server.Models.Entities.Business;
 using Point_of_Sale_System.Server.Models.Entities.ServiceBased;
 using Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments;
 using Point_of_Sale_System.Server.Interfaces;
@@ -80,7 +79,6 @@ public class ServicesService : IServicesService
         _db.MenuServices.Add(service);
         await _db.SaveChangesAsync();
     }
-
     public async Task<MenuServiceDto?> UpdateAsync(Guid id, CreateMenuServiceDto dto)
     {
         var service = await _db.MenuServices
@@ -99,8 +97,7 @@ public class ServicesService : IServicesService
         service.Description = dto.Description;
         service.Status = dto.Status;
         service.DiscountId = dto.DiscountId;
-
-        // ✅ Replace taxes safely
+        
         service.Taxes.Clear();
 
         if (dto.TaxIds.Any())

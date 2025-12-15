@@ -34,23 +34,17 @@ namespace Point_of_Sale_System.Server.Services
                 Id = a.Id,
                 EmployeeId = a.EmployeeId,
                 EmployeeName = a.Employee.Username,
-
                 MenuServiceId = a.MenuServiceId,
                 ServiceName = a.MenuService.Name,
-
                 StartTime = a.StartTime,
                 EndTime = a.EndTime,
-
                 CustomerName = a.CustomerName,
                 CustomerPhone = a.CustomerPhone,
                 ExtraInfo = a.ExtraInfo,
-
                 OrganizationId = a.OrganizationId,
                 PaymentStatus = a.PaymentStatus
             }).ToList();
         }
-
-
         // -------------------------
         // GET APPOINTMENTS BY DATE
         // -------------------------
@@ -62,7 +56,8 @@ namespace Point_of_Sale_System.Server.Services
                 .Include(a => a.MenuService)
                 .Where(a =>
                     a.OrganizationId == organizationId &&
-                    a.StartTime.Date == date.Date)
+                    a.StartTime.Date == date.Date &&
+                    a.PaymentStatus == PaymentEnum.pending)
                 .ToListAsync();
 
             return appts.Select(a => new AppointmentDto
@@ -70,13 +65,10 @@ namespace Point_of_Sale_System.Server.Services
                 Id = a.Id,
                 EmployeeId = a.EmployeeId,
                 EmployeeName = a.Employee.Username,
-
                 MenuServiceId = a.MenuServiceId,
                 ServiceName = a.MenuService.Name,
-
                 StartTime = a.StartTime,
                 EndTime = a.EndTime,
-
                 CustomerName = a.CustomerName,
                 CustomerPhone = a.CustomerPhone,
                 ExtraInfo = a.ExtraInfo,

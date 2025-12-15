@@ -44,7 +44,6 @@ export default function CreateServiceModal({
       return;
     }
 
-    // ✅ TAX VALIDATION
     if (selectedTaxIds.length === 0) {
       setError("At least one tax must be selected.");
       return;
@@ -137,7 +136,6 @@ export default function CreateServiceModal({
             />
           </Form.Group>
 
-          {/* ✅ TAX SELECTION */}
           <Form.Group className="mb-3">
             <Form.Label>Taxes *</Form.Label>
             <Form.Control

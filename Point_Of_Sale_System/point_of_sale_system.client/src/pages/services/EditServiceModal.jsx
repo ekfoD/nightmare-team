@@ -34,7 +34,6 @@ export default function EditServiceModal({
         service.status?.toLowerCase() === "inactive" ? "Inactive" : "Active"
       );
 
-      // ✅ MAP TAX OBJECTS → IDS
       setSelectedTaxIds(service.taxes?.map((t) => t.id) || []);
       setError("");
     }
@@ -52,6 +51,11 @@ export default function EditServiceModal({
     setError("");
   };
 
+  const handleClose = () => {
+  resetForm();
+  onClose();
+  };
+
   const currencySymbol =
     {
       euro: "€",
@@ -66,7 +70,6 @@ export default function EditServiceModal({
       return;
     }
 
-    // ✅ TAX VALIDATION
     if (selectedTaxIds.length === 0) {
       setError("At least one tax must be selected.");
       return;
@@ -103,14 +106,14 @@ export default function EditServiceModal({
       price: priceNumber,
       description,
       status: isActive,
-      taxIds: selectedTaxIds, // ✅ BACKEND FORMAT
+      taxIds: selectedTaxIds,
     });
 
     onClose();
   };
 
   return (
-    <Modal show={show} onHide={onClose} centered>
+    <Modal show={show} onHide={handleClose} centered>
       <Modal.Header closeButton>
         <Modal.Title>Edit Service</Modal.Title>
       </Modal.Header>
@@ -157,7 +160,6 @@ export default function EditServiceModal({
             />
           </Form.Group>
 
-          {/* ✅ TAX SELECTION */}
           <Form.Group className="mb-3">
             <Form.Label>Taxes *</Form.Label>
             <Form.Control
@@ -198,7 +200,7 @@ export default function EditServiceModal({
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={onClose}>
+        <Button variant="secondary" onClick={handleClose}>
           Cancel
         </Button>
         <Button
