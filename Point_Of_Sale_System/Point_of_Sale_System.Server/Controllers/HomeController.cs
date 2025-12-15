@@ -2,22 +2,60 @@ using Microsoft.AspNetCore.Mvc;
 using Point_of_Sale_System.Server.Enums;
 using Point_of_Sale_System.Server.DTOs;
 
+using Microsoft.AspNetCore.Authorization;     // [Authorize], [AllowAnonymous]
+using Microsoft.AspNetCore.Mvc;                // ControllerBase, HttpGet, etc.
+using System.Security.Claims;                  // Claim, ClaimTypes
+using Microsoft.IdentityModel.Tokens;          // SymmetricSecurityKey, SigningCredentials, TokenValidationParameters
+using System.IdentityModel.Tokens.Jwt;         // JwtSecurityToken, JwtSecurityTokenHandler
+using System.Text;                             // Encoding.UTF8
+
+
 [Route("api/")]
 [ApiController]
 public class HomeController : ControllerBase
 {
+    private readonly IConfiguration _config;
 
+    public HomeController(IConfiguration config)
+    {
+        _config = config;
+    }
+
+    [AllowAnonymous]
     [HttpPost("login")]
     public IActionResult Login([FromBody] LoginRequestDTO request)
     {
+        // validate user credentials
         if (string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Password))
             return BadRequest("Missing username or password");
 
-        // Always return "admin" for demo
-        return Ok(new { role = "admin", businessType = "service", businessId = "demo-business-id" });
-        //return Ok(new { role = "admin", businessType = "service" });
+
+        // JWT stuff
+        var claims = new[]
+        {
+            new Claim("name", "John"),
+            new Claim("role", "admin"),
+            new Claim("businessId", "123"),
+            new Claim("businessType", "service")
+        };
+
+        var key = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(_config["Jwt:Key"])
+        );
+
+        var token = new JwtSecurityToken(
+            issuer: _config["Jwt:Issuer"],
+            audience: _config["Jwt:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddHours(1),
+            signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
+        );
+
+        // Return the token 
+        return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
     }
 
+    [Authorize]
     [HttpPost("pickBusiness")]
     public IActionResult PickBusiness([FromBody] PickBusinessRequestDTO request)
     {

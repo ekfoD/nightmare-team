@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import useAuth from "../../hooks/useAuth.jsx"
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
-import axios from "axios";
+import api from '../../api/axios.js';
 import "../../styles/Register.css";
 
 const LOGIN_URL = 'http://localhost:5098/api/login';
@@ -17,35 +17,47 @@ function Login() {
     const [pwd, setPwd] = useState('');
     const [errMsg, setErrMsg] = useState('');
 
-    const handleSubmit = async(e) => {
-        e.preventDefault();
-        setErrMsg("");
-        try {
-            const response = await axios.post(LOGIN_URL,
-                JSON.stringify({ username: user, password: pwd }),
-                {
-                    headers: { 'Content-Type': 'application/json' },
-                    withCredentials: true
-                }
-            );
-            setAuth({ role: response.data.role, businessType: response.data.businessType, businessId: response.data.businessId });
-            // setAuth({ role: response.data.role, businessType: response.data.businessType });
-            setUser('');
-            setPwd('');
-            navigate(from, { replace: true });
-        } catch (err) {
-            if (!err?.response) {
-                setErrMsg('No server Response');
-            } else if (err.response?.status === 400) {
-                setErrMsg('Missing Username or Password');
-            } else if (err.response?.status === 401) {
-                setErrMsg('Unauthorized');
-            } else {
-                setErrMsg('Login Failed');
-            }
-            errRef.current?.focus();
+
+
+    const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrMsg("");
+
+    try {
+        const response = await api.post("/login", {
+        username: user,
+        password: pwd,
+        });
+
+        const token = response.data.token;
+
+        // decode JWT payload
+        const payload = JSON.parse(atob(token.split(".")[1]));
+
+        setAuth({
+        token,
+        role: payload.role,
+        businessId: payload.businessId || null,
+        businessType: payload.businessType || null,
+        });
+
+        setUser("");
+        setPwd("");
+        navigate(from, { replace: true });
+
+    } catch (err) {
+        if (!err?.response) {
+        setErrMsg("No server response");
+        } else if (err.response.status === 400) {
+        setErrMsg("Missing username or password");
+        } else if (err.response.status === 401) {
+        setErrMsg("Unauthorized");
+        } else {
+        setErrMsg("Login failed");
         }
+        errRef.current?.focus();
     }
+    };
 
     return (
 
