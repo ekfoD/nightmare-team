@@ -1,12 +1,15 @@
 import { useEffect, useState, useRef } from 'react';
 import { Table, Container, Button, Modal, Form, Pagination } from 'react-bootstrap';
 import axios from 'axios';
-
+import api from '../../api/axios.js';
 import "../../styles/Superadmin.css";
+import useAuth from "../../hooks/useAuth.jsx"
 
 const ORGANIZATIONS_API = "https://localhost:7079/api/Organizations/";
+const HOME_API = "https://localhost:7079/api/"
 
 function Superadmin() {
+    const { setAuth } = useAuth();
     const [organizations, setOrganizations] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [newOrg, setNewOrg] = useState({
@@ -18,11 +21,15 @@ function Superadmin() {
         currencyType: 0
     });
 
+
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
     const formRef = useRef(null);
+    const errRef = useRef();
+
+    const [errMsg, setErrMsg] = useState('');
 
     useEffect(() => {
         fetchOrganizations(currentPage);
@@ -49,8 +56,36 @@ function Superadmin() {
         }
     };
 
-    const handleManage = (organization) => {
-        console.log("Managing: " + organization.name);
+    const handleManage = async (organization) => {
+        try {
+            const response = await api.post("/pickBusiness", {
+                businessId: organization.organizationId,
+            });
+
+            const token = response.data.token;
+
+            // decode JWT payload
+            const payload = JSON.parse(atob(token.split(".")[1]));
+
+            setAuth({
+                token,
+                role: payload.role,
+                businessId: payload.businessId || null,
+                businessType: payload.businessType || null,
+            });
+
+        } catch (err) {
+            if (!err?.response) {
+                setErrMsg("No server response");
+            } else if (err.response.status === 400) {
+                setErrMsg("Missing username or password");
+            } else if (err.response.status === 401) {
+                setErrMsg("Unauthorized");
+            } else {
+                setErrMsg("Login failed");
+            }
+            errRef.current?.focus();
+        }
     };
 
     const handleInputChange = (e) => {
@@ -115,6 +150,7 @@ function Superadmin() {
 
     return (
         <Container className="p-2 d-flex flex-column gap-2 w-100 border rounded-4 bg-light">
+            <h2 ref={errRef} className={errMsg.length ? "errorMessage text-danger" : "hide"}>{errMsg}</h2>
             <Button className="p-2 mb-2" onClick={() => setShowModal(true)}>
                 Add New Organization
             </Button>
