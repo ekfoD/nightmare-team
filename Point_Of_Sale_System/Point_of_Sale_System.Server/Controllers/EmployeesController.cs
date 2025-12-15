@@ -29,7 +29,7 @@ public class EmployeesController : ControllerBase
         _context = context;
     }
 
-    [Authorize(Roles = "admin,owner,manager")]
+    [Authorize(Roles = "admin,owner,manager,employee")]
     [HttpGet("{organizationId}")]
     public async Task<ActionResult<IEnumerable<EmployeeGetResponseDTO>>> GetAsync(Guid organizationId)
     {
@@ -37,6 +37,9 @@ public class EmployeesController : ControllerBase
 
         var query = _context.Employees
             .Where(e => e.Organizations.Any(o => o.Id == organizationId));
+
+        if (User.IsInRole("employee"))
+            query = query.Where(e => e.AccessFlag != 2 && e.AccessFlag != 3);
 
         if (User.IsInRole("manager"))
             query = query.Where(e => e.AccessFlag != 2 && e.AccessFlag != 3);
