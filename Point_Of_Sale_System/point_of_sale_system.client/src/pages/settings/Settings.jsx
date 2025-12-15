@@ -1,5 +1,6 @@
 import { Container, Row, Col, Card, ListGroup } from "react-bootstrap";
 import { useState, useEffect } from "react";
+import useAuth from "../../hooks/useAuth.jsx"
 import axios from 'axios';
 import EditAccount from "./EditAccount";
 import EditOrganization from "./EditOrganization";
@@ -9,11 +10,14 @@ function Settings() {
     const [business, setBusiness] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { auth } = useAuth();
+
+    const organizationId = auth.businessId;
 
     useEffect(() => {
         async function loadOrg() {
             try {
-                const response = await axios.get('/api/Organizations/36f11d11-b412-4154-b288-056f258e6920');
+                const response = await axios.get('/api/Organizations/' + organizationId);
                 console.log("Loaded:", response.data);
 
                 setBusiness(response.data);
