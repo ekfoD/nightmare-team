@@ -1,7 +1,7 @@
 import { Container, Row, Col, Card, ListGroup } from "react-bootstrap";
 import { useState, useEffect } from "react";
-import useAuth from "../../hooks/useAuth.jsx"
-import axios from 'axios';
+import useAuth from "../../hooks/useAuth.jsx";
+import api from '../../api/axios.js';
 import EditAccount from "./EditAccount";
 import EditOrganization from "./EditOrganization";
 
@@ -17,7 +17,7 @@ function Settings() {
     useEffect(() => {
         async function loadOrg() {
             try {
-                const response = await axios.get('/api/Organizations/' + organizationId);
+                const response = await api.get('/Organizations/' + organizationId);
                 console.log("Loaded:", response.data);
 
                 setBusiness(response.data);
@@ -34,8 +34,8 @@ function Settings() {
 
     async function handleFormSubmit(updatedData) {
         try {
-            const response = await axios.put(
-                `/api/Organizations/${business.organizationId}`,
+            const response = await api.put(
+                `/Organizations/${business.organizationId}`,
                 updatedData
             );
 
