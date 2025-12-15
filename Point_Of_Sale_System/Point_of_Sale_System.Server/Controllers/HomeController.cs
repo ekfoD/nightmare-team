@@ -1,13 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
 using Point_of_Sale_System.Server.Enums;
 using Point_of_Sale_System.Server.DTOs;
+using Point_of_Sale_System.Server.Interfaces;
 
 using Microsoft.AspNetCore.Authorization;     // [Authorize], [AllowAnonymous]
 using Microsoft.AspNetCore.Mvc;                // ControllerBase, HttpGet, etc.
 using System.Security.Claims;                  // Claim, ClaimTypes
 using Microsoft.IdentityModel.Tokens;          // SymmetricSecurityKey, SigningCredentials, TokenValidationParameters
 using System.IdentityModel.Tokens.Jwt;         // JwtSecurityToken, JwtSecurityTokenHandler
-using System.Text;                             // Encoding.UTF8
+using System.Text;
+using System.Threading.Tasks;
+using Point_of_Sale_System.Server.Models.Entities.Business;                             // Encoding.UTF8
 
 
 [Route("api/")]
@@ -15,10 +18,12 @@ using System.Text;                             // Encoding.UTF8
 public class HomeController : ControllerBase
 {
     private readonly IConfiguration _config;
+    private readonly IOrganizationRepository _organizationRepository;
 
-    public HomeController(IConfiguration config)
+    public HomeController(IConfiguration config, IOrganizationRepository organizationRepositor)
     {
         _config = config;
+        _organizationRepository = organizationRepositor;
     }
 
     [AllowAnonymous]
@@ -57,14 +62,48 @@ public class HomeController : ControllerBase
 
     [Authorize]
     [HttpPost("pickBusiness")]
-    public IActionResult PickBusiness([FromBody] PickBusinessRequestDTO request)
+    public async Task<IActionResult> PickBusiness([FromBody] PickBusinessRequestDTO request)
     {
         if (string.IsNullOrEmpty(request.BusinessId))
             return BadRequest("Missing business ID");
 
-        // Always return success for demo
-        return Ok(new { businessType = "service", businessId = request.BusinessId });
+
+        Guid organizationId = Guid.Parse(request.BusinessId);
+        var organization = await _organizationRepository.GetOrganizationAsync(organizationId);
+
+        var user = HttpContext.User;
+
+        var name = user.FindFirst("name")?.Value;
+        var role = user.FindFirst("role")?.Value;
+
+        
+        // Build NEW claims
+        var claims = new[]
+        {
+        new Claim("name", name),
+        new Claim("role", "admin"),
+        new Claim("businessId", request.BusinessId),
+        new Claim("businessType", organization.Plan)
+    };
+
+        var key = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(_config["Jwt:Key"])
+        );
+
+        var token = new JwtSecurityToken(
+            issuer: _config["Jwt:Issuer"],
+            audience: _config["Jwt:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddHours(1),
+            signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
+        );
+
+        var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+        // Return NEW token
+        return Ok(new { token = jwt });
     }
+
 }
 
 
