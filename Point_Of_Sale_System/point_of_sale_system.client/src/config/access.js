@@ -7,7 +7,7 @@ export const ROLES = {
 
 export const BUSINESS_TYPES = {
   SERVICE: "service",
-  RESTAURANT: "restaurant",
+  ORDER: "order",
 };
 
 export const ROLE_HIERARCHY = [
@@ -20,15 +20,15 @@ export const ROLE_HIERARCHY = [
 export const ROUTE_RULES = {
   inventory: {
     minRole: ROLES.MANAGER,
-    business: [BUSINESS_TYPES.RESTAURANT],
+    business: [BUSINESS_TYPES.ORDER],
   },
   menuManagement: {
     minRole: ROLES.MANAGER,
-    business: [BUSINESS_TYPES.RESTAURANT],
+    business: [BUSINESS_TYPES.ORDER],
   },
   orderHistory: {
     minRole: ROLES.EMPLOYEE,
-    business: [BUSINESS_TYPES.RESTAURANT],
+    business: [BUSINESS_TYPES.ORDER],
   },
   services: {
     minRole: ROLES.EMPLOYEE,
