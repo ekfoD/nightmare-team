@@ -40,21 +40,21 @@ function App() {
         <Route element={<MainLayout />}>
 
             {/* admin */}
-            <Route element={<RequireAuth minRole={ROLES.ADMIN} business={[BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]} requireBusiness={false} />}>
+            <Route element={<RequireAuth minRole={ROLES.ADMIN} business={[BUSINESS_TYPES.ORDER, BUSINESS_TYPES.SERVICE]} requireBusiness={false} />}>
                 <Route path="/superadmin" element={<Superadmin />} />
             </Route>
 
-            <Route element={<RequireAuth minRole={ROLES.OWNER} business={[BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]} />}>
+            <Route element={<RequireAuth minRole={ROLES.OWNER} business={[BUSINESS_TYPES.ORDER, BUSINESS_TYPES.SERVICE]} />}>
                 <Route path="/management" element={<Management />} />
             </Route>
 
             {/* manager */}
-            <Route element={<RequireAuth minRole={ROLES.MANAGER} business={[BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]} />}>
+            <Route element={<RequireAuth minRole={ROLES.MANAGER} business={[BUSINESS_TYPES.ORDER, BUSINESS_TYPES.SERVICE]} />}>
                 <Route path="/employees" element={<Employees />} />
                 <Route path="/settings" element={<Settings />} />
             </Route>
 
-            <Route element={<RequireAuth minRole={ROLES.MANAGER} business={[BUSINESS_TYPES.RESTAURANT]} />}>
+            <Route element={<RequireAuth minRole={ROLES.MANAGER} business={[BUSINESS_TYPES.ORDER]} />}>
                 <Route path="/inventory" element={<Inventory />} />
                 <Route path="/menuManagement" element={<MenuManagement />} />
                 <Route path="/orderHistory" element={<OrderHistory />} />
@@ -66,7 +66,7 @@ function App() {
             </Route>
 
             {/* employee */}
-            <Route element={<RequireAuth minRole={ROLES.EMPLOYEE} business={[BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]} />}>
+            <Route element={<RequireAuth minRole={ROLES.EMPLOYEE} business={[BUSINESS_TYPES.ORDER, BUSINESS_TYPES.SERVICE]} />}>
                 <Route path="/" element={<About />} />
                 <Route path="/orders" element={<Orders />} />
             </Route>

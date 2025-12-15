@@ -36,7 +36,7 @@ public class HomeController : ControllerBase
             new Claim("name", "John"),
             new Claim("role", "admin"),
             new Claim("businessId", "123"),
-            new Claim("businessType", "service")
+            new Claim("businessType", "order")
         };
 
         var key = new SymmetricSecurityKey(

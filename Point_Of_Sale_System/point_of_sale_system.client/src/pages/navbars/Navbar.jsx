@@ -52,15 +52,15 @@ function Navbar() {
                 )}
 
                 {/* manager (common) */}
-                {canSee(ROLES.MANAGER, [BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]) && (
+                {canSee(ROLES.MANAGER, [BUSINESS_TYPES.ORDER, BUSINESS_TYPES.SERVICE]) && (
                   <>
                     <Nav.Link as={NavLink} to="/employees">Employees</Nav.Link>
                     <Nav.Link as={NavLink} to="/settings">Settings</Nav.Link>
                   </>
                 )}
 
-                {/* manager restaurant */}
-                {canSee(ROLES.MANAGER, [BUSINESS_TYPES.RESTAURANT]) && (
+                {/* manager ORDER */}
+                {canSee(ROLES.MANAGER, [BUSINESS_TYPES.ORDER]) && (
                   <>
                     <Nav.Link as={NavLink} to="/inventory">Inventory</Nav.Link>
                     <Nav.Link as={NavLink} to="/menuManagement">Menu Management</Nav.Link>
@@ -77,7 +77,7 @@ function Navbar() {
                 )}
 
                 {/* employee common */}
-                {canSee(ROLES.EMPLOYEE, [BUSINESS_TYPES.RESTAURANT, BUSINESS_TYPES.SERVICE]) && (
+                {canSee(ROLES.EMPLOYEE, [BUSINESS_TYPES.ORDER, BUSINESS_TYPES.SERVICE]) && (
                   <>
                     <Nav.Link as={NavLink} to="/orders">Orders</Nav.Link>
                   </>
