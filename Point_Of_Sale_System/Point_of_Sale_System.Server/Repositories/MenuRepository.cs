@@ -14,23 +14,16 @@ namespace Point_of_Sale_System.Server.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<MenuItem>> GetMenuItemsAsync()
+        public async Task<IEnumerable<MenuItem>> GetMenuItemsAsync(Guid organizationId)
         {
             return await _context.MenuItems
-                .Include(m => m.Variations)
-                .Include(m => m.Organization)
-                .Include(m => m.Tax)
-                .Include(m => m.Discount)
+                .Where(x => x.OrganizationId == organizationId)
                 .ToListAsync();
         }
 
         public async Task<MenuItem?> GetMenuItemAsync(Guid id)
         {
             return await _context.MenuItems
-                .Include(m => m.Variations)
-                .Include(m => m.Organization)
-                .Include(m => m.Tax)
-                .Include(m => m.Discount)
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
 

@@ -15,13 +15,13 @@ namespace Point_of_Sale_System.Server.Models.Entities.MenuBased
         public DateTime Timestamp { get; set; } = DateTime.Now;
 
         //navigation to FK's
-        public virtual ICollection<OrderItem> OrderItems { get; set; }
+        public virtual ICollection<OrderItem?> OrderItems { get; set; } = new List<OrderItem>();
 
         // foreign key to MenuItem
         [Required]
         public Guid MenuItemId { get; set; }
 
         [ForeignKey("MenuItemId")]
-        public virtual MenuItem MenuItem { get; set; }
+        public virtual MenuItem? MenuItem { get; set; }
     }
 }
