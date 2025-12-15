@@ -3,7 +3,7 @@ import useAuth from "../../hooks/useAuth";
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
-
+import { ROLES } from "../../config/access.js";
 
 
 const EMPLOYEE_API = "https://localhost:7079/api/employees/"
@@ -18,7 +18,7 @@ function Employees() {
     const { auth } = useAuth();
 
     const organizationId = auth.businessId;
-
+    const currentRole = auth.role;
 
     const [employees, setEmployees] = useState([]);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
@@ -108,6 +108,29 @@ function Employees() {
             setErrMsg(error.response?.data?.message || error.message);
         }
     }
+
+    const renderSwitchOptions = () => {
+        const options = [];
+
+        switch (currentRole) {
+            case ROLES.ADMIN:
+                options.push(<option key="owner" value="2">Owner</option>);
+            // fall through
+
+            case ROLES.OWNER:
+                options.push(<option key="manager" value="3">Manager</option>);
+            // fall through
+
+            case ROLES.MANAGER:
+                options.push(<option key="employee" value="4">Employee</option>);
+            // fall through
+
+            default:
+                break;
+        }
+
+        return options;
+    };
 
 
 
@@ -205,9 +228,8 @@ function Employees() {
                                     onChange={e => setAccess(e.target.value)}
                                     required
                                 >
-                                    <option value="2">Owner</option>
-                                    <option value="3">Manager</option>
-                                    <option value="4">Employee</option>
+                                    <option value="">Select from these options...</option>
+                                    {renderSwitchOptions()}
                                 </Form.Select>
                             </Form.Group>
 
