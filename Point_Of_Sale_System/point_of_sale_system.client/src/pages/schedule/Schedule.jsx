@@ -29,6 +29,7 @@ const generateTimes = (workStart, workEnd, intervalMinutes) => {
   return times;
 };
 
+
 const organizationId = "a685b0d3-d465-4b02-8d66-5315e84f6cba";
 
 const Schedule = () => {
@@ -121,9 +122,9 @@ const Schedule = () => {
                   </div>
 
                   {times.map(t => <div key={t} className="time-slot-empty"></div>)}
-
+                  
                   {dayAppointments
-                    .filter(a => String(a.employeeId) === String(worker.id))
+                    .filter(a => a.employeeId.toLowerCase() === worker.id.toLowerCase())
                     .map(app => (
                       <div
                         key={app.id}
