@@ -110,17 +110,23 @@ const EditAppointmentPopup = ({
     }
 
     try {
-      await axios.put(`https://localhost:7079/api/appointments/${appointment.id}/edit`, {
-        employeeId,
-        employeeName: workers.find(w => w.id === employeeId)?.name,
-        serviceName: service.name,
-        startTime: start.toISOString(),
-        endTime: end.toISOString(),
-        customerName,
-        customerPhone,
-        extraInfo,
-        organizationId
-      });
+      const startStr = `${date}T${time}`;
+      const endStr = `${date}T${form.endTime}`;
+
+      await axios.put(
+        `https://localhost:7079/api/appointments/${appointment.id}/edit`,
+        {
+          employeeId,
+          employeeName: workers.find(w => w.id === employeeId)?.name,
+          serviceName: service.name,
+          startTime: startStr,
+          endTime: endStr,
+          customerName,
+          customerPhone,
+          extraInfo,
+          organizationId
+        }
+      );
 
       onSuccess && onSuccess("Appointment updated");
       handleClose();

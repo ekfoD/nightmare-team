@@ -67,7 +67,7 @@ const Schedule = () => {
       ]);
 
       setAllWorkers(workersRes.data.map(w => ({
-        id: w.employeeId,       
+        id: w.employeeId.toLowerCase(),       
         name: w.username
       })));
 
