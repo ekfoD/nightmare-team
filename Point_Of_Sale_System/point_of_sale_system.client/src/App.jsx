@@ -23,6 +23,7 @@ import Services from "./pages/services/Services.jsx";
 import { ROLES, BUSINESS_TYPES } from "./config/access.js";
 
 import Management from './pages/management/management.jsx';
+import AppointmentPayments from './pages/processing/AppointmentPayments.jsx';
 
 const BASE_URL = "http://localhost:5098"
 

@@ -20,21 +20,13 @@ namespace Point_of_Sale_System.Server.Models.Entities.ServiceBased
         //navigation to FK's
         public virtual ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
 
-        // foreign key to Organization
         [Required]
         public Guid OrganizationId { get; set; }
 
         [ForeignKey("OrganizationId")]
         public required virtual Organization Organization { get; set; }
 
-        // foreign key to Tax
-        [Required]
-        public Guid TaxId { get; set; }
-
-        [ForeignKey("TaxId")]
-        public virtual Tax Tax { get; set; } = null!;
-
-        // foreign key to Discount
+        public virtual ICollection<Tax> Taxes { get; set; }= new List<Tax>();
         public Guid? DiscountId { get; set; }
 
         [ForeignKey("DiscountId")]

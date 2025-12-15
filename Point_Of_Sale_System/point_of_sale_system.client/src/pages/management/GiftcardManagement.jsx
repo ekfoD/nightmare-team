@@ -4,7 +4,7 @@ import { Container, Table, Button, Spinner } from "react-bootstrap";
 import GiftcardModal from "./GiftcardModal";
 
 const API_URL = "https://localhost:7079/api/Giftcard";
-const ORGANIZATION_ID = "8bbb7afb-d664-492a-bcd2-d29953ab924e"; // fixed for now
+const ORGANIZATION_ID = "a685b0d3-d465-4b02-8d66-5315e84f6cba"; // fixed for now
 
 const GiftcardManagement = () => {
     const [giftcards, setGiftcards] = useState([]);
