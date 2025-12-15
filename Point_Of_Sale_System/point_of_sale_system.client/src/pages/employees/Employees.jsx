@@ -1,10 +1,9 @@
 import '../../styles/Employees.css';
 import useAuth from "../../hooks/useAuth";
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import { ROLES } from "../../config/access.js";
-
+import api from '../../api/axios.js';
 
 const EMPLOYEE_API = "https://localhost:7079/api/employees/"
 
@@ -16,7 +15,6 @@ const StatusEnum = {
 
 function Employees() {
     const { auth } = useAuth();
-
     const organizationId = auth.businessId;
     const currentRole = auth.role;
 
@@ -32,7 +30,7 @@ function Employees() {
 
     const fetchEmployees = async () => {
         try {
-            const response = await axios.get("https://localhost:7079/api/Employees/" + organizationId);
+            const response = await api.get("https://localhost:7079/api/Employees/" + organizationId);
             // Make sure we always set an array
             setEmployees(Array.isArray(response.data) ? response.data : []);
         } catch (e) {
@@ -65,7 +63,7 @@ function Employees() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            await axios.post(EMPLOYEE_API + "add", {
+            await api.post(EMPLOYEE_API + "add", {
                 username,
                 password,
                 accessFlag: access,
@@ -82,7 +80,7 @@ function Employees() {
     const handleEdit = async (event) => {
         event.preventDefault();
         try {
-            await axios.put(EMPLOYEE_API + selectedEmployee.employeeId + "/edit",
+            await api.put(EMPLOYEE_API + selectedEmployee.employeeId + "/edit",
                 {
                     username,
                     password,
@@ -99,7 +97,7 @@ function Employees() {
 
     const handleDelete = async () => {
         try {
-            await axios.delete(EMPLOYEE_API + selectedEmployee.employeeId + "/delete");
+            await api.delete(EMPLOYEE_API + selectedEmployee.employeeId + "/delete");
 
             handleSelect(null); // Just return the fields all to null if delete went well
             await fetchEmployees();
