@@ -98,6 +98,9 @@ public class OrganizationController : ControllerBase
     {
         var organization = await _context.Organizations.FindAsync(organizationId);
 
+        if (organization == null)
+            return BadRequest("No such organiszation");
+
         var response = new OrganizationGetDTO
         {
             OrganizationId = organization.Id,

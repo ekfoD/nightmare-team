@@ -200,12 +200,15 @@ function Employees() {
 
                             <Form.Group className="mb-3">
                                 <Form.Label>Access Level</Form.Label>
-                                <Form.Control
-                                    type="number"
+                                <Form.Select
                                     value={access}
                                     onChange={e => setAccess(e.target.value)}
                                     required
-                                />
+                                >
+                                    <option value="2">Owner</option>
+                                    <option value="3">Manager</option>
+                                    <option value="4">Employee</option>
+                                </Form.Select>
                             </Form.Group>
 
                             <Row className="mt-3">

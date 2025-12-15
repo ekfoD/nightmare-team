@@ -83,8 +83,8 @@ public class HomeController : ControllerBase
         new Claim("name", name),
         new Claim("role", "admin"),
         new Claim("businessId", request.BusinessId),
-        new Claim("businessType", organization.Plan)
-    };
+        new Claim("businessType", organization.Plan.ToString())
+        };
 
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(_config["Jwt:Key"])
