@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import axios from "axios";
+import api from '../../api/axios.js';
 import { workStart, workEnd, isWithinWorkHours, parseDurationToMinutes, doesOverlap } from './utils/ScheduleHelpers';
 
 const EditAppointmentPopup = ({
@@ -16,8 +16,8 @@ const EditAppointmentPopup = ({
 }) => {
   const [form, setForm] = useState({
     service: null,
-    employeeId: workers.length ? workers[0].id : "",
-    date: selectedDate?.toISOString().slice(0, 10) || "",
+    employeeId: "",
+    date: "",
     time: "",
     endTime: "",
     customerName: "",
@@ -25,15 +25,40 @@ const EditAppointmentPopup = ({
     extraInfo: ""
   });
 
+  // Helper: parse ISO string as local date
+  const parseLocalDate = (isoString) => {
+    const [datePart, timePart] = isoString.split('T');
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hours, minutes] = timePart.split(':').map(Number);
+    return new Date(year, month - 1, day, hours, minutes);
+  };
+
+  const resetForm = () => {
+    setForm({
+      service: services[0] || null,
+      employeeId: workers[0]?.id || "",
+      date: selectedDate?.toISOString().slice(0,10) || "",
+      time: "",
+      endTime: "",
+      customerName: "",
+      customerPhone: "",
+      extraInfo: ""
+    });
+  };
+
   // Initialize form when appointment or services change
   useEffect(() => {
     if (!appointment) return resetForm();
 
-    const serviceObj = services.find(s => s.name === appointment.serviceName) || null;
+    const serviceObj = services.find(s => s.name === appointment.serviceName) || services[0] || null;
+    const startDate = appointment.startTime ? parseLocalDate(appointment.startTime) : null;
 
-    const startDate = appointment.startTime ? new Date(appointment.startTime) : null;
-    const startTime = startDate ? startDate.toTimeString().substring(0,5) : "";
-    const date = startDate ? startDate.toISOString().slice(0,10) : "";
+    const startTime = startDate
+      ? `${startDate.getHours().toString().padStart(2,'0')}:${startDate.getMinutes().toString().padStart(2,'0')}`
+      : "";
+    const date = startDate
+      ? `${startDate.getFullYear()}-${(startDate.getMonth()+1).toString().padStart(2,'0')}-${startDate.getDate().toString().padStart(2,'0')}`
+      : "";
 
     const endTime = (startDate && serviceObj?.duration)
       ? new Date(startDate.getTime() + parseDurationToMinutes(serviceObj.duration) * 60000)
@@ -42,7 +67,7 @@ const EditAppointmentPopup = ({
 
     setForm({
       service: serviceObj,
-      employeeId: appointment.employeeId || "",
+      employeeId: appointment.employeeId || workers[0]?.id || "",
       date,
       time: startTime,
       endTime,
@@ -50,29 +75,18 @@ const EditAppointmentPopup = ({
       customerPhone: appointment.customerPhone || "",
       extraInfo: appointment.extraInfo || ""
     });
-  }, [appointment, services]);
+  }, [appointment, services, workers]);
 
   // Update endTime whenever service, date, or time changes
   useEffect(() => {
     if (!form.service || !form.time || !form.date) return;
 
     const start = new Date(`${form.date}T${form.time}:00`);
-    if (isNaN(start)) return; // guard against invalid date
+    if (isNaN(start)) return;
 
     const end = new Date(start.getTime() + parseDurationToMinutes(form.service.duration) * 60000);
     setForm(f => ({ ...f, endTime: end.toTimeString().substring(0,5) }));
   }, [form.service, form.time, form.date]);
-
-  const resetForm = () => setForm({
-    service: null,
-    employeeId: workers.length ? workers[0].id : "",
-    date: selectedDate?.toISOString().slice(0,10) || "",
-    time: "",
-    endTime: "",
-    customerName: "",
-    customerPhone: "",
-    extraInfo: ""
-  });
 
   const handleChange = key => e => setForm(f => ({ ...f, [key]: e.target.value }));
 
@@ -96,17 +110,24 @@ const EditAppointmentPopup = ({
     }
 
     try {
-      await axios.put(`https://localhost:7079/api/appointments/${appointment.id}/edit`, {
-        employeeId,
-        employeeName: workers.find(w => w.id === employeeId)?.name,
-        serviceName: service.name,
-        startTime: start.toISOString(),
-        endTime: end.toISOString(),
-        customerName,
-        customerPhone,
-        extraInfo,
-        organizationId
-      });
+      const startStr = `${date}T${time}`;
+      const endStr = `${date}T${form.endTime}`;
+
+      await api.put(
+        `https://localhost:7079/api/appointments/${appointment.id}/edit`,
+        {
+          employeeId,
+          employeeName: workers.find(w => w.id === employeeId)?.name,
+          serviceName: service.name,
+          startTime: startStr,
+          endTime: endStr,
+          customerName,
+          customerPhone,
+          extraInfo,
+          organizationId
+        }
+      );
+
       onSuccess && onSuccess("Appointment updated");
       handleClose();
     } catch (err) {
@@ -118,7 +139,7 @@ const EditAppointmentPopup = ({
   const handleDelete = async () => {
     if (!appointment || !confirm("Delete this appointment?")) return;
     try {
-      await axios.delete(`https://localhost:7079/api/appointments/${appointment.id}/delete`);
+      await api.delete(`https://localhost:7079/api/appointments/${appointment.id}/delete`);
       onSuccess && onSuccess("Appointment deleted");
       handleClose();
     } catch (err) {
@@ -136,7 +157,10 @@ const EditAppointmentPopup = ({
       <Modal.Body>
         <Form.Group className="mb-3">
           <Form.Label>Service *</Form.Label>
-          <Form.Select value={form.service?.name || ""} onChange={e => setForm(f => ({ ...f, service: services.find(s => s.name === e.target.value) } ))}>
+          <Form.Select
+            value={form.service?.name || ""}
+            onChange={e => setForm(f => ({ ...f, service: services.find(s => s.name === e.target.value) } ))}
+          >
             <option value="">Select service</option>
             {services.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
           </Form.Select>
@@ -155,7 +179,13 @@ const EditAppointmentPopup = ({
           <div style={{ display:'flex', gap:8, alignItems:'center' }}>
             <Form.Control type="date" value={form.date} onChange={handleChange("date")} style={{flex:1}} />
             <Form.Control type="time" value={form.time} onChange={handleChange("time")} style={{flex:1}} />
-            <Form.Control type="text" value={form.endTime} readOnly placeholder="End time" style={{width:'90px', fontSize:'0.85rem', textAlign:'center', backgroundColor:'#f0f0f0'}} />
+            <Form.Control
+              type="text"
+              value={form.endTime}
+              readOnly
+              placeholder="End time"
+              style={{width:'90px', fontSize:'0.85rem', textAlign:'center', backgroundColor:'#f0f0f0'}}
+            />
           </div>
         </Form.Group>
 

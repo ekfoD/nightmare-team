@@ -1,7 +1,5 @@
 using Point_of_Sale_System.Server.DTOs;
 using Point_of_Sale_System.Server.Interfaces;
-using Point_of_Sale_System.Server.Models;
-using Point_of_Sale_System.Server.Services;
 using Point_of_Sale_System.Server.Models.Entities.Business;
 
 namespace Point_of_Sale_System.Server.Services
@@ -10,8 +8,6 @@ namespace Point_of_Sale_System.Server.Services
     {
         public Organization ConvertOrganizationFromDTO(Organization org, OrganizationRequest dto)
         {
-
-            //org.Id = dto.Id;
             org.Name = dto.Name;
             org.Currency = dto.Currency;
             org.Address = dto.Address;
@@ -19,7 +15,6 @@ namespace Point_of_Sale_System.Server.Services
             org.PhoneNumber = dto.PhoneNumber;
 
             return org;
-
         }
 
         public OrganizationRequest ConvertOrganizationToDTO(Organization org)

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import axios from "axios";
-import {workStart, workEnd, isWithinWorkHours, parseDurationToMinutes, doesOverlap } from './utils/ScheduleHelpers';
+import api from '../../api/axios.js';
+import { workStart, workEnd, isWithinWorkHours, parseDurationToMinutes, doesOverlap } from './utils/ScheduleHelpers';
 
 const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, selectedDate, allAppointments, organizationId }) => {
   const [form, setForm] = useState({
@@ -14,7 +14,6 @@ const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, 
     extraInfo: ""
   });
 
-  // Initialize defaults when popup opens
   useEffect(() => {
     setForm(f => ({
       ...f,
@@ -46,32 +45,46 @@ const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, 
 
   const handleSave = async () => {
     const { service, employeeId, date, time, customerName, customerPhone, extraInfo } = form;
-    if (!service || !employeeId || !time || !customerName || !date) return alert("Fill required fields.");
+    if (!service || !employeeId || !time || !customerName || !date) {
+      return alert("Fill required fields.");
+    }
 
     const start = new Date(`${date}T${time}:00`);
-    const end = new Date(start.getTime() + parseDurationToMinutes(service.duration)*60000);
+    const end = new Date(start.getTime() + parseDurationToMinutes(service.duration) * 60000);
 
-      if (!isWithinWorkHours(time)) {
-        return alert(`Time must be between ${workStart} and ${workEnd}.`);
-      }
+    if (!isWithinWorkHours(time)) {
+      return alert(`Time must be between ${workStart} and ${workEnd}.`);
+    }
 
-    if (doesOverlap(start, end, employeeId, allAppointments)) 
+    if (doesOverlap(start, end, employeeId, allAppointments)) {
       return alert("This appointment overlaps with an existing appointment for this employee.");
+    }
 
     try {
-      await axios.post("https://localhost:7079/api/appointments/create", {
-        employeeId,
-        employeeName: workers.find(w => w.id === employeeId)?.name,
+      const employee = workers.find(w => String(w.id) === String(employeeId));
+
+      if (!employee) {
+        console.error("Employee lookup failed", { employeeId, workers });
+        alert("Please select a valid employee");
+        return;
+      }
+      const startStr = `${date}T${time}`;
+
+      await api.post("https://localhost:7079/api/appointments/create", {
+        employeeId: employee.id,
+        employeeName: employee.name,
         serviceName: service.name,
-        startTime: start.toISOString(),
+        startTime: startStr,
         customerName,
         customerPhone,
         extraInfo,
         organizationId
       });
+
       onSuccess && onSuccess("Appointment created");
       resetForm();
       handleClose();
+
     } catch (err) {
       console.error(err);
       alert(err?.response?.data?.error || "Failed to create appointment");
@@ -87,17 +100,27 @@ const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, 
       <Modal.Body>
         <Form.Group className="mb-3">
           <Form.Label>Service *</Form.Label>
-          <Form.Select value={form.service?.name || ""} onChange={e => setForm(f => ({ ...f, service: services.find(s => s.name === e.target.value) }))}>
+          <Form.Select
+            value={form.service?.name || ""}
+            onChange={e => setForm(f => ({ ...f, service: services.find(s => s.name === e.target.value) }))}
+          >
             <option value="">Select service</option>
-            {services.map((s, idx) => <option key={idx} value={s.name}>{s.name}</option>)}
+            {services.map(s => (
+              <option key={s.id || s.name} value={s.name}>{s.name}</option>
+            ))}
           </Form.Select>
         </Form.Group>
 
         <Form.Group className="mb-3">
           <Form.Label>Employee *</Form.Label>
-          <Form.Select value={form.employeeId} onChange={handleChange("employeeId")}>
+          <Form.Select
+            value={form.employeeId}
+            onChange={handleChange("employeeId")}
+          >
             <option value="">Select employee</option>
-            {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+            {workers.map(w => (
+              <option key={w.id} value={w.id}>{w.name}</option>
+            ))}
           </Form.Select>
         </Form.Group>
 
@@ -106,7 +129,9 @@ const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, 
           <div style={{ display:'flex', gap:8, alignItems:'center' }}>
             <Form.Control type="date" value={form.date} onChange={handleChange("date")} style={{flex:1}} />
             <Form.Control type="time" value={form.time} onChange={handleChange("time")} style={{flex:1}} />
-            <Form.Control type="text" value={computeEndTime()} readOnly placeholder="End time" style={{width:'90px', fontSize:'0.85rem', textAlign:'center', backgroundColor:'#f0f0f0'}} />
+            <Form.Control type="text" value={computeEndTime()} readOnly placeholder="End time"
+              style={{width:'90px', fontSize:'0.85rem', textAlign:'center', backgroundColor:'#f0f0f0'}}
+            />
           </div>
         </Form.Group>
 

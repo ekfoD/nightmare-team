@@ -1,7 +1,7 @@
 using System.Runtime.Versioning;
 using Point_of_Sale_System.Server.Enums;
 
-namespace Point_of_Sale_System.Server.Dtos
+namespace Point_of_Sale_System.Server.DTOs
 {
     public class MenuServiceDto
     {
@@ -12,5 +12,6 @@ namespace Point_of_Sale_System.Server.Dtos
         public required string Description { get; set; }
         public StatusEnum Status { get; set; }
         public CurrencyEnum Currency { get; set; }
+        public List<TaxDTO> Taxes { get; set; } = new();
     }
 }
