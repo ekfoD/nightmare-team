@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Point_of_Sale_System.Server.Interfaces;
-using Point_of_Sale_System.Server.Dtos;
+using Point_of_Sale_System.Server.DTOs;
 
 namespace Point_of_Sale_System.Server.Controllers
 {
@@ -9,8 +9,6 @@ namespace Point_of_Sale_System.Server.Controllers
     public class ServicesController : ControllerBase
     {
         private readonly IServicesService _services;
-
-
 
         public ServicesController (IServicesService services)
         {

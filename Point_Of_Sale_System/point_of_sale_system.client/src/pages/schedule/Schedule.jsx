@@ -8,10 +8,8 @@ import SuccessNotifier from "../../utilities/SuccessNotifier";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../styles/Schedule.css';
-
 import { getColorForService, getAppointmentHeight, workStart, workEnd, getAppointmentTop } from './utils/ScheduleHelpers';
 
-// Generate time slots
 const generateTimes = (workStart, workEnd, intervalMinutes) => {
   const times = [];
   const [startHour, startMin] = workStart.split(':').map(Number);
@@ -31,7 +29,8 @@ const generateTimes = (workStart, workEnd, intervalMinutes) => {
   return times;
 };
 
-const organizationId = "a886c4f8-bbdb-4151-b1b6-679fbd5f4a2e";
+
+const organizationId = "a685b0d3-d465-4b02-8d66-5315e84f6cba";
 
 const Schedule = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,7 +45,6 @@ const Schedule = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const intervalMinutes = 30;
-
   const times = generateTimes(workStart, workEnd, intervalMinutes);
 
   const [showPopup, setShowPopup] = useState(false);
@@ -69,9 +67,8 @@ const Schedule = () => {
       ]);
 
       setAllWorkers(workersRes.data.map(w => ({
-        id: w.id,
-        name: w.username,
-        photo: w.photoUrl || "/default.jpg"
+        id: w.employeeId.toLowerCase(),       
+        name: w.username
       })));
 
       const mappedAppts = apptsRes.data.map(a => {
@@ -94,7 +91,7 @@ const Schedule = () => {
 
   useEffect(() => {
     fetchDataForDate(selectedDate);
-  }, []);
+  }, [selectedDate]);
 
   const workers = allWorkers.filter(worker =>
     worker.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -114,35 +111,38 @@ const Schedule = () => {
         <Card className="schedule-card">
           <div className="schedule-grid">
             <div className="time-column">
-              {times.map((time, idx) => <div key={idx} className="time-slot">{time}</div>)}
+              {times.map(time => <div key={time} className="time-slot">{time}</div>)}
             </div>
 
             <div className="employees-wrapper">
-              {workers.map((worker, wIdx) => (
-                <div key={wIdx} className="employee-column">
+              {workers.map(worker => (
+                <div key={worker.id} className="employee-column">
                   <div className="employee-header">
                     <div className="employee-name">{worker.name}</div>
                   </div>
 
-                  {times.map((_, idx) => <div key={idx} className="time-slot-empty"></div>)}
-
-                  {dayAppointments.filter(a => a.employeeId === worker.id).map((app, idx) => (
-                    <div
-                    key={idx}
-                    className="appointment-block"
-                    style={{
-                        top: 90 + getAppointmentTop(app.startTime, times),
-                        height: getAppointmentHeight(app.startTime, app.endTime),
-                        backgroundColor: getColorForService(app.serviceName)
-                    }}
-                    onClick={() => { setEditingAppointment(app); setShowEdit(true); }}
-                    >
-                      <div className="appointment-block-content">
-                        <div className="appointment-service">{app.serviceName}</div>
-                        <div className="appointment-details">{app.customerName} • {app.time}</div>
+                  {times.map(t => <div key={t} className="time-slot-empty"></div>)}
+                  
+                  {dayAppointments
+                    .filter(a => a.employeeId.toLowerCase() === worker.id.toLowerCase())
+                    .map(app => (
+                      <div
+                        key={app.id}
+                        className="appointment-block"
+                        style={{
+                          top: 90 + getAppointmentTop(app.startTime, times),
+                          height: getAppointmentHeight(app.startTime, app.endTime),
+                          backgroundColor: getColorForService(app.serviceName)
+                        }}
+                        onClick={() => { setEditingAppointment(app); setShowEdit(true); }}
+                      >
+                        <div className="appointment-block-content">
+                          <div className="appointment-service">{app.serviceName}</div>
+                          <div className="appointment-details">{app.customerName} • {app.time}</div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+
                 </div>
               ))}
             </div>
@@ -180,7 +180,6 @@ const Schedule = () => {
         onSuccess={(msg) => { setSuccessMessage(msg); setShowSuccess(true); refresh(); }}
         workers={allWorkers}
         services={services}
-        timeSlots={times}
         selectedDate={selectedDate}
         allAppointments={allAppointments}
         organizationId={organizationId}
@@ -192,7 +191,6 @@ const Schedule = () => {
         appointment={editingAppointment || mockAppointment}
         workers={allWorkers}
         services={services}
-        timeSlots={times}
         onSuccess={(msg) => { setSuccessMessage(msg); setShowSuccess(true); refresh(); }}
         allAppointments={allAppointments}
         organizationId={organizationId}

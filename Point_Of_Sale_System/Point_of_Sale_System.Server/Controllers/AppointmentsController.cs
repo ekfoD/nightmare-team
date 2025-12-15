@@ -24,6 +24,13 @@ namespace Point_of_Sale_System.Server.Controllers
             return Ok(items);
         }
 
+        [HttpGet("pending/{organizationId}")]
+        public async Task<IActionResult> GetPendingAppointments(Guid organizationId)
+        {
+            var items = await _service.GetPendingAppointmentsAsync(organizationId);
+            return Ok(items);
+        }
+
         [HttpPost("create")]
         public async Task<IActionResult> Create([FromBody] CreateAppointmentDto dto)
         {

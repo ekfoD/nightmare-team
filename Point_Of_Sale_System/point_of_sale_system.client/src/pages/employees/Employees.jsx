@@ -5,7 +5,7 @@ import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 
 //const EMPLOYEE_API = "api/employees/"
 const EMPLOYEE_API = "https://localhost:7079/api/employees/"
-const organizationId = "6a0c37bc-6245-492c-b1ec-108cfd6f8f66" // cia random guid
+const organizationId = "a685b0d3-d465-4b02-8d66-5315e84f6cba" // cia random guid
 
 const StatusEnum = {
     active: 1,

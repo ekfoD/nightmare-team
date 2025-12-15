@@ -35,7 +35,7 @@
   position: sticky;
   left: 0;
   background-color: #f0f4f7;
-  z-index: 2;
+  z-index: 3;
   border-right: 1px solid #ccc;
   padding-top: 91px;
 }
@@ -73,7 +73,7 @@
   background-color: #e8e4ff;
   position: sticky;
   top: 0;
-  z-index: 3;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
