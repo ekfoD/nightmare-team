@@ -3,9 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Point_of_Sale_System.Server.Models.Data;
 using Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments;
 using Point_of_Sale_System.Server.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Point_of_Sale_System.Server.Controllers
-{
+{   
+    [Authorize(Roles = "admin,owner")]
     [ApiController]
     [Route("api/[controller]")]
     public class TaxController : ControllerBase

@@ -1,11 +1,11 @@
 import '../../styles/Employees.css';
+import useAuth from "../../hooks/useAuth";
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
+import { ROLES } from "../../config/access.js";
+import api from '../../api/axios.js';
 
-//const EMPLOYEE_API = "api/employees/"
 const EMPLOYEE_API = "https://localhost:7079/api/employees/"
-const organizationId = "6a0c37bc-6245-492c-b1ec-108cfd6f8f66" // cia random guid
 
 const StatusEnum = {
     active: 1,
@@ -14,6 +14,9 @@ const StatusEnum = {
 };
 
 function Employees() {
+    const { auth } = useAuth();
+    const organizationId = auth.businessId;
+    const currentRole = auth.role;
 
     const [employees, setEmployees] = useState([]);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
@@ -27,7 +30,7 @@ function Employees() {
 
     const fetchEmployees = async () => {
         try {
-            const response = await axios.get("https://localhost:7079/api/Employees/" + organizationId);
+            const response = await api.get("https://localhost:7079/api/Employees/" + organizationId);
             // Make sure we always set an array
             setEmployees(Array.isArray(response.data) ? response.data : []);
         } catch (e) {
@@ -60,7 +63,7 @@ function Employees() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            await axios.post(EMPLOYEE_API + "add", {
+            await api.post(EMPLOYEE_API + "add", {
                 username,
                 password,
                 accessFlag: access,
@@ -77,7 +80,7 @@ function Employees() {
     const handleEdit = async (event) => {
         event.preventDefault();
         try {
-            await axios.put(EMPLOYEE_API + selectedEmployee.employeeId + "/edit",
+            await api.put(EMPLOYEE_API + selectedEmployee.employeeId + "/edit",
                 {
                     username,
                     password,
@@ -94,7 +97,7 @@ function Employees() {
 
     const handleDelete = async () => {
         try {
-            await axios.delete(EMPLOYEE_API + selectedEmployee.employeeId + "/delete");
+            await api.delete(EMPLOYEE_API + selectedEmployee.employeeId + "/delete");
 
             handleSelect(null); // Just return the fields all to null if delete went well
             await fetchEmployees();
@@ -103,6 +106,29 @@ function Employees() {
             setErrMsg(error.response?.data?.message || error.message);
         }
     }
+
+    const renderSwitchOptions = () => {
+        const options = [];
+
+        switch (currentRole) {
+            case ROLES.ADMIN:
+                options.push(<option key="owner" value="2">Owner</option>);
+            // fall through
+
+            case ROLES.OWNER:
+                options.push(<option key="manager" value="3">Manager</option>);
+            // fall through
+
+            case ROLES.MANAGER:
+                options.push(<option key="employee" value="4">Employee</option>);
+            // fall through
+
+            default:
+                break;
+        }
+
+        return options;
+    };
 
 
 
@@ -195,12 +221,14 @@ function Employees() {
 
                             <Form.Group className="mb-3">
                                 <Form.Label>Access Level</Form.Label>
-                                <Form.Control
-                                    type="number"
+                                <Form.Select
                                     value={access}
                                     onChange={e => setAccess(e.target.value)}
                                     required
-                                />
+                                >
+                                    <option value="">Select from these options...</option>
+                                    {renderSwitchOptions()}
+                                </Form.Select>
                             </Form.Group>
 
                             <Row className="mt-3">

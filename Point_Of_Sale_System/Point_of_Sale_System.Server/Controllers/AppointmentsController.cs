@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Point_of_Sale_System.Server.DTOs;
 using Point_of_Sale_System.Server.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Point_of_Sale_System.Server.Controllers
 {
+    [Authorize(Roles = "admin,owner,manager,employee")]
     [ApiController]
     [Route("api/[controller]")]
     public class AppointmentsController : ControllerBase
@@ -21,6 +23,13 @@ namespace Point_of_Sale_System.Server.Controllers
         public async Task<IActionResult> GetAppointments(Guid organizationId, DateTime date)
         {
             var items = await _service.GetAppointmentsForDateAsync(organizationId, date);
+            return Ok(items);
+        }
+
+        [HttpGet("pending/{organizationId}")]
+        public async Task<IActionResult> GetPendingAppointments(Guid organizationId)
+        {
+            var items = await _service.GetPendingAppointmentsAsync(organizationId);
             return Ok(items);
         }
 

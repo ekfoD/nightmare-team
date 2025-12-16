@@ -1,6 +1,6 @@
 using Point_of_Sale_System.Server.Enums;
 
-namespace Point_of_Sale_System.Server.Dtos
+namespace Point_of_Sale_System.Server.DTOs
 {
     public class CreateMenuServiceDto
     {
@@ -10,8 +10,7 @@ namespace Point_of_Sale_System.Server.Dtos
         public required string Description { get; set; }
         public required StatusEnum Status { get; set; }
         public required Guid OrganizationId { get; set; }
-        //public required Guid TaxId { get; set; }
-        public Guid? DiscountId { get; set; } // optional
-        public required Guid TaxId { get; set; }
+        public Guid? DiscountId { get; set; }
+        public List<Guid> TaxIds { get; set; } = new();
     }
 }
