@@ -16,7 +16,7 @@ export default function AppointmentHistory() {
 
   useEffect(() => {
     api
-      .get(`https://localhost:7079/api/Receipt/appointment/${organizationId}`)
+      .get(`/Receipt/appointment/${organizationId}`)
       .then((res) => {
         setReceipts(res.data);
         setSelected(res.data[0] ?? null);
@@ -47,11 +47,15 @@ export default function AppointmentHistory() {
     return filtered;
   }, [receipts, searchTerm, sortKey]);
 
-  const formatDateTime = (date) =>
-    new Date(date).toLocaleString([], {
+  const formatDate = (date) =>
+    new Date(date).toLocaleDateString([], {
       year: "numeric",
       month: "short",
       day: "numeric",
+    });
+
+  const formatTime = (date) =>
+    new Date(date).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -67,6 +71,14 @@ export default function AppointmentHistory() {
 
     return { taxTotal, discountTotal, total };
   };
+
+  const handleRefund = () => {
+    if (!selected) return;
+
+    // later this will call backend refund endpoint
+    alert(`Refund initiated for receipt ${selected.id}`);
+  };
+
 
   if (loading) return <div>Loading receipts...</div>;
 
@@ -101,12 +113,16 @@ export default function AppointmentHistory() {
                 selected?.id === r.id ? "selected" : ""
               }`}
             >
-              <div className="item-id">{r.id}</div>
-              <div className="item-date">
-                {formatDateTime(r.startTime)} – {formatDateTime(r.endTime)}
+              <div className="item-id">
+                {r.timestamp} — {r.employeeName}
               </div>
+
+              <div className="item-date">
+                {formatTime(r.startTime)} – {formatTime(r.endTime)}
+              </div>
+
               <div className="item-emp">
-                {r.employeeName} | {r.customerName} | {r.serviceName}
+                {r.serviceName} | {r.customerName}
               </div>
             </div>
           ))}
@@ -120,50 +136,78 @@ export default function AppointmentHistory() {
       {/* RIGHT — RECEIPT DETAILS */}
       <div className="order-details">
         {selected && (() => {
-          const { taxTotal, discountTotal, total } =
-            calculateTotals(selected);
+          const { total } = calculateTotals(selected);
+          const currencySymbol = "€";
 
           return (
             <>
               <div className="details-title">
-                Receipt — {selected.customerName}
+                Receipt — {selected.id}
               </div>
 
               <div className="details-scroll">
-                <div><strong>Employee:</strong> {selected.employeeName}</div>
+                <div><strong>Date:</strong> {formatDate(selected.startTime)}</div>
                 <div>
                   <strong>Time:</strong>{" "}
-                  {formatDateTime(selected.startTime)} –{" "}
-                  {formatDateTime(selected.endTime)}
+                  {formatTime(selected.startTime)} – {formatTime(selected.endTime)}
                 </div>
+                <div><strong>Employee:</strong> {selected.employeeName}</div>
                 <div><strong>Service:</strong> {selected.serviceName}</div>
                 <div><strong>Customer:</strong> {selected.customerName}</div>
                 <div><strong>Status:</strong> {selected.paymentStatus}</div>
               </div>
 
+              {/* PRICE SUMMARY — SAME STYLE AS PAYMENTS */}
               <div className="order-summary">
-                <div className="summary-row">
-                  <span>Service Price</span>
-                  <span>{selected.servicePrice.toFixed(2)} €</span>
-                </div>
-
-                {selected.taxes.map((t) => (
-                  <div className="summary-row" key={t.id}>
-                    <span>+ {t.name}</span>
-                    <span>{t.amount.toFixed(2)} €</span>
-                  </div>
-                ))}
-
-                {selected.discounts.map((d) => (
-                  <div className="summary-row" key={d.id}>
-                    <span>- {d.name}</span>
-                    <span>{d.affectedAmount.toFixed(2)} €</span>
-                  </div>
-                ))}
-
                 <div className="summary-total">
-                  <span>Total</span>
-                  <span>{total.toFixed(2)} €</span>
+                  <div className="price-row">
+                    <span className="price-label">Base Price:</span>
+                    <span className="price-value">
+                      {currencySymbol} {selected.servicePrice.toFixed(2)}
+                    </span>
+                  </div>
+
+                  {selected.taxes.map((t) => (
+                    <div className="price-row" key={t.id}>
+                      <span className="price-label">
+                        + {t.name}
+                      </span>
+                      <span className="price-value">
+                        {currencySymbol} {t.amount.toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+
+                  {selected.discounts.map((d) => (
+                    <div className="price-row" key={d.id}>
+                      <span className="price-label">
+                        - {d.name}
+                      </span>
+                      <span className="price-value">
+                        {currencySymbol} {d.affectedAmount.toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+
+                  <div className="price-row final-price">
+                    <span className="price-label">
+                      <strong>Total:</strong>
+                    </span>
+                    <span className="price-value">
+                      <strong>
+                        {currencySymbol} {total.toFixed(2)}
+                      </strong>
+                    </span>
+                  </div>
+                  <div className="payment-actions">
+                    <button
+                      className="payment-primary"
+                      onClick={handleRefund}
+                      disabled={selected.paymentStatus !== "succeeded"}
+                    >
+                      Refund
+                    </button>
+                  </div>
                 </div>
               </div>
             </>
