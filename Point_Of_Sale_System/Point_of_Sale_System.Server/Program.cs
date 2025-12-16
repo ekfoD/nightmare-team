@@ -4,6 +4,7 @@ using Point_of_Sale_System.Server.Services;
 using Microsoft.EntityFrameworkCore;
 using Point_of_Sale_System.Server.Models.Data;
 using Point_of_Sale_System.Server.Data;
+using Point_of_Sale_System.Server.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,8 @@ builder.Services.AddScoped<IServicesService, ServicesService>();
 builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
 builder.Services.AddScoped<IVariationRepository, VariationRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 
 builder.Services.AddCors(options =>
 {
