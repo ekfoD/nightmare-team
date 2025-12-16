@@ -200,6 +200,15 @@ export default function AppointmentHistory() {
                     </span>
                   </div>
                   <div className="payment-actions">
+                    <div className="payment-left">
+                      <button
+                        className="secondary-action"
+                        onClick={() => window.print()}
+                      >
+                        Print Receipt
+                      </button>
+                    </div>
+
                     <button
                       className="payment-primary"
                       onClick={handleRefund}
