@@ -209,3 +209,27 @@
 .payment-primary:hover {
   background: #0b5ed7;
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .order-details,
+  .order-details * {
+    visibility: visible;
+  }
+
+  .order-details {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 24px;
+    background: white;
+  }
+
+  .payment-actions {
+    display: none;
+  }
+}
