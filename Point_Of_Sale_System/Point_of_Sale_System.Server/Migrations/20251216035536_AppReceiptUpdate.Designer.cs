@@ -12,8 +12,8 @@ using Point_of_Sale_System.Server.Models.Data;
 namespace Point_of_Sale_System.Server.Migrations
 {
     [DbContext(typeof(PoSDbContext))]
-    [Migration("20251214183853_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251216035536_AppReceiptUpdate")]
+    partial class AppReceiptUpdate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,6 +38,21 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasIndex("OrganizationsId");
 
                     b.ToTable("EmployeeOrganization");
+                });
+
+            modelBuilder.Entity("MenuServiceTax", b =>
+                {
+                    b.Property<Guid>("MenuServicesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TaxesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("MenuServicesId", "TaxesId");
+
+                    b.HasIndex("TaxesId");
+
+                    b.ToTable("MenuServiceTax");
                 });
 
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.Business.Employee", b =>
@@ -172,7 +187,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Property<int>("Category")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("DiscountId")
+                    b.Property<Guid?>("DiscountId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ImagePath")
@@ -184,6 +199,9 @@ namespace Point_of_Sale_System.Server.Migrations
 
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -266,6 +284,32 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.ToTable("Discounts");
                 });
 
+            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.DiscountReceipt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("AffectedAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Procentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("ReceiptId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceiptId");
+
+                    b.ToTable("DiscountReceipts");
+                });
+
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Giftcard", b =>
                 {
                     b.Property<Guid>("Id")
@@ -316,8 +360,15 @@ namespace Point_of_Sale_System.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal?>("Discount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<Guid?>("MenuItemId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
@@ -325,8 +376,17 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Property<Guid?>("ParentOrderItemId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<decimal?>("Tax")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("TaxName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("VariationId")
                         .HasColumnType("uniqueidentifier");
@@ -428,6 +488,35 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.ToTable("Taxes");
                 });
 
+            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.TaxReceipt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("AffectedAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NumberType")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ReceiptId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceiptId");
+
+                    b.ToTable("TaxReceipts");
+                });
+
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.ServiceBased.Appointment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -477,6 +566,55 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.ToTable("Appointments");
                 });
 
+            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.ServiceBased.AppointmentReceipt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("EmployeeName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PaymentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("PaymentStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ServiceName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("ServicePrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("AppointmentReceipts");
+                });
+
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.ServiceBased.MenuService", b =>
                 {
                     b.Property<Guid>("Id")
@@ -506,9 +644,6 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("TaxId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
@@ -517,8 +652,6 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasIndex("DiscountId");
 
                     b.HasIndex("OrganizationId");
-
-                    b.HasIndex("TaxId");
 
                     b.ToTable("MenuServices");
                 });
@@ -534,6 +667,21 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", null)
                         .WithMany()
                         .HasForeignKey("OrganizationsId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MenuServiceTax", b =>
+                {
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.ServiceBased.MenuService", null)
+                        .WithMany()
+                        .HasForeignKey("MenuServicesId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Tax", null)
+                        .WithMany()
+                        .HasForeignKey("TaxesId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -554,8 +702,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Discount", "Discount")
                         .WithMany("MenuItems")
                         .HasForeignKey("DiscountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany("MenuItems")
@@ -585,6 +732,17 @@ namespace Point_of_Sale_System.Server.Migrations
                         .IsRequired();
 
                     b.Navigation("MenuItem");
+                });
+
+            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.DiscountReceipt", b =>
+                {
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.ServiceBased.AppointmentReceipt", "Receipt")
+                        .WithMany("Discounts")
+                        .HasForeignKey("ReceiptId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Receipt");
                 });
 
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Giftcard", b =>
@@ -684,6 +842,17 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Navigation("Organization");
                 });
 
+            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.TaxReceipt", b =>
+                {
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.ServiceBased.AppointmentReceipt", "Receipt")
+                        .WithMany("Taxes")
+                        .HasForeignKey("ReceiptId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Receipt");
+                });
+
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.ServiceBased.Appointment", b =>
                 {
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Employee", "Employee")
@@ -711,6 +880,17 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Navigation("Organization");
                 });
 
+            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.ServiceBased.AppointmentReceipt", b =>
+                {
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Payment", "Payment")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Payment");
+                });
+
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.ServiceBased.MenuService", b =>
                 {
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Discount", "Discount")
@@ -724,17 +904,9 @@ namespace Point_of_Sale_System.Server.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Tax", "Tax")
-                        .WithMany("MenuServices")
-                        .HasForeignKey("TaxId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Discount");
 
                     b.Navigation("Organization");
-
-                    b.Navigation("Tax");
                 });
 
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.Business.Employee", b =>
@@ -794,13 +966,18 @@ namespace Point_of_Sale_System.Server.Migrations
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Tax", b =>
                 {
                     b.Navigation("MenuItems");
-
-                    b.Navigation("MenuServices");
                 });
 
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.ServiceBased.Appointment", b =>
                 {
                     b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.ServiceBased.AppointmentReceipt", b =>
+                {
+                    b.Navigation("Discounts");
+
+                    b.Navigation("Taxes");
                 });
 
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.ServiceBased.MenuService", b =>

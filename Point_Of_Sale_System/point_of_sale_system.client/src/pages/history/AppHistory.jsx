@@ -1,121 +1,83 @@
 // AppointmentHistory.jsx
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import useAuth from "../../hooks/useAuth";
+import api from "../../api/axios";
 import "../../styles/History.css";
 
-const dummyAppointments = [
-  {
-    id: "#A23546",
-    date: "10 Oct 2025",
-    appointmentTime: "07:00",
-    employee: "Alice",
-    service: "Haircut",
-    customerName: "John Doe",
-    phone: "+123456789",
-    extraInfo: "Allergic to certain shampoos",
-    subtotal: 25,
-    tax: 2.5,
-    total: 27.5
-  },
-  {
-    id: "#A23547",
-    date: "10 Oct 2025",
-    appointmentTime: "07:30",
-    employee: "Bob",
-    service: "Manicure",
-    customerName: "Mary Smith",
-    phone: "+987654321",
-    extraInfo: "",
-    subtotal: 20,
-    tax: 2,
-    total: 22
-  },
-  {
-    id: "#A23548",
-    date: "11 Oct 2025",
-    appointmentTime: "08:00",
-    employee: "Charlie",
-    service: "Massage",
-    customerName: "Alex Johnson",
-    phone: "+456789123",
-    extraInfo: "Prefers strong pressure",
-    subtotal: 50,
-    tax: 5,
-    total: 55
-  },
-  {
-    id: "#A23549",
-    date: "11 Oct 2025",
-    appointmentTime: "08:30",
-    employee: "Alice",
-    service: "Nail Polish",
-    customerName: "Sophie Brown",
-    phone: "+321654987",
-    extraInfo: "",
-    subtotal: 15,
-    tax: 1.5,
-    total: 16.5
-  },
-  {
-    id: "#A23550",
-    date: "12 Oct 2025",
-    appointmentTime: "09:00",
-    employee: "Diana",
-    service: "Facial",
-    customerName: "Michael Lee",
-    phone: "+111222333",
-    extraInfo: "Sensitive skin",
-    subtotal: 40,
-    tax: 4,
-    total: 44
-  }
-];
-
 export default function AppointmentHistory() {
-  const [selected, setSelected] = useState(dummyAppointments[0]);
+  const { auth } = useAuth();
+  const organizationId = auth.businessId;
+
+  const [receipts, setReceipts] = useState([]);
+  const [selected, setSelected] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortKey, setSortKey] = useState("date");
+  const [loading, setLoading] = useState(true);
 
-  const filteredAppointments = useMemo(() => {
-    let filtered = dummyAppointments.filter(
-      (app) =>
-        app.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.employee.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.service.toLowerCase().includes(searchTerm.toLowerCase())
+  useEffect(() => {
+    api
+      .get(`https://localhost:7079/api/Receipt/appointment/${organizationId}`)
+      .then((res) => {
+        setReceipts(res.data);
+        setSelected(res.data[0] ?? null);
+      })
+      .catch(() => setReceipts([]))
+      .finally(() => setLoading(false));
+  }, [organizationId]);
+
+  const filteredReceipts = useMemo(() => {
+    let filtered = receipts.filter(
+      (r) =>
+        r.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.serviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.id.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     if (sortKey === "date") {
-      filtered.sort(
-        (a, b) =>
-          new Date(b.date + " " + b.appointmentTime) -
-          new Date(a.date + " " + a.appointmentTime)
-      );
-    } else if (sortKey === "id") {
-      filtered.sort((a, b) => a.id.localeCompare(b.id));
+      filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     } else if (sortKey === "employee") {
-      filtered.sort((a, b) => a.employee.localeCompare(b.employee));
+      filtered.sort((a, b) => a.employeeName.localeCompare(b.employeeName));
     } else if (sortKey === "customer") {
       filtered.sort((a, b) => a.customerName.localeCompare(b.customerName));
     } else if (sortKey === "service") {
-      filtered.sort((a, b) => a.service.localeCompare(b.service));
+      filtered.sort((a, b) => a.serviceName.localeCompare(b.serviceName));
     }
 
     return filtered;
-  }, [searchTerm, sortKey]);
+  }, [receipts, searchTerm, sortKey]);
 
-  const handleRefund = () => {
-    alert(`Refund initiated for appointment ${selected.id}`);
+  const formatDateTime = (date) =>
+    new Date(date).toLocaleString([], {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  const calculateTotals = (receipt) => {
+    const taxTotal = receipt.taxes.reduce((sum, t) => sum + t.amount, 0);
+    const discountTotal = receipt.discounts.reduce(
+      (sum, d) => sum + d.affectedAmount,
+      0
+    );
+
+    const total = receipt.servicePrice + taxTotal - discountTotal;
+
+    return { taxTotal, discountTotal, total };
   };
+
+  if (loading) return <div>Loading receipts...</div>;
 
   return (
     <div className="order-history-container">
-      {/* LEFT — APPOINTMENT LIST */}
+      {/* LEFT — RECEIPT LIST */}
       <div className="order-list">
         <div className="list-header">
-          <span>Appointments</span>
+          <span>Receipts</span>
           <select value={sortKey} onChange={(e) => setSortKey(e.target.value)}>
-            <option value="date">Sort by Date/Time</option>
-            <option value="id">Sort by ID</option>
+            <option value="date">Sort by Date</option>
             <option value="employee">Sort by Employee</option>
             <option value="customer">Sort by Customer</option>
             <option value="service">Sort by Service</option>
@@ -124,59 +86,89 @@ export default function AppointmentHistory() {
 
         <div className="list-search">
           <input
-            type="text"
-            placeholder="Search by ID, worker, customer, or service..."
+            placeholder="Search receipt, customer, employee, service..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
         <div className="list-scroll">
-          {filteredAppointments.map((app) => (
+          {filteredReceipts.map((r) => (
             <div
-              key={app.id}
-              onClick={() => setSelected(app)}
-              className={selected.id === app.id ? "list-item selected" : "list-item"}
+              key={r.id}
+              onClick={() => setSelected(r)}
+              className={`list-item ${
+                selected?.id === r.id ? "selected" : ""
+              }`}
             >
-              <div className="item-id">{app.id}</div>
+              <div className="item-id">{r.id}</div>
               <div className="item-date">
-                {app.date} — {app.appointmentTime}
+                {formatDateTime(r.startTime)} – {formatDateTime(r.endTime)}
               </div>
               <div className="item-emp">
-                Employee: {app.employee} | Customer: {app.customerName} | Service: {app.service}
+                {r.employeeName} | {r.customerName} | {r.serviceName}
               </div>
             </div>
           ))}
-          {filteredAppointments.length === 0 && (
-            <div className="no-orders">No appointments found</div>
+
+          {filteredReceipts.length === 0 && (
+            <div className="no-orders">No receipts found</div>
           )}
         </div>
       </div>
 
-      {/* RIGHT — APPOINTMENT DETAILS */}
+      {/* RIGHT — RECEIPT DETAILS */}
       <div className="order-details">
-        <div className="details-title">Appointment Details — {selected.id}</div>
+        {selected && (() => {
+          const { taxTotal, discountTotal, total } =
+            calculateTotals(selected);
 
-        <div className="details-scroll">
-          <div style={{ marginBottom: "10px" }}>
-            <div><strong>Employee:</strong> {selected.employee}</div>
-            <div><strong>Time:</strong> {selected.appointmentTime}</div>
-            <div><strong>Service:</strong> {selected.service}</div>
-            <div><strong>Customer:</strong> {selected.customerName}</div>
-            <div><strong>Phone:</strong> {selected.phone}</div>
-            {selected.extraInfo && <div><strong>Extra Info:</strong> {selected.extraInfo}</div>}
-          </div>
-        </div>
+          return (
+            <>
+              <div className="details-title">
+                Receipt — {selected.customerName}
+              </div>
 
-        <div className="order-summary">
-          <button className="refund-button" onClick={handleRefund}>
-            Refund
-          </button>
+              <div className="details-scroll">
+                <div><strong>Employee:</strong> {selected.employeeName}</div>
+                <div>
+                  <strong>Time:</strong>{" "}
+                  {formatDateTime(selected.startTime)} –{" "}
+                  {formatDateTime(selected.endTime)}
+                </div>
+                <div><strong>Service:</strong> {selected.serviceName}</div>
+                <div><strong>Customer:</strong> {selected.customerName}</div>
+                <div><strong>Status:</strong> {selected.paymentStatus}</div>
+              </div>
 
-          <div className="summary-row"><span>Subtotal</span><span>{selected.subtotal} €</span></div>
-          <div className="summary-row"><span>Tax</span><span>{selected.tax} €</span></div>
-          <div className="summary-total"><span>Total</span><span>{selected.total} €</span></div>
-        </div>
+              <div className="order-summary">
+                <div className="summary-row">
+                  <span>Service Price</span>
+                  <span>{selected.servicePrice.toFixed(2)} €</span>
+                </div>
+
+                {selected.taxes.map((t) => (
+                  <div className="summary-row" key={t.id}>
+                    <span>+ {t.name}</span>
+                    <span>{t.amount.toFixed(2)} €</span>
+                  </div>
+                ))}
+
+                {selected.discounts.map((d) => (
+                  <div className="summary-row" key={d.id}>
+                    <span>- {d.name}</span>
+                    <span>{d.affectedAmount.toFixed(2)} €</span>
+                  </div>
+                ))}
+
+                <div className="summary-total">
+                  <span>Total</span>
+                  <span>{total.toFixed(2)} €</span>
+                </div>
+              </div>
+            </>
+          );
+        })()}
       </div>
     </div>
   );

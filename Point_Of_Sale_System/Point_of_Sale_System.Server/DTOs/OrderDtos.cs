@@ -1,6 +1,6 @@
 using Point_of_Sale_System.Server.Enums;
 
-namespace Point_of_Sale_System.Server.Dtos
+namespace Point_of_Sale_System.Server.DTOs
 {
     public class CreateOrderDto
     {

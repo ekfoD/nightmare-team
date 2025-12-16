@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Point_of_Sale_System.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class AppReceipt : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -147,6 +147,37 @@ namespace Point_of_Sale_System.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MenuServices",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Duration = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    OrganizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DiscountId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MenuServices", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MenuServices_Discounts_DiscountId",
+                        column: x => x.DiscountId,
+                        principalTable: "Discounts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_MenuServices_Organizations_OrganizationId",
+                        column: x => x.OrganizationId,
+                        principalTable: "Organizations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Orders",
                 columns: table => new
                 {
@@ -184,103 +215,6 @@ namespace Point_of_Sale_System.Server.Migrations
                         name: "FK_Taxes_Organizations_OrganizationId",
                         column: x => x.OrganizationId,
                         principalTable: "Organizations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "MenuItems",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Category = table.Column<int>(type: "int", nullable: false),
-                    ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    OrganizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TaxId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DiscountId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MenuItems", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_MenuItems_Discounts_DiscountId",
-                        column: x => x.DiscountId,
-                        principalTable: "Discounts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_MenuItems_Organizations_OrganizationId",
-                        column: x => x.OrganizationId,
-                        principalTable: "Organizations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_MenuItems_Taxes_TaxId",
-                        column: x => x.TaxId,
-                        principalTable: "Taxes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "MenuServices",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Duration = table.Column<int>(type: "int", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    OrganizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TaxId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DiscountId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MenuServices", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_MenuServices_Discounts_DiscountId",
-                        column: x => x.DiscountId,
-                        principalTable: "Discounts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_MenuServices_Organizations_OrganizationId",
-                        column: x => x.OrganizationId,
-                        principalTable: "Organizations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_MenuServices_Taxes_TaxId",
-                        column: x => x.TaxId,
-                        principalTable: "Taxes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Variations",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    MenuItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Variations", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Variations_MenuItems_MenuItemId",
-                        column: x => x.MenuItemId,
-                        principalTable: "MenuItems",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -325,41 +259,63 @@ namespace Point_of_Sale_System.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "OrderItems",
+                name: "MenuItems",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    VariationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    MenuItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ParentOrderItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Category = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    OrganizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TaxId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DiscountId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrderItems", x => x.Id);
+                    table.PrimaryKey("PK_MenuItems", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_OrderItems_MenuItems_MenuItemId",
-                        column: x => x.MenuItemId,
-                        principalTable: "MenuItems",
+                        name: "FK_MenuItems_Discounts_DiscountId",
+                        column: x => x.DiscountId,
+                        principalTable: "Discounts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_OrderItems_OrderItems_ParentOrderItemId",
-                        column: x => x.ParentOrderItemId,
-                        principalTable: "OrderItems",
+                        name: "FK_MenuItems_Organizations_OrganizationId",
+                        column: x => x.OrganizationId,
+                        principalTable: "Organizations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_OrderItems_Orders_OrderId",
-                        column: x => x.OrderId,
-                        principalTable: "Orders",
+                        name: "FK_MenuItems_Taxes_TaxId",
+                        column: x => x.TaxId,
+                        principalTable: "Taxes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MenuServiceTax",
+                columns: table => new
+                {
+                    MenuServicesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TaxesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MenuServiceTax", x => new { x.MenuServicesId, x.TaxesId });
+                    table.ForeignKey(
+                        name: "FK_MenuServiceTax_MenuServices_MenuServicesId",
+                        column: x => x.MenuServicesId,
+                        principalTable: "MenuServices",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_OrderItems_Variations_VariationId",
-                        column: x => x.VariationId,
-                        principalTable: "Variations",
+                        name: "FK_MenuServiceTax_Taxes_TaxesId",
+                        column: x => x.TaxesId,
+                        principalTable: "Taxes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -410,6 +366,149 @@ namespace Point_of_Sale_System.Server.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Variations",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    MenuItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Variations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Variations_MenuItems_MenuItemId",
+                        column: x => x.MenuItemId,
+                        principalTable: "MenuItems",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AppointmentReceipts",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrganizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PaymentStatus = table.Column<int>(type: "int", nullable: false),
+                    ServiceName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ServicePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    EmployeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EmployeeName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PaymentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppointmentReceipts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AppointmentReceipts_Payments_PaymentId",
+                        column: x => x.PaymentId,
+                        principalTable: "Payments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OrderItems",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TaxName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Tax = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    Discount = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    VariationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    MenuItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ParentOrderItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OrderItems_MenuItems_MenuItemId",
+                        column: x => x.MenuItemId,
+                        principalTable: "MenuItems",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_OrderItems_OrderItems_ParentOrderItemId",
+                        column: x => x.ParentOrderItemId,
+                        principalTable: "OrderItems",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_OrderItems_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_OrderItems_Variations_VariationId",
+                        column: x => x.VariationId,
+                        principalTable: "Variations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DiscountReceipts",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AffectedAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ReceiptId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Procentage = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DiscountReceipts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DiscountReceipts_AppointmentReceipts_ReceiptId",
+                        column: x => x.ReceiptId,
+                        principalTable: "AppointmentReceipts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TaxReceipts",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AffectedAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ReceiptId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    NumberType = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TaxReceipts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TaxReceipts_AppointmentReceipts_ReceiptId",
+                        column: x => x.ReceiptId,
+                        principalTable: "AppointmentReceipts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppointmentReceipts_PaymentId",
+                table: "AppointmentReceipts",
+                column: "PaymentId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Appointments_EmployeeId",
                 table: "Appointments",
@@ -424,6 +523,11 @@ namespace Point_of_Sale_System.Server.Migrations
                 name: "IX_Appointments_OrganizationId",
                 table: "Appointments",
                 column: "OrganizationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DiscountReceipts_ReceiptId",
+                table: "DiscountReceipts",
+                column: "ReceiptId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_EmployeeOrganization_OrganizationsId",
@@ -466,9 +570,9 @@ namespace Point_of_Sale_System.Server.Migrations
                 column: "OrganizationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MenuServices_TaxId",
-                table: "MenuServices",
-                column: "TaxId");
+                name: "IX_MenuServiceTax_TaxesId",
+                table: "MenuServiceTax",
+                column: "TaxesId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderItems_MenuItemId",
@@ -521,6 +625,11 @@ namespace Point_of_Sale_System.Server.Migrations
                 column: "OrganizationId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_TaxReceipts_ReceiptId",
+                table: "TaxReceipts",
+                column: "ReceiptId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Variations_MenuItemId",
                 table: "Variations",
                 column: "MenuItemId");
@@ -530,22 +639,40 @@ namespace Point_of_Sale_System.Server.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "DiscountReceipts");
+
+            migrationBuilder.DropTable(
                 name: "EmployeeOrganization");
 
             migrationBuilder.DropTable(
                 name: "InventoryItems");
 
             migrationBuilder.DropTable(
-                name: "OrderItems");
+                name: "MenuServiceTax");
 
             migrationBuilder.DropTable(
-                name: "Payments");
+                name: "OrderItems");
 
             migrationBuilder.DropTable(
                 name: "SuperAdmins");
 
             migrationBuilder.DropTable(
+                name: "TaxReceipts");
+
+            migrationBuilder.DropTable(
                 name: "Variations");
+
+            migrationBuilder.DropTable(
+                name: "AppointmentReceipts");
+
+            migrationBuilder.DropTable(
+                name: "MenuItems");
+
+            migrationBuilder.DropTable(
+                name: "Payments");
+
+            migrationBuilder.DropTable(
+                name: "Taxes");
 
             migrationBuilder.DropTable(
                 name: "Appointments");
@@ -557,9 +684,6 @@ namespace Point_of_Sale_System.Server.Migrations
                 name: "Orders");
 
             migrationBuilder.DropTable(
-                name: "MenuItems");
-
-            migrationBuilder.DropTable(
                 name: "Employees");
 
             migrationBuilder.DropTable(
@@ -567,9 +691,6 @@ namespace Point_of_Sale_System.Server.Migrations
 
             migrationBuilder.DropTable(
                 name: "Discounts");
-
-            migrationBuilder.DropTable(
-                name: "Taxes");
 
             migrationBuilder.DropTable(
                 name: "Organizations");
