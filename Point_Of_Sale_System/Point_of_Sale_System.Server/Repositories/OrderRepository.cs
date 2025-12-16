@@ -33,15 +33,15 @@ namespace Point_of_Sale_System.Server.Repositories
                 .FirstOrDefaultAsync(o => o.Id == id);
         }
 
-        public async Task<List<OrderItem>> AddItemsToOrderAsync(List<OrderItem> items)
-        {
+        public async Task<bool> AddItemsToOrderAsync(List<OrderItem> items)
+        {  
             foreach (var item in items)
             {
                 var menuItem = await _context.MenuItems
                     .Include(m => m.Tax)
                     .FirstOrDefaultAsync(m => m.Id == item.MenuItemId);
                 
-                if (menuItem == null) return null;
+                if (menuItem == null) return false;
 
                 if (item.VariationId != null)
                 {
@@ -50,18 +50,19 @@ namespace Point_of_Sale_System.Server.Repositories
                     
                     if (parentItem == null)
                     {
-                        // Check local cache for parent added in this transaction
-                        parentItem = await _context.OrderItems
-                            .FirstOrDefaultAsync(oi => oi.OrderId == item.OrderId && oi.MenuItemId == item.MenuItemId);
+                        parentItem = _context.OrderItems.Local
+                            .FirstOrDefault(oi =>
+                                oi.OrderId == item.OrderId &&
+                                oi.MenuItemId == item.MenuItemId);
                     }
 
-                    if (parentItem == null) return null;
+                    if (parentItem == null) return false;
 
                     item.ParentOrderItemId = parentItem.Id;
                     
                     var variationItem = await _context.Variations
                         .FirstOrDefaultAsync(v => v.Id == item.VariationId);
-                    if (variationItem == null) return null;
+                    if (variationItem == null) return false;
                     item.Price = variationItem.Price;
                     item.Name = variationItem.Name;
                 }
@@ -87,7 +88,7 @@ namespace Point_of_Sale_System.Server.Repositories
             };
 
             await _context.SaveChangesAsync();
-            return items;
+            return true;
         }
 
         public async Task<bool> CheckMenuItemOrVariationExistsAsync(Guid menuItemId, Guid? variationId, Guid orderId, bool isParent)

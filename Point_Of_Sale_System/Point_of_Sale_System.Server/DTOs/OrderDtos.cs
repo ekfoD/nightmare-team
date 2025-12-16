@@ -31,6 +31,13 @@ namespace Point_of_Sale_System.Server.DTOs
         public bool IsParent { get; set; }
     }
 
+    public class AddItemsResponseDto
+    {
+        public Guid OrderId { get; set; }
+        public DateTime Timestamp { get; set; }
+        public List<AddItemDto> OrderItems { get; set; } = new List<AddItemDto>();
+    }
+
     public class OrderItemDto
     {
         public Guid Id { get; set; }

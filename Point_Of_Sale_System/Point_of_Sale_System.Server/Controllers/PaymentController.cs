@@ -66,11 +66,15 @@ namespace Point_of_Sale_System.Server.Controllers
                 };
                 orderItems.Add(orderItem);
             };
-            
-            var items = await _orderRepository.AddItemsToOrderAsync(orderItems);
-            if (items == null) return NotFound("Items not found");
 
-            return Ok(items);
+            if (!(await _orderRepository.AddItemsToOrderAsync(orderItems))) return NotFound("Items not found");
+
+            return Ok(new AddItemsResponseDto
+            {
+                OrderId = orderId,
+                Timestamp = DateTime.Now,
+                OrderItems = dtos.OrderItems
+            });
         }
 
         [HttpDelete("CancelOrder/{orderId}")]
