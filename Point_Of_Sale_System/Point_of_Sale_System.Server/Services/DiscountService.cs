@@ -21,6 +21,7 @@ public class DiscountService : IDiscountService
             .OrderByDescending(d => d.Timestamp)
             .Select(d => new DiscountResponseDto
             {
+                Name = d.Name,
                 Id = d.Id,
                 Amount = d.Amount,
                 ApplicableTo = d.ApplicableTo,
@@ -37,7 +38,8 @@ public class DiscountService : IDiscountService
         return await _db.Discounts
             .Where(d => d.Id == id)
             .Select(d => new DiscountResponseDto
-            {
+            {   
+                Name = d.Name,
                 Id = d.Id,
                 Amount = d.Amount,
                 ApplicableTo = d.ApplicableTo,
@@ -56,6 +58,7 @@ public class DiscountService : IDiscountService
 
         var discount = new Discount
         {
+            Name = dto.Name,
             Amount = dto.Amount,
             ApplicableTo = dto.ApplicableTo,
             ValidFrom = dto.ValidFrom,
@@ -74,6 +77,7 @@ public class DiscountService : IDiscountService
         var discount = await _db.Discounts.FindAsync(id);
         if (discount == null) return;
 
+        discount.Name = dto.Name;
         discount.Amount = dto.Amount;
         discount.ApplicableTo = dto.ApplicableTo;
         discount.ValidFrom = dto.ValidFrom;

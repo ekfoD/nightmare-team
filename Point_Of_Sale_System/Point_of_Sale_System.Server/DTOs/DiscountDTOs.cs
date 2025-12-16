@@ -6,6 +6,9 @@ namespace Point_of_Sale_System.Server.DTOs
     public class CreateDiscountDto
     {
         [Required]
+        public required string Name { get; set; }
+
+        [Required]
         public decimal Amount { get; set; }
 
         [Required]
@@ -25,6 +28,7 @@ namespace Point_of_Sale_System.Server.DTOs
 
     public class UpdateDiscountDto
     {
+        public required string Name { get; set; }
         [Required]
         public decimal Amount { get; set; }
 
@@ -43,6 +47,7 @@ namespace Point_of_Sale_System.Server.DTOs
     public class DiscountResponseDto
     {
         public Guid Id { get; set; }
+        public required string Name { get; set; }
         public decimal Amount { get; set; }
         public AppliedToEnum ApplicableTo { get; set; }
         public DateOnly ValidFrom { get; set; }
