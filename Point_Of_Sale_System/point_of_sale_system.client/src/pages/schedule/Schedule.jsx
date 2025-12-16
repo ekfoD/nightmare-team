@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Container, Card, Button, Form, Modal } from 'react-bootstrap';
 import NewAppointmentPopup from './NewAppointmentPopup';
 import EditAppointmentPopup from './EditAppointmentPopup';
 import Calendar from './Calendar';
 import SuccessNotifier from "../../utilities/SuccessNotifier";
+import useAuth from "../../hooks/useAuth";
+import api from '../../api/axios.js';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../styles/Schedule.css';
@@ -29,10 +30,10 @@ const generateTimes = (workStart, workEnd, intervalMinutes) => {
   return times;
 };
 
-
-const organizationId = "a685b0d3-d465-4b02-8d66-5315e84f6cba";
-
 const Schedule = () => {
+  const { auth } = useAuth();
+  const organizationId = auth.businessId;
+
   const [searchTerm, setSearchTerm] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -61,9 +62,9 @@ const Schedule = () => {
       const isoDate = `${yyyy}-${mm}-${dd}`;
 
       const [workersRes, apptsRes, servicesRes] = await Promise.all([
-        axios.get(`https://localhost:7079/api/employees/${organizationId}`),
-        axios.get(`https://localhost:7079/api/appointments/${organizationId}/${isoDate}`),
-        axios.get(`https://localhost:7079/api/services/${organizationId}`),
+        api.get(`https://localhost:7079/api/employees/${organizationId}`),
+        api.get(`https://localhost:7079/api/appointments/${organizationId}/${isoDate}`),
+        api.get(`https://localhost:7079/api/services/${organizationId}`),
       ]);
 
       setAllWorkers(workersRes.data.map(w => ({

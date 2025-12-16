@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import axios from "axios";
+import api from '../../api/axios.js';
 import { workStart, workEnd, isWithinWorkHours, parseDurationToMinutes, doesOverlap } from './utils/ScheduleHelpers';
 
 const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, selectedDate, allAppointments, organizationId }) => {
@@ -68,12 +68,13 @@ const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, 
         alert("Please select a valid employee");
         return;
       }
+      const startStr = `${date}T${time}`;
 
-      await axios.post("https://localhost:7079/api/appointments/create", {
+      await api.post("https://localhost:7079/api/appointments/create", {
         employeeId: employee.id,
         employeeName: employee.name,
         serviceName: service.name,
-        startTime: start.toISOString(),
+        startTime: startStr,
         customerName,
         customerPhone,
         extraInfo,

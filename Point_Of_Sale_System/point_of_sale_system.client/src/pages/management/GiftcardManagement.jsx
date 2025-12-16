@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import useAuth from "../../hooks/useAuth";
+import api from '../../api/axios.js';
 import { Container, Table, Button, Spinner } from "react-bootstrap";
 import GiftcardModal from "./GiftcardModal";
 
 const API_URL = "https://localhost:7079/api/Giftcard";
-const ORGANIZATION_ID = "a685b0d3-d465-4b02-8d66-5315e84f6cba"; // fixed for now
 
 const GiftcardManagement = () => {
     const [giftcards, setGiftcards] = useState([]);
@@ -12,6 +12,9 @@ const GiftcardManagement = () => {
 
     const [showModal, setShowModal] = useState(false);
     const [selectedGiftcard, setSelectedGiftcard] = useState(null);
+
+    const { auth } = useAuth();
+    const organizationId = auth.businessId;
 
     // =========================
     // LOAD DATA
@@ -22,7 +25,7 @@ const GiftcardManagement = () => {
 
     const loadGiftcards = async () => {
         try {
-            const res = await axios.get(`${API_URL}/organization/${ORGANIZATION_ID}`);
+            const res = await api.get(`${API_URL}/organization/${organizationId}`);
             setGiftcards(res.data);
         } catch (err) {
             console.error("Failed to load giftcards", err);
@@ -37,12 +40,12 @@ const GiftcardManagement = () => {
     const handleSave = async (card) => {
         try {
             if (card.id) {
-                await axios.put(`${API_URL}/${card.id}`, {
+                await api.put(`${API_URL}/${card.id}`, {
                     balance: card.balance,
                     validUntil: card.validUntil
                 });
             } else {
-                await axios.post(`${API_URL}/organization/${ORGANIZATION_ID}`, {
+                await api.post(`${API_URL}/organization/${organizationId}`, {
                     balance: card.balance,
                     validUntil: card.validUntil
                 });
@@ -63,7 +66,7 @@ const GiftcardManagement = () => {
         if (!window.confirm("Delete this giftcard?")) return;
 
         try {
-            await axios.delete(`${API_URL}/${id}`);
+            await api.delete(`${API_URL}/${id}`);
             setGiftcards(giftcards.filter(g => g.id !== id));
         } catch (err) {
             console.error("Delete failed", err);

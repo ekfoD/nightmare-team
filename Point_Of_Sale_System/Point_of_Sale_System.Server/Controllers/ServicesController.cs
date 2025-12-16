@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Point_of_Sale_System.Server.Interfaces;
 using Point_of_Sale_System.Server.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Point_of_Sale_System.Server.Controllers
 {
@@ -15,6 +16,7 @@ namespace Point_of_Sale_System.Server.Controllers
             _services = services;
         }
 
+        [Authorize(Roles = "admin,owner,manager,employee")]
         [HttpGet("{organizationId}")]
         public async Task<IActionResult> GetServices(Guid organizationId)
         {
@@ -22,6 +24,7 @@ namespace Point_of_Sale_System.Server.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "admin,owner,manager,employee")]
         [HttpGet("full/{organizationId}")]
         public async Task<IActionResult> GetFullServices(Guid organizationId)
         {
@@ -29,6 +32,7 @@ namespace Point_of_Sale_System.Server.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "admin,owner,manager")]
         [HttpPost]
         public async Task<IActionResult> CreateService([FromBody] CreateMenuServiceDto dto)
         {
@@ -37,6 +41,7 @@ namespace Point_of_Sale_System.Server.Controllers
             return Ok(new { message = "Service created successfully" });
         }
 
+        [Authorize(Roles = "admin,owner,manager")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateService(Guid id, [FromBody] CreateMenuServiceDto dto)
         {
@@ -47,6 +52,7 @@ namespace Point_of_Sale_System.Server.Controllers
             return Ok(updated);
         }
 
+        [Authorize(Roles = "admin,owner,manager")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteService(Guid id)
         {

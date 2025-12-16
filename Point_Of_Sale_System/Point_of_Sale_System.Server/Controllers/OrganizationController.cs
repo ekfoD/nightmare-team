@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Point_of_Sale_System.Server.DTOs;
@@ -21,6 +22,7 @@ public class OrganizationController : ControllerBase
         _context = context;
     }
 
+    [Authorize(Roles = "admin")]
     [HttpGet]
     public async Task<ActionResult<PagedResponseDTO<OrganizationGetDTO>>> GetOrganizationsPaginatedAsync(
         int pageNumber = 1,
@@ -55,6 +57,7 @@ public class OrganizationController : ControllerBase
         return Ok(response);
     }
 
+    [Authorize(Roles = "admin")]
     [HttpPost]
     public async Task<ActionResult<OrganizationGetDTO>> AddOrganizationAsync([FromBody] OrganizationPostDTO request)
     {
@@ -93,10 +96,14 @@ public class OrganizationController : ControllerBase
         return Created("Successfully created an organization", response);
     }
 
+    [Authorize(Roles = "admin, owner")]
     [HttpGet("{organizationId}")]
     public async Task<ActionResult<OrganizationGetDTO>> GetOrganizationByIdAsync(Guid organizationId)
     {
         var organization = await _context.Organizations.FindAsync(organizationId);
+
+        if (organization == null)
+            return BadRequest("No such organiszation");
 
         var response = new OrganizationGetDTO
         {
@@ -110,6 +117,8 @@ public class OrganizationController : ControllerBase
         return Ok(response);
     }
 
+
+    [Authorize(Roles = "admin, owner")]
     [HttpPut("{organizationId}")]
     public async Task<ActionResult<OrganizationGetDTO>> PutOrganizationAsync(
     Guid organizationId,
@@ -157,6 +166,7 @@ public class OrganizationController : ControllerBase
         return Ok(response);
     }
 
+    [Authorize(Roles = "admin, owner")]
     [HttpDelete("{organizationId}")]
     public async Task<IActionResult> DeleteOrganizationAsync(Guid organizationId)
     {

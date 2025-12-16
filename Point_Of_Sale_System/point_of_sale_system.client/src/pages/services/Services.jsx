@@ -3,9 +3,8 @@ import "../../styles/Services.css";
 import CreateServiceModal from "./CreateServiceModal";
 import EditServiceModal from "./EditServiceModal";
 import SuccessNotifier from "../../utilities/SuccessNotifier";
-import axios from "axios";
-
-const ORGANIZATION_ID = "a685b0d3-d465-4b02-8d66-5315e84f6cba";
+import useAuth from "../../hooks/useAuth";
+import api from '../../api/axios.js';
 
 function formatDuration(minutes) {
   const h = Math.floor(minutes / 60).toString().padStart(2, "0");
@@ -14,6 +13,9 @@ function formatDuration(minutes) {
 }
 
 export default function Services() {
+  const { auth } = useAuth();
+  const organizationId = auth.businessId;
+
   const [services, setServices] = useState([]);
   const [taxes, setTaxes] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -25,11 +27,10 @@ export default function Services() {
   const [showNotifier, setShowNotifier] = useState(false);
   const [notifierMessage, setNotifierMessage] = useState("");
 
-  // ---------------- FETCH DATA ----------------
 
   const fetchServices = async () => {
     try {
-      const res = await axios.get(`/api/services/full/${ORGANIZATION_ID}`);
+      const res = await api.get(`/services/full/${organizationId}`);
       setServices(res.data);
       setSelected(res.data.length ? res.data[0] : null);
     } catch (err) {
@@ -39,7 +40,7 @@ export default function Services() {
 
   const fetchTaxes = async () => {
     try {
-      const res = await axios.get(`/api/Tax/Organization/${ORGANIZATION_ID}`);
+      const res = await api.get(`/Tax/Organization/${organizationId}`);
       setTaxes(res.data);
     } catch (err) {
       console.error("Failed to fetch taxes:", err);
@@ -47,6 +48,7 @@ export default function Services() {
   };
 
   useEffect(() => {
+    
     const load = async () => {
       setLoading(true);
       await Promise.all([fetchServices(), fetchTaxes()]);
@@ -54,8 +56,6 @@ export default function Services() {
     };
     load();
   }, []);
-
-  // ---------------- CREATE ----------------
 
   const handleCreateService = async (service) => {
     try {
@@ -65,11 +65,11 @@ export default function Services() {
         price: service.price,
         description: service.description,
         status: service.status,
-        organizationId: ORGANIZATION_ID,
+        organizationId: organizationId,
         taxIds: service.taxIds
       };
 
-      await axios.post("/api/services", payload);
+      await api.post("/services", payload);
       await fetchServices();
 
       setShowCreateModal(false);
@@ -80,8 +80,6 @@ export default function Services() {
     }
   };
 
-  // ---------------- UPDATE ----------------
-
   const handleUpdateService = async (service) => {
     try {
       const payload = {
@@ -90,11 +88,11 @@ export default function Services() {
         price: service.price,
         description: service.description,
         status: service.status,
-        organizationId: ORGANIZATION_ID,
+        organizationId: organizationId,
         taxIds: service.taxIds
       };
 
-      await axios.put(`/api/services/${service.id}`, payload);
+      await api.put(`/services/${service.id}`, payload);
       await fetchServices();
 
       setShowEditModal(false);
@@ -106,13 +104,12 @@ export default function Services() {
     }
   };
 
-  // ---------------- DELETE ----------------
 
   const handleDeleteService = async (service) => {
     if (!window.confirm(`Delete "${service.name}"?`)) return;
 
     try {
-      await axios.delete(`/api/services/${service.id}`);
+      await api.delete(`/services/${service.id}`);
       setServices((prev) => prev.filter((s) => s.id !== service.id));
       setSelected(null);
       setNotifierMessage(`Service "${service.name}" deleted successfully!`);

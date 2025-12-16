@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import axios from "axios";
+import api from '../../api/axios.js';
 import { workStart, workEnd, isWithinWorkHours, parseDurationToMinutes, doesOverlap } from './utils/ScheduleHelpers';
 
 const EditAppointmentPopup = ({
@@ -113,7 +113,7 @@ const EditAppointmentPopup = ({
       const startStr = `${date}T${time}`;
       const endStr = `${date}T${form.endTime}`;
 
-      await axios.put(
+      await api.put(
         `https://localhost:7079/api/appointments/${appointment.id}/edit`,
         {
           employeeId,
@@ -139,7 +139,7 @@ const EditAppointmentPopup = ({
   const handleDelete = async () => {
     if (!appointment || !confirm("Delete this appointment?")) return;
     try {
-      await axios.delete(`https://localhost:7079/api/appointments/${appointment.id}/delete`);
+      await api.delete(`https://localhost:7079/api/appointments/${appointment.id}/delete`);
       onSuccess && onSuccess("Appointment deleted");
       handleClose();
     } catch (err) {
