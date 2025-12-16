@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Point_of_Sale_System.Server.DTOs;
 using Point_of_Sale_System.Server.Interfaces;
+using Point_of_Sale_System.Server.Enums;
 
 namespace Point_of_Sale_System.Server.Controllers
 {
@@ -29,6 +30,24 @@ namespace Point_of_Sale_System.Server.Controllers
         {
             var discount = await _discounts.GetByIdAsync(id);
             return discount == null ? NotFound() : Ok(discount);
+        }
+
+        [Authorize(Roles = "admin,owner,manager,employee")]
+        [HttpGet("organization/{organizationId}/items")]
+        public async Task<IActionResult> GetItemDiscounts(Guid organizationId)
+        {
+            var discounts = await _discounts.GetAllByOrganizationAsync(organizationId);
+
+            var itemDiscounts = discounts
+                .Where(d => d.ApplicableTo == AppliedToEnum.item)
+                .Select(d => new 
+                {
+                    d.Id,
+                    d.Name,
+                    d.Amount
+                });
+
+            return Ok(itemDiscounts);
         }
 
         [Authorize(Roles = "admin,owner,manager")]

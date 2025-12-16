@@ -1,19 +1,23 @@
 import { useState, useEffect } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
 
-export default function CreateServiceModal({ show, onClose, onCreate, currency }) {
+export default function CreateServiceModal({ show, onClose, onCreate, currency, discounts, taxes = [] }) {
   const [name, setName] = useState("");
   const [duration, setDuration] = useState(""); // "HH:MM" input
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState("Active");
   const [error, setError] = useState("");
+  const [selectedDiscountId, setSelectedDiscountId] = useState(null);
+  const [selectedTaxIds, setSelectedTaxIds] = useState ([])
 
   const resetForm = () => {
     setName("");
     setDuration("");
     setPrice("");
     setDescription("");
+    setSelectedTaxIds([]);
+    setSelectedDiscountId(null);
     setIsActive("Active");
     setError("");
   };
@@ -67,10 +71,11 @@ const currencySymbol = currencySymbolMap[currency] ?? "";
     const newService = {
       id: "TEMP-ID", // optional, only for frontend display
       name,
-      durationMinutes: totalMinutes, // <-- send minutes to backend
+      durationMinutes: totalMinutes,
       price: priceNumber,
       description,
       status: isActive,
+      discountId: selectedDiscountId,
     };
 
     onCreate(newService);
@@ -134,6 +139,44 @@ const currencySymbol = currencySymbolMap[currency] ?? "";
               onChange={(e) => setDescription(e.target.value)}
             />
           </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Taxes *</Form.Label>
+            <Form.Control
+              as="select"
+              multiple
+              value={selectedTaxIds}
+              onChange={(e) =>
+                setSelectedTaxIds(
+                  Array.from(e.target.selectedOptions, (opt) => opt.value)
+                )
+              }
+            >
+              {taxes.map((tax) => (
+                <option key={tax.id} value={tax.id}>
+                  {tax.name} (
+                  {tax.amount?.parsedValue}
+                  {tax.numberType === "percentage" ? "%" : ""})
+                </option>
+              ))}
+            </Form.Control>
+            <Form.Text className="text-muted">
+              At least one tax is required. Hold Ctrl (Cmd on Mac) to select
+              multiple.
+            </Form.Text>
+          </Form.Group>
+
+          <Form.Select
+            value={selectedDiscountId || ""}
+            onChange={(e) => setSelectedDiscountId(e.target.value || null)}
+          >
+            <option value="">None</option>
+            {discounts.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name} — {d.amount}{d.applicableTo === "item" ? "%" : ""}
+              </option>
+            ))}
+          </Form.Select>
 
           <Form.Group>
             <Form.Label>Status</Form.Label>

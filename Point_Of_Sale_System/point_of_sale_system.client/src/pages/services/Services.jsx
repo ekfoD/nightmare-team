@@ -18,6 +18,7 @@ export default function Services() {
 
   const [services, setServices] = useState([]);
   const [taxes, setTaxes] = useState([]);
+  const [discounts, setDiscounts] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,7 +27,6 @@ export default function Services() {
 
   const [showNotifier, setShowNotifier] = useState(false);
   const [notifierMessage, setNotifierMessage] = useState("");
-
 
   const fetchServices = async () => {
     try {
@@ -47,11 +47,19 @@ export default function Services() {
     }
   };
 
+  const fetchDiscounts = async () => {
+    try {
+      const res = await api.get(`/discount/organization/${organizationId}/items`);
+      setDiscounts(res.data);
+    } catch (err) {
+      console.error("Failed to fetch discounts:", err);
+    }
+  };
+
   useEffect(() => {
-    
     const load = async () => {
       setLoading(true);
-      await Promise.all([fetchServices(), fetchTaxes()]);
+      await Promise.all([fetchServices(), fetchTaxes(), fetchDiscounts()]);
       setLoading(false);
     };
     load();
@@ -66,7 +74,8 @@ export default function Services() {
         description: service.description,
         status: service.status,
         organizationId: organizationId,
-        taxIds: service.taxIds
+        taxIds: service.taxIds,
+        discountId: service.discountId || null
       };
 
       await api.post("/services", payload);
@@ -89,7 +98,8 @@ export default function Services() {
         description: service.description,
         status: service.status,
         organizationId: organizationId,
-        taxIds: service.taxIds
+        taxIds: service.taxIds,
+        discountId: service.discountId || null
       };
 
       await api.put(`/services/${service.id}`, payload);
@@ -103,7 +113,6 @@ export default function Services() {
       alert("Failed to update service. See console for details.");
     }
   };
-
 
   const handleDeleteService = async (service) => {
     if (!window.confirm(`Delete "${service.name}"?`)) return;
@@ -174,13 +183,17 @@ export default function Services() {
                   <ul>
                     {selected.taxes.map((t) => (
                       <li key={t.id}>
-                        {t.name} —{" "}
-                        {t.amount}
-                        {t.numberType === "percentage" ? "%" : " (flat)"}
+                        {t.name} — {t.amount}{t.numberType === "percentage" ? "%" : " (flat)"}
                       </li>
-
                     ))}
                   </ul>
+                </div>
+              )}
+
+              {selected.discount && (
+                <div>
+                  <strong>Discount:</strong> {selected.discount.name} — {selected.discount.amount}
+                  {selected.discount.applicableTo === "item" ? "%" : ""}
                 </div>
               )}
             </div>
@@ -208,6 +221,7 @@ export default function Services() {
           onCreate={handleCreateService}
           currency={selected?.currency}
           taxes={taxes}
+          discounts={discounts}
         />
 
         <EditServiceModal
@@ -216,6 +230,7 @@ export default function Services() {
           onUpdate={handleUpdateService}
           service={selected}
           taxes={taxes}
+          discounts={discounts}
         />
 
         <SuccessNotifier
