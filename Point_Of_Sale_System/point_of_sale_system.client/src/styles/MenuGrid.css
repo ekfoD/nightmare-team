@@ -1,0 +1,141 @@
+.MenuGridSomething {
+    color: #666;
+    font-weight: 500;
+    border: 2px solid #333;
+    border-bottom: none;
+    background-color: transparent;
+}
+.MenuGridSomethingActive {
+    color: #333;
+    font-weight: 500;
+    border: 2px solid transparent;
+    border-bottom: none;
+    background-color: white;
+}
+
+
+.item-preview-card {
+    border-width: 2px;
+    border-style: solid;
+    border-color: #333;
+    background-color: #fff;
+}
+
+.card-body {
+    font-size:1.5rem;
+}
+/* Image */
+.item-preview-image {
+    height: 150px;
+    background: #f0f0f0;
+    border-width: 2px;
+    border-style: solid;
+    border-color: #999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.item-preview-image-img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.item-preview-image-placeholder {
+    color: #999;
+}
+
+/* Text */
+.item-preview-name {
+    text-align: center;
+    color: #333;
+}
+
+.item-preview-price {
+    text-align: center;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.item-preview-category {
+    text-align: center;
+    color: #666;
+}
+
+.item-preview-status {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.item-preview-timestamp {
+    font-size: 0.85rem;
+    color: #777;
+    text-align: center;
+}
+
+/* Sections */
+.item-preview-section-title {
+    margin-top: 16px;
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #333;
+}
+
+.item-preview-list-item {
+    background-color: #e9ecef;
+    border: none;
+}
+
+.item-preview-muted {
+    color: #777;
+    font-style: italic;
+}
+
+/*Jesus Christ*/
+.menu-modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.menu-item-card {
+  margin-bottom: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.new-item-card {
+  border: 2px dashed #0d6efd;
+}
+
+.menu-modal-footer {
+  background-color: #f8f9fa;
+}
+
+.menu-modal-header {
+  background-color: #f8f9fa;
+}
+
+.menu-modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.menu-item-card {
+    margin-bottom: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.new-item-card {
+    border: 2px dashed #0d6efd;
+}
+
+.menu-modal-footer {
+    background-color: #f8f9fa;
+}
+
+.menu-modal-header {
+    background-color: #f8f9fa;
+}

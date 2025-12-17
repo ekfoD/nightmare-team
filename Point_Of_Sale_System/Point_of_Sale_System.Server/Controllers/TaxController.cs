@@ -3,11 +3,12 @@ using Microsoft.EntityFrameworkCore;
 using Point_of_Sale_System.Server.Models.Data;
 using Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments;
 using Point_of_Sale_System.Server.DTOs;
+using Point_of_Sale_System.Server.Enums;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Point_of_Sale_System.Server.Controllers
 {   
-    [Authorize(Roles = "admin,owner")]
+    [Authorize(Roles = "admin,owner,manager")]
     [ApiController]
     [Route("api/[controller]")]
     public class TaxController : ControllerBase
@@ -57,8 +58,8 @@ namespace Point_of_Sale_System.Server.Controllers
                 Id = Guid.NewGuid(),
                 Name = dto.Name,
                 Amount = dto.Amount,
-                NumberType = dto.NumberType,
-                Status = dto.Status,
+                NumberType = (NumberTypeEnum) dto.NumberType,
+                Status = (StatusEnum) dto.Status,
                 OrganizationId = organizationId
             };
             tax.Timestamp = DateTime.UtcNow;
@@ -87,8 +88,8 @@ namespace Point_of_Sale_System.Server.Controllers
 
             existing.Name = dto.Name;
             existing.Amount = dto.Amount;
-            existing.NumberType = dto.NumberType;
-            existing.Status = dto.Status;
+            existing.NumberType = (NumberTypeEnum) dto.NumberType;
+            existing.Status = (StatusEnum) dto.Status;
 
             await _context.SaveChangesAsync();
 

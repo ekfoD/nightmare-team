@@ -36,9 +36,44 @@ namespace Point_of_Sale_System.Server.Repositories
 
         public async Task UpdateMenuItemAsync(MenuItem menuItem)
         {
-            _context.Entry(menuItem).State = EntityState.Modified;
+            var existingMenuItem = await _context.MenuItems
+                .Include(m => m.Variations)
+                .FirstOrDefaultAsync(m => m.Id == menuItem.Id);
+
+            if (existingMenuItem == null)
+                throw new Exception("Menu item not found");
+
+            _context.Entry(existingMenuItem).CurrentValues.SetValues(menuItem);
+
+            foreach (var variation in menuItem.Variations)
+            {
+                var trackedVariation = existingMenuItem.Variations
+                    .FirstOrDefault(v => v.Id == variation.Id);
+
+                if (trackedVariation != null)
+                {
+                    _context.Entry(trackedVariation).CurrentValues.SetValues(variation);
+                }
+                else
+                {
+                    variation.MenuItemId = existingMenuItem.Id;
+
+                    _context.Variations.Add(variation); 
+                }
+            }
+
+            foreach (var trackedVariation in existingMenuItem.Variations.ToList())
+            {
+                if (!menuItem.Variations.Any(v => v.Id == trackedVariation.Id))
+                {
+                    _context.Variations.Remove(trackedVariation);
+                }
+            }
+
             await _context.SaveChangesAsync();
         }
+
+
 
         public async Task DeleteMenuItemAsync(Guid id)
         {

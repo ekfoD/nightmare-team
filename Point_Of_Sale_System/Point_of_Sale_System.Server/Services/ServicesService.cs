@@ -44,8 +44,8 @@ public class ServicesService : IServicesService
                     Id = t.Id,
                     Name = t.Name,
                     Amount = t.Amount,
-                    NumberType = t.NumberType,
-                    Status = t.Status
+                    NumberType = (int) t.NumberType,
+                    Status = (int) t.Status
                 }).ToList()
             })
             .ToListAsync();

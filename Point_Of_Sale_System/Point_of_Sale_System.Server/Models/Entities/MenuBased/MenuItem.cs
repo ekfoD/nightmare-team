@@ -11,7 +11,7 @@ namespace Point_of_Sale_System.Server.Models.Entities.MenuBased
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
         public required string Name { get; set; }
-        public CategoryEnum Category { get; set; }
+        public required string Category { get; set; }
         public required decimal Price { get; set; }
         public string? ImagePath { get; set; }
         public StatusEnum Status { get; set; }

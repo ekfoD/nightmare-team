@@ -46,7 +46,7 @@ namespace Point_of_Sale_System.Server.Controllers
 
         // Create a new menu item
         [HttpPost("PostMenuItem")]
-        public async Task<ActionResult<MenuItem>> PostMenuItem(MenuItem menuItem)
+        public async Task<ActionResult<MenuItem>> PostMenuItem([FromBody] MenuItem menuItem)
         {
             if (!ModelState.IsValid)
             {
@@ -60,7 +60,7 @@ namespace Point_of_Sale_System.Server.Controllers
 
         // Update a menu item
         [HttpPut("PutMenuItem")]
-        public async Task<IActionResult> PutMenuItem(MenuItem menuItem)
+        public async Task<IActionResult> PutMenuItem([FromBody] MenuItem menuItem)
         {
             try
             {

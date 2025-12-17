@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Point_of_Sale_System.Server.Models.Data;
 
@@ -11,9 +12,11 @@ using Point_of_Sale_System.Server.Models.Data;
 namespace Point_of_Sale_System.Server.Migrations
 {
     [DbContext(typeof(PoSDbContext))]
-    partial class PoSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251216150100_MenuItemCategoriesToString")]
+    partial class MenuItemCategoriesToString
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -653,7 +656,7 @@ namespace Point_of_Sale_System.Server.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.MenuBased.Variation", "Variation")
-                        .WithMany()
+                        .WithMany("OrderItems")
                         .HasForeignKey("VariationId")
                         .OnDelete(DeleteBehavior.Restrict);
 
@@ -777,6 +780,11 @@ namespace Point_of_Sale_System.Server.Migrations
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.MenuBased.MenuItem", b =>
                 {
                     b.Navigation("Variations");
+                });
+
+            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.MenuBased.Variation", b =>
+                {
+                    b.Navigation("OrderItems");
                 });
 
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Discount", b =>

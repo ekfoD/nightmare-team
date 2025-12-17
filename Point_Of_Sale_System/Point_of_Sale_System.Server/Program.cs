@@ -30,6 +30,13 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
 builder.Services.AddScoped<IVariationRepository, VariationRepository>();
 
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = null;
+        options.JsonSerializerOptions.MaxDepth = 64; // optional
+    });
+
 
 // builder.Services.AddCors(options =>
 // {
