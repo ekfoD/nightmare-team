@@ -38,6 +38,7 @@ public class ServicesService : IServicesService
                 Description = s.Description,
                 Status = s.Status,
                 Currency = s.Organization.Currency,
+                DiscountId = s.DiscountId,
 
                 Taxes = s.Taxes.Select(t => new TaxDTO
                 {
@@ -120,20 +121,27 @@ public class ServicesService : IServicesService
             Price = service.Price,
             Description = service.Description,
             Status = service.Status,
-            Currency = service.Organization.Currency
+            Currency = service.Organization.Currency,
+            DiscountId = service.DiscountId
         };
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var service = await _db.MenuServices.FindAsync(id);
+        var service = await _db.MenuServices
+            .Include(s => s.Taxes)
+            .FirstOrDefaultAsync(s => s.Id == id);
+
         if (service == null)
             return false;
+
+        service.Taxes.Clear();
 
         _db.MenuServices.Remove(service);
         await _db.SaveChangesAsync();
         return true;
     }
+
 
     public async Task<IEnumerable<object>> GetActiveForOrganizationAsync(Guid organizationId)
     {

@@ -1,15 +1,22 @@
 import { useState, useEffect } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
 
-export default function CreateServiceModal({ show, onClose, onCreate, currency, discounts, taxes = [] }) {
+export default function CreateServiceModal({
+  show,
+  onClose,
+  onCreate,
+  currency,
+  discounts,
+  taxes = [],
+}) {
   const [name, setName] = useState("");
-  const [duration, setDuration] = useState(""); // "HH:MM" input
+  const [duration, setDuration] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState("Active");
   const [error, setError] = useState("");
   const [selectedDiscountId, setSelectedDiscountId] = useState(null);
-  const [selectedTaxIds, setSelectedTaxIds] = useState ([])
+  const [selectedTaxIds, setSelectedTaxIds] = useState([]);
 
   const resetForm = () => {
     setName("");
@@ -22,12 +29,11 @@ export default function CreateServiceModal({ show, onClose, onCreate, currency, 
     setError("");
   };
 
-  const currencySymbolMap = {
-    euro: "€",
-    dollar: "$",
-  };
-
-const currencySymbol = currencySymbolMap[currency] ?? "";
+  const currencySymbol =
+    {
+      euro: "€",
+      dollar: "$",
+    }[currency] ?? "";
 
   useEffect(() => {
     if (!show) resetForm();
@@ -41,14 +47,17 @@ const currencySymbol = currencySymbolMap[currency] ?? "";
       return;
     }
 
-    // Validate HH:MM format
+    if (selectedTaxIds.length === 0) {
+      setError("At least one tax must be selected.");
+      return;
+    }
+
     const durationRegex = /^([0-1]\d|2[0-3]):([0-5]\d)$/;
     if (!durationRegex.test(duration)) {
       setError("Duration must be in HH:MM format.");
       return;
     }
 
-    // Convert HH:MM to total minutes
     const [hours, minutes] = duration.split(":").map(Number);
     const totalMinutes = hours * 60 + minutes;
 
@@ -56,6 +65,7 @@ const currencySymbol = currencySymbolMap[currency] ?? "";
       setError("Duration must be greater than 0 minutes.");
       return;
     }
+
     if (totalMinutes > 16 * 60) {
       setError("Duration cannot exceed 16 hours.");
       return;
@@ -67,19 +77,19 @@ const currencySymbol = currencySymbolMap[currency] ?? "";
       return;
     }
 
-    // ---- VALIDATED: CREATE OBJECT ----
+    // ✅ INCLUDE taxIds
     const newService = {
-      id: "TEMP-ID", // optional, only for frontend display
       name,
       durationMinutes: totalMinutes,
       price: priceNumber,
       description,
       status: isActive,
+      taxIds: selectedTaxIds,
       discountId: selectedDiscountId,
     };
 
     onCreate(newService);
-    resetForm(); // optional
+    resetForm();
     onClose();
   };
 
@@ -99,7 +109,6 @@ const currencySymbol = currencySymbolMap[currency] ?? "";
               type="text"
               placeholder="Enter service name"
               value={name}
-              required
               onChange={(e) => setName(e.target.value)}
             />
           </Form.Group>
@@ -109,8 +118,6 @@ const currencySymbol = currencySymbolMap[currency] ?? "";
             <Form.Control
               type="text"
               placeholder="00:30"
-              pattern="^([0-1]\\d|2[0-3]):([0-5]\\d)$"
-              required
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
             />
@@ -120,8 +127,6 @@ const currencySymbol = currencySymbolMap[currency] ?? "";
             <Form.Label>Price ({currencySymbol})</Form.Label>
             <Form.Control
               type="number"
-              placeholder="0.00"
-              required
               step="0.01"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
@@ -133,13 +138,12 @@ const currencySymbol = currencySymbolMap[currency] ?? "";
             <Form.Control
               as="textarea"
               rows={3}
-              required
-              placeholder="Service description..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
           </Form.Group>
 
+          {/* ✅ TAXES */}
           <Form.Group className="mb-3">
             <Form.Label>Taxes *</Form.Label>
             <Form.Control
@@ -154,34 +158,35 @@ const currencySymbol = currencySymbolMap[currency] ?? "";
             >
               {taxes.map((tax) => (
                 <option key={tax.id} value={tax.id}>
-                  {tax.name} (
-                  {tax.amount?.parsedValue}
-                  {tax.numberType === "percentage" ? "%" : ""})
+                  {tax.name} — {tax.amount}
+                  {tax.numberType === "percentage" ? "%" : ""}
                 </option>
               ))}
             </Form.Control>
-            <Form.Text className="text-muted">
-              At least one tax is required. Hold Ctrl (Cmd on Mac) to select
-              multiple.
-            </Form.Text>
           </Form.Group>
 
-          <Form.Select
-            value={selectedDiscountId || ""}
-            onChange={(e) => setSelectedDiscountId(e.target.value || null)}
-          >
-            <option value="">None</option>
-            {discounts.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name} — {d.amount}{d.applicableTo === "item" ? "%" : ""}
-              </option>
-            ))}
-          </Form.Select>
+          {/* ✅ DISCOUNT WITH LABEL */}
+          <Form.Group className="mb-3">
+            <Form.Label>Discount</Form.Label>
+            <Form.Select
+              value={selectedDiscountId || ""}
+              onChange={(e) =>
+                setSelectedDiscountId(e.target.value || null)
+              }
+            >
+              <option value="">None</option>
+              {discounts.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name} — {d.amount}
+                  {d.numberType === "percentage" ? "%" : ""}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
 
           <Form.Group>
             <Form.Label>Status</Form.Label>
             <Form.Select
-              required
               value={isActive}
               onChange={(e) => setIsActive(e.target.value)}
             >
@@ -193,8 +198,12 @@ const currencySymbol = currencySymbolMap[currency] ?? "";
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={onClose}>Cancel</Button>
-        <Button variant="success" onClick={handleCreate}>Create</Button>
+        <Button variant="secondary" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button variant="success" onClick={handleCreate}>
+          Create
+        </Button>
       </Modal.Footer>
     </Modal>
   );
