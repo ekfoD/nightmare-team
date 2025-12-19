@@ -81,6 +81,48 @@ export default function AppointmentPayments() {
   }, [appointments]);
 
   /* ================= HELPERS ================= */
+  const buildDiscountReceipts = (service) => {
+  const discountsApplied = [];
+
+  // SERVICE DISCOUNT
+  const serviceDiscount = discounts.find(
+    d => d.id === service.discountId && d.status === "active"
+  );
+
+  if (serviceDiscount) {
+    const amount =
+      (service.price * serviceDiscount.amount) / 100;
+
+    discountsApplied.push({
+      id: serviceDiscount.id,
+      name: serviceDiscount.name,
+      procentage: serviceDiscount.amount,
+      affectedAmount: amount.toFixed(2)
+    });
+  }
+
+  // ORDER DISCOUNT (applied AFTER service discount)
+  if (selectedOrderDiscount) {
+    const baseAfterServiceDiscount =
+      serviceDiscount
+        ? service.price * (1 - serviceDiscount.amount / 100)
+        : service.price;
+
+    const amount =
+      (baseAfterServiceDiscount * selectedOrderDiscount.amount) / 100;
+
+    discountsApplied.push({
+      id: selectedOrderDiscount.id,
+      name: selectedOrderDiscount.name,
+      procentage: selectedOrderDiscount.amount,
+      affectedAmount: amount.toFixed(2)
+    });
+  }
+
+  return discountsApplied;
+};
+
+
   const formatTime = date =>
     new Date(date).toLocaleTimeString([], {
       hour: "2-digit",
@@ -148,7 +190,7 @@ export default function AppointmentPayments() {
   };
 
   /* ================= PAYMENT ================= */
-  const handlePay = async () => {
+    const handlePay = async () => {
     if (!selected) return;
 
     const service = menuServices[selected.menuServiceId];
@@ -156,6 +198,8 @@ export default function AppointmentPayments() {
 
     const discountedBase = calculateDiscountedBase(service);
     const { breakdown } = calculateTaxes(service, discountedBase);
+
+    const discountReceipts = buildDiscountReceipts(service);
 
     try {
       await api.post(`/Receipt/appointment`, {
@@ -166,17 +210,17 @@ export default function AppointmentPayments() {
         paymentStatus: "succeeded",
         serviceName: selected.serviceName,
         servicePrice: service.price,
-        discountedBase,
         employeeId: selected.employeeId,
         employeeName: selected.employeeName,
+
         taxes: breakdown.map(t => ({
           name: t.name,
           amount: t.amount,
           affectedAmount: parseFloat(t.appliedAmount),
           numberType: t.numberType
         })),
-        serviceDiscountId: service.discountId,
-        orderDiscountId: selectedDiscountId
+
+        discounts: discountReceipts
       });
 
       setSelected(null);
@@ -188,6 +232,7 @@ export default function AppointmentPayments() {
       alert("Payment failed.");
     }
   };
+
 
   if (loading) return <div>Loading appointments...</div>;
 

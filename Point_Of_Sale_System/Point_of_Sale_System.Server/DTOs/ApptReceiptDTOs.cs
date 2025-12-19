@@ -51,9 +51,10 @@ namespace Point_of_Sale_System.Server.DTOs
 
     public class DiscountReceiptDto
     {
-        public Guid? Id { get; set; }
+        public required Guid Id { get; set; }
         public required string Name { get; set; }
-        public required decimal AffectedAmount { get; set; }
-        public required decimal Procentage { get; set; }
+        public required decimal Procentage { get; set; }                
+        public required decimal AffectedAmount { get; set; }  
     }
+
 }
