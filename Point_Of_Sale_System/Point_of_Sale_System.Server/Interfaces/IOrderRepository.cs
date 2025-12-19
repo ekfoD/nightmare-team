@@ -6,7 +6,7 @@ namespace Point_of_Sale_System.Server.Interfaces
     {
         Task<Order> CreateOrderAsync(Order order);
         Task<Order?> GetOrderAsync(Guid id);
-        Task<List<OrderItem>> AddItemsToOrderAsync(List<OrderItem> items);
+        Task<bool> AddItemsToOrderAsync(List<OrderItem> items);
         Task<bool> CheckMenuItemOrVariationExistsAsync(Guid menuItemId, Guid? variationId, Guid orderId, bool isParent);
     }
 }
