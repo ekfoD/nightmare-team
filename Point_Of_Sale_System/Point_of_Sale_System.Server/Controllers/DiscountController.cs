@@ -32,24 +32,6 @@ namespace Point_of_Sale_System.Server.Controllers
             return discount == null ? NotFound() : Ok(discount);
         }
 
-        [Authorize(Roles = "admin,owner,manager,employee")]
-        [HttpGet("organization/{organizationId}/items")]
-        public async Task<IActionResult> GetItemDiscounts(Guid organizationId)
-        {
-            var discounts = await _discounts.GetAllByOrganizationAsync(organizationId);
-
-            var itemDiscounts = discounts
-                .Where(d => d.ApplicableTo == AppliedToEnum.item)
-                .Select(d => new 
-                {
-                    d.Id,
-                    d.Name,
-                    d.Amount
-                });
-
-            return Ok(itemDiscounts);
-        }
-
         [Authorize(Roles = "admin,owner,manager")]
         [HttpPost]
         public async Task<IActionResult> Create(CreateDiscountDto dto)

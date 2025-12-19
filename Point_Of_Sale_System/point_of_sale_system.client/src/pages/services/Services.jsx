@@ -47,9 +47,12 @@ export default function Services() {
 
   const fetchDiscounts = async () => {
     const res = await api.get(
-      `/discount/organization/${organizationId}/items`
+      `/discount/organization/${organizationId}`
     );
-    setDiscounts(res.data);
+    const itemDiscounts = res.data.filter(
+      d => d.applicableTo === "item" && d.status === "active"
+);
+    setDiscounts(itemDiscounts);
   };
 
   useEffect(() => {
