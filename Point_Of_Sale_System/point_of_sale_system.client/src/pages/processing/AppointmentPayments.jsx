@@ -210,6 +210,7 @@ export default function AppointmentPayments() {
         paymentStatus: "succeeded",
         serviceName: selected.serviceName,
         servicePrice: service.price,
+        currency: service.currency,
         employeeId: selected.employeeId,
         employeeName: selected.employeeName,
 
