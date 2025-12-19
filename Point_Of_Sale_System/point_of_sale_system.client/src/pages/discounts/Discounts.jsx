@@ -115,7 +115,7 @@ export default function Discounts() {
           {discounts
             .slice()
             .sort((a, b) =>
-              a.status === b.status ? 0 : a.status === "Active" ? -1 : 1
+              a.status === b.status ? 0 : a.status === "active" ? -1 : 1
             )
             .map((discount) => (
               <div

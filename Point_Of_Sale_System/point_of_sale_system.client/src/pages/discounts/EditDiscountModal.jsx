@@ -12,7 +12,7 @@ export default function EditDiscountModal({
   const [applicableTo, setApplicableTo] = useState("");
   const [validFrom, setValidFrom] = useState("");
   const [validUntil, setValidUntil] = useState("");
-  const [status, setStatus] = useState("Active");
+  const [status, setStatus] = useState("active");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export default function EditDiscountModal({
       setApplicableTo(discount.applicableTo || "");
       setValidFrom(discount.validFrom || "");
       setValidUntil(discount.validUntil || "");
-      setStatus(discount.status || "Active");
+      setStatus(discount.status ?? "active");
       setError("");
     }
 
@@ -34,7 +34,7 @@ export default function EditDiscountModal({
     setApplicableTo("");
     setValidFrom("");
     setValidUntil("");
-    setStatus("Active");
+    setStatus("active");
     setError("");
   };
 
@@ -140,8 +140,8 @@ export default function EditDiscountModal({
               value={status}
               onChange={(e) => setStatus(e.target.value)}
             >
-              <option>Active</option>
-              <option>Inactive</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
             </Form.Select>
           </Form.Group>
         </Form>

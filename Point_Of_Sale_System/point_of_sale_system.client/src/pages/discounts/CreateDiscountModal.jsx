@@ -11,7 +11,7 @@ export default function CreateDiscountModal({
   const [applicableTo, setApplicableTo] = useState("");
   const [validFrom, setValidFrom] = useState("");
   const [validUntil, setValidUntil] = useState("");
-  const [status, setStatus] = useState("Active");
+  const [status, setStatus] = useState("active");
   const [error, setError] = useState("");
 
   const resetForm = () => {
@@ -20,7 +20,7 @@ export default function CreateDiscountModal({
     setApplicableTo("");
     setValidFrom("");
     setValidUntil("");
-    setStatus("Active");
+    setStatus("active");
     setError("");
   };
 
