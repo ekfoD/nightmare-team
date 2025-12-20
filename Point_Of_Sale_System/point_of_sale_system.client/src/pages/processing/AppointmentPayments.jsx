@@ -63,6 +63,30 @@ export default function AppointmentPayments() {
   const formatTime = (date) =>
     new Date(date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
+  const buildReceiptDto = (service) => {
+  const { breakdown } = calculateTaxes(service);
+
+  return {
+    organizationId,
+    customerName: selected.customerName,
+    startTime: selected.startTime,
+    endTime: selected.endTime,
+    paymentStatus: "succeeded",
+    serviceName: selected.serviceName,
+    servicePrice: service.price,
+    employeeId: selected.employeeId,
+    employeeName: selected.employeeName,
+
+    taxes: breakdown.map(t => ({
+      name: t.name,
+      amount: t.amount,
+      affectedAmount: parseFloat(t.appliedAmount),
+      numberType: t.numberType
+    }))
+  };
+};
+
+
   const calculateTaxes = (service) => {
     let totalTaxes = 0;
     const breakdown = service.taxes.map((t) => {
@@ -109,8 +133,30 @@ export default function AppointmentPayments() {
     return totalPrice.toFixed(2);
   };
 
-  const handlePay = () => {
-    alert(`Proceeding to payment for ${selected.id}`);
+  const handlePay = async () => {
+    if (!selected) return;
+
+    const service = menuServices[selected.menuServiceId];
+    if (!service) return;
+
+    const receiptDto = buildReceiptDto(service);
+
+    try {
+      await api.post(`/Receipt/appointment`, receiptDto);
+
+      // remove appointment from pending list
+      // setAppointments(prev =>
+      //   prev.filter(a => a.id !== selected.id)
+      // );
+
+      setSelected(null);
+      setAppliedGiftcards([]);
+
+      alert("Payment successful. Receipt created.");
+    } catch (err) {
+      console.error(err);
+      alert("Payment failed. Receipt was not created.");
+    }
   };
 
   if (loading) return <div>Loading appointments...</div>;

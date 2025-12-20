@@ -8,7 +8,12 @@ namespace Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
+        public string Name { get; set; }
         public int Quantity { get; set; }
+        public decimal Price { get; set; }
+        public string? TaxName { get; set; }
+        public decimal? Tax { get; set; }
+        public decimal? Discount { get; set; }
 
         //navigation to FK's
         public virtual ICollection<OrderItem> ChildOrderItems { get; set; }
