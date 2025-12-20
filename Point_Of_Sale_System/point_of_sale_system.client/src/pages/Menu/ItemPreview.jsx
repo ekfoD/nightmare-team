@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Badge, ListGroup, Button } from 'react-bootstrap';
 
-const ItemPreview = ({ item, categories, setShowModal }) => {
+const ItemPreview = ({ item, setItem, categories, setShowModal, handleDelete }) => {
     if (!item) return null;
 
     const categoryName =
@@ -11,6 +11,8 @@ const ItemPreview = ({ item, categories, setShowModal }) => {
     const handleModify = () => {
         setShowModal(true);
     };
+
+
 
     return (
         <Card className="item-preview-card">
@@ -31,6 +33,7 @@ const ItemPreview = ({ item, categories, setShowModal }) => {
                 <Button
                     variant="primary"
                     size="lg"
+                    className="modifyButton"
                     onClick={handleModify}
                     style={{
                         borderRadius: '8px',
@@ -41,6 +44,20 @@ const ItemPreview = ({ item, categories, setShowModal }) => {
                     }}
                 >
                     Modify
+                </Button>
+                <Button
+                    variant="primary"
+                    size="lg"
+                    onClick={() => { setItem(null); handleDelete(item) }}
+                    className="bg-danger"
+                    style={{
+                        minWidth: '100%',
+                        padding: '12px 50px',
+                        fontWeight: '500',
+                        borderRadius: '8px',
+                    }}
+                    >
+                Delete
                 </Button>
                 {/* Name */}
                 <h2 className="item-preview-name">{item.name}</h2>

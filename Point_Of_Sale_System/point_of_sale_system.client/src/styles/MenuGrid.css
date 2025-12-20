@@ -24,6 +24,10 @@
 .card-body {
     font-size:1.5rem;
 }
+
+.modifyButton {
+    margin-bottom: 10px;
+}
 /* Image */
 .item-preview-image {
     height: 150px;

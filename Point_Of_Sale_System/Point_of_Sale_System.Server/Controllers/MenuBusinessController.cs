@@ -91,6 +91,10 @@ namespace Point_of_Sale_System.Server.Controllers
                 return NotFound();
             }
 
+            //var variationsExist = await _variationRepository.GetVariationsAsync(id);
+            //if (variationsExist.Count() != 0)
+            //    return BadRequest("Variations still exist.");
+
             await _menuRepository.DeleteMenuItemAsync(id);
 
             return NoContent();
@@ -160,7 +164,7 @@ namespace Point_of_Sale_System.Server.Controllers
         }
 
         // Delete a variation
-        [HttpDelete("{id}/DeleteVariations")]
+        [HttpDelete("{id}/DeleteVariation")]
         public async Task<IActionResult> DeleteVariation(Guid id)
         {
             var exists = await _variationRepository.VariationExistsAsync(id);

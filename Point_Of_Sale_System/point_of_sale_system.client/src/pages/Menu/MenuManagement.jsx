@@ -6,6 +6,8 @@ import useAuth from "../../hooks/useAuth.jsx"
 import MenuGrid from './MenuGrid';
 import ItemPreview from './ItemPreview';
 import MenuManagementModal from './MenuManagementModal';
+import AddItemModal from './AddItemModal'
+import AddCategoryModal from './AddCategoryModal'
 import api from '../../api/axios.js';
 
 const MenuManagement = () => {
@@ -15,6 +17,8 @@ const MenuManagement = () => {
     const [activeTab, setActiveTab] = useState('starters');
     const [selectedItem, setSelectedItem] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [showAddItemModal, setShowAddItemModal] = useState(false);
+    const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
     const [loading, setLoading] = useState(false);
     const [taxes, setTaxes] = useState([]);
 
@@ -110,6 +114,15 @@ const MenuManagement = () => {
         setShowModal(false);
     };
 
+    const handleDelete = async (item) => {
+        try {
+            await api.delete("MenuBusiness/" + item.id + "/DeleteMenuItem");
+            fetchMenuData();
+        } catch (error) {
+            console.error('Error saving menu:', error);
+        }
+    }
+
     if (loading) {
         return <div className="text-center p-5">Loading...</div>;
     }
@@ -125,6 +138,8 @@ const MenuManagement = () => {
                         menuItems={menuItems}
                         onItemClick={handleItemClick}
                         showAddItem={false}
+                        setShowAddItemModal={setShowAddItemModal}
+                        setShowAddCategoryModal={setShowAddCategoryModal}
                     />
 
                     <div className="text-center mt-4">
@@ -132,19 +147,36 @@ const MenuManagement = () => {
                 </Col>
 
                 <Col lg={4} md={5}>
-                    <ItemPreview item={selectedItem} categories={categories} setShowModal={setShowModal} />
+                    <ItemPreview item={selectedItem} setItem={setSelectedItem} categories={categories} setShowModal={setShowModal} handleDelete={handleDelete} />
                 </Col>
             </Row>
 
             <MenuManagementModal
                 show={showModal}
-                categories={categories}
+                editedCategories={categories}
                 onCancel={handleCancel}
                 selectedItem={selectedItem}
                 handleSave={handleSave}
-                handleAddItem={handleAddItem}
                 taxes={taxes}
                 organizationId={organizationId }
+            />
+
+            <AddItemModal
+                show={showAddItemModal}
+                setShow={setShowAddItemModal}
+                organizationId={organizationId}
+                categories={categories}
+                taxes={taxes}
+                handleAddItem={handleAddItem}
+
+            />
+
+            <AddCategoryModal
+                show={showAddCategoryModal}
+                setShow={setShowAddCategoryModal}
+                organizationId={organizationId}
+                editedCategories={categories}
+                setEditedCategories={setCategories}
             />
         </Container>
     );

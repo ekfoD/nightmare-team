@@ -18,7 +18,7 @@ namespace Point_of_Sale_System.Server.Models.Entities.MenuBased
         public DateTime Timestamp { get; set; } = DateTime.Now;
 
         //navigation to FK's
-        public virtual ICollection<Variation?> Variations { get; set; } = new List<Variation>();
+        public virtual ICollection<Variation> Variations { get; set; } = new List<Variation>();
 
         // foreign key to Organization
         [Required]

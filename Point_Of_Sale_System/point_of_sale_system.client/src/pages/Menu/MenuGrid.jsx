@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, Nav, Card } from 'react-bootstrap';
+import { Row, Col, Nav, Card, Button } from 'react-bootstrap';
 import '../../styles/MenuGrid.css'
 
 const MenuGrid = ({
@@ -9,10 +9,39 @@ const MenuGrid = ({
     menuItems,
     onItemClick,
     showAddItem = false,
-    onAddItemClick
+    onAddItemClick,
+    setShowAddItemModal,
+    setShowAddCategoryModal,
 }) => {
     return (
         <>
+            <div className="d-flex gap-2">
+                <Button
+                    style={{
+                        borderRadius: '8px',
+                        border: '2px solid #0d6efd',
+                        fontWeight: '500',
+                        padding: '12px 50px',
+                        marginBottom: '10px'
+                    }}
+                    onClick={() => { setShowAddItemModal(true) }}
+                >
+                    Add Item
+                </Button>
+                <Button
+                    style={{
+                        borderRadius: '8px',
+                        border: '2px solid #0d6efd',
+                        fontWeight: '500',
+                        padding: '12px 50px',
+                        marginBottom: '10px'
+
+                    }}
+                    onClick={() => { setShowAddCategoryModal(true) }}
+                >
+                    Add Category
+                </Button>
+            </div>
             {/* Category Tabs */}
             <Nav variant="tabs" className="mb-4" style={{ backgroundColor: '#abb8fbff' }}>
                 {categories.map((category) => (
