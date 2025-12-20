@@ -6,6 +6,7 @@ export default function CreateServiceModal({
   onClose,
   onCreate,
   currency,
+  discounts,
   taxes = [],
 }) {
   const [name, setName] = useState("");
@@ -13,24 +14,26 @@ export default function CreateServiceModal({
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState("Active");
-  const [selectedTaxIds, setSelectedTaxIds] = useState([]);
   const [error, setError] = useState("");
+  const [selectedDiscountId, setSelectedDiscountId] = useState(null);
+  const [selectedTaxIds, setSelectedTaxIds] = useState([]);
 
   const resetForm = () => {
     setName("");
     setDuration("");
     setPrice("");
     setDescription("");
-    setIsActive("Active");
     setSelectedTaxIds([]);
+    setSelectedDiscountId(null);
+    setIsActive("Active");
     setError("");
   };
 
-  const currencySymbolMap = {
-    euro: "€",
-    dollar: "$",
-  };
-  const currencySymbol = currencySymbolMap[currency] ?? "";
+  const currencySymbol =
+    {
+      euro: "€",
+      dollar: "$",
+    }[currency] ?? "";
 
   useEffect(() => {
     if (!show) resetForm();
@@ -62,6 +65,7 @@ export default function CreateServiceModal({
       setError("Duration must be greater than 0 minutes.");
       return;
     }
+
     if (totalMinutes > 16 * 60) {
       setError("Duration cannot exceed 16 hours.");
       return;
@@ -73,6 +77,7 @@ export default function CreateServiceModal({
       return;
     }
 
+    // ✅ INCLUDE taxIds
     const newService = {
       name,
       durationMinutes: totalMinutes,
@@ -80,6 +85,7 @@ export default function CreateServiceModal({
       description,
       status: isActive,
       taxIds: selectedTaxIds,
+      discountId: selectedDiscountId,
     };
 
     onCreate(newService);
@@ -101,6 +107,7 @@ export default function CreateServiceModal({
             <Form.Label>Service Name</Form.Label>
             <Form.Control
               type="text"
+              placeholder="Enter service name"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -136,6 +143,7 @@ export default function CreateServiceModal({
             />
           </Form.Group>
 
+          {/* ✅ TAXES */}
           <Form.Group className="mb-3">
             <Form.Label>Taxes *</Form.Label>
             <Form.Control
@@ -150,16 +158,30 @@ export default function CreateServiceModal({
             >
               {taxes.map((tax) => (
                 <option key={tax.id} value={tax.id}>
-                  {tax.name} (
-                  {tax.amount?.parsedValue}
-                  {tax.numberType === "percentage" ? "%" : ""})
+                  {tax.name} — {tax.amount}
+                  {tax.numberType === "percentage" ? "%" : ""}
                 </option>
               ))}
             </Form.Control>
-            <Form.Text className="text-muted">
-              At least one tax is required. Hold Ctrl (Cmd on Mac) to select
-              multiple.
-            </Form.Text>
+          </Form.Group>
+
+          {/* ✅ DISCOUNT WITH LABEL */}
+          <Form.Group className="mb-3">
+            <Form.Label>Discount</Form.Label>
+            <Form.Select
+              value={selectedDiscountId || ""}
+              onChange={(e) =>
+                setSelectedDiscountId(e.target.value || null)
+              }
+            >
+              <option value="">None</option>
+              {discounts.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name} — {d.amount}
+                  {d.numberType === "percentage" ? "%" : ""}
+                </option>
+              ))}
+            </Form.Select>
           </Form.Group>
 
           <Form.Group>
@@ -179,11 +201,7 @@ export default function CreateServiceModal({
         <Button variant="secondary" onClick={onClose}>
           Cancel
         </Button>
-        <Button
-          variant="success"
-          onClick={handleCreate}
-          disabled={selectedTaxIds.length === 0}
-        >
+        <Button variant="success" onClick={handleCreate}>
           Create
         </Button>
       </Modal.Footer>

@@ -7,6 +7,7 @@ export default function EditServiceModal({
   onUpdate,
   service,
   taxes = [],
+  discounts = []
 }) {
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("00:00");
@@ -14,27 +15,21 @@ export default function EditServiceModal({
   const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState("Active");
   const [selectedTaxIds, setSelectedTaxIds] = useState([]);
+  const [selectedDiscountId, setSelectedDiscountId] = useState("");
   const [error, setError] = useState("");
 
+  // When service or show changes, populate the form
   useEffect(() => {
     if (service && show) {
       setName(service.name || "");
-
-      const hours = Math.floor(service.duration / 60)
-        .toString()
-        .padStart(2, "0");
-      const minutes = (service.duration % 60)
-        .toString()
-        .padStart(2, "0");
+      const hours = Math.floor(service.duration / 60).toString().padStart(2, "0");
+      const minutes = (service.duration % 60).toString().padStart(2, "0");
       setDuration(`${hours}:${minutes}`);
-
       setPrice(service.price?.toString() || "");
       setDescription(service.description || "");
-      setIsActive(
-        service.status?.toLowerCase() === "inactive" ? "Inactive" : "Active"
-      );
-
-      setSelectedTaxIds(service.taxes?.map((t) => t.id) || []);
+      setIsActive(service.status?.toLowerCase() === "inactive" ? "Inactive" : "Active");
+      setSelectedTaxIds(service.taxes?.map(t => t.id.toString()) || []);
+      setSelectedDiscountId(service.discountId ? service.discountId.toString() : "");
       setError("");
     }
 
@@ -48,19 +43,16 @@ export default function EditServiceModal({
     setDescription("");
     setIsActive("Active");
     setSelectedTaxIds([]);
+    setSelectedDiscountId("");
     setError("");
   };
 
   const handleClose = () => {
-  resetForm();
-  onClose();
+    resetForm();
+    onClose();
   };
 
-  const currencySymbol =
-    {
-      euro: "€",
-      dollar: "$",
-    }[service?.currency] || "$";
+  const currencySymbol = { euro: "€", dollar: "$" }[service?.currency] || "$";
 
   const handleUpdate = () => {
     setError("");
@@ -107,6 +99,7 @@ export default function EditServiceModal({
       description,
       status: isActive,
       taxIds: selectedTaxIds,
+      discountId: selectedDiscountId || null
     });
 
     onClose();
@@ -167,23 +160,30 @@ export default function EditServiceModal({
               multiple
               value={selectedTaxIds}
               onChange={(e) =>
-                setSelectedTaxIds(
-                  Array.from(e.target.selectedOptions, (opt) => opt.value)
-                )
+                setSelectedTaxIds(Array.from(e.target.selectedOptions, opt => opt.value))
               }
             >
               {taxes.map((tax) => (
-                <option key={tax.id} value={tax.id}>
-                  {tax.name} (
-                  {tax.amount?.parsedValue}
-                  {tax.numberType === "percentage" ? "%" : ""})
+                <option key={tax.id} value={tax.id.toString()}>
+                  {tax.name} ({tax.amount?.parsedValue}{tax.numberType === "percentage" ? "%" : ""})
                 </option>
               ))}
             </Form.Control>
-            <Form.Text className="text-muted">
-              At least one tax is required. Hold Ctrl (Cmd on Mac) to select
-              multiple.
-            </Form.Text>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Discount</Form.Label>
+            <Form.Select
+              value={selectedDiscountId}
+              onChange={(e) => setSelectedDiscountId(e.target.value)}
+            >
+              <option value="">None</option>
+              {discounts.map((d) => (
+                <option key={d.id} value={d.id.toString()}>
+                  {d.name} — {d.amount}{d.applicableTo === "item" ? "%" : ""}
+                </option>
+              ))}
+            </Form.Select>
           </Form.Group>
 
           <Form.Group>

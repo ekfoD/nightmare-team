@@ -1,3 +1,4 @@
+using Microsoft.Identity.Client;
 using Point_of_Sale_System.Server.Enums;
 
 namespace Point_of_Sale_System.Server.DTOs
@@ -11,6 +12,7 @@ namespace Point_of_Sale_System.Server.DTOs
         public PaymentEnum PaymentStatus { get; set; }
         public string ServiceName { get; set; } = string.Empty;
         public decimal ServicePrice { get; set; }
+        public CurrencyEnum Currency { get; set; }
         public Guid EmployeeId { get; set; }
         public string EmployeeName { get; set; } = string.Empty;
 
@@ -30,6 +32,7 @@ namespace Point_of_Sale_System.Server.DTOs
         public DateTime EndTime { get; set; }
         public Guid EmployeeId { get; set; }
         public Guid PaymentId { get; set; }
+        public CurrencyEnum Currency { get; set; }
         public required string PaymentStatus { get; set; }
         public required string ServiceName { get; set; }
         public required decimal ServicePrice { get; set; }
@@ -51,9 +54,10 @@ namespace Point_of_Sale_System.Server.DTOs
 
     public class DiscountReceiptDto
     {
-        public Guid? Id { get; set; }
+        public required Guid Id { get; set; }
         public required string Name { get; set; }
-        public required decimal AffectedAmount { get; set; }
-        public required decimal Procentage { get; set; }
+        public required decimal Procentage { get; set; }                
+        public required decimal AffectedAmount { get; set; }  
     }
+
 }
