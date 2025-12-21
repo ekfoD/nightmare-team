@@ -55,41 +55,96 @@ export default function EditServiceModal({
   const currencySymbol = { euro: "€", dollar: "$" }[service?.currency] || "$";
 
   const handleUpdate = () => {
-    setError("");
+  setError("");
 
-    if (!name || !duration || !price || !description) {
-      setError("All fields are required.");
-      return;
-    }
+  const trimmedName = name.trim();
+  const trimmedDescription = description.trim();
 
-    if (selectedTaxIds.length === 0) {
-      setError("At least one tax must be selected.");
-      return;
-    }
+  /* ---------- NAME ---------- */
+  if (!trimmedName) {
+    setError("Service name cannot be empty.");
+    return;
+  }
 
-    const durationRegex = /^([0-1]\d|2[0-3]):([0-5]\d)$/;
-    if (!durationRegex.test(duration)) {
-      setError("Duration must be in HH:MM format.");
-      return;
-    }
+  if (trimmedName.length < 3) {
+    setError("Service name must be at least 3 characters long.");
+    return;
+  }
 
-    const [hours, minutes] = duration.split(":").map(Number);
-    const totalMinutes = hours * 60 + minutes;
+  if (trimmedName.length > 30) {
+    setError("Service name cannot exceed 30 characters.");
+    return;
+  }
 
-    if (totalMinutes <= 0) {
-      setError("Duration must be greater than 0 minutes.");
-      return;
-    }
-    if (totalMinutes > 16 * 60) {
-      setError("Duration cannot exceed 16 hours.");
-      return;
-    }
+  /* ---------- DESCRIPTION ---------- */
+  if (!trimmedDescription) {
+    setError("Description cannot be empty.");
+    return;
+  }
 
-    const priceNumber = Number(price);
-    if (isNaN(priceNumber) || priceNumber <= 0) {
-      setError("Price must be a number greater than 0.");
-      return;
-    }
+  if (trimmedDescription.length > 500) {
+    setError("Description cannot exceed 500 characters.");
+    return;
+  }
+
+  /* ---------- DURATION ---------- */
+  const durationRegex = /^([0-1]\d|2[0-3]):([0-5]\d)$/;
+  if (!durationRegex.test(duration)) {
+    setError("Duration must be in HH:MM format.");
+    return;
+  }
+
+  const [hours, minutes] = duration.split(":").map(Number);
+  const totalMinutes = hours * 60 + minutes;
+
+  if (totalMinutes < 5) {
+    setError("Duration must be at least 5 minutes.");
+    return;
+  }
+
+  if (totalMinutes > 16 * 60) {
+    setError("Duration cannot exceed 16 hours.");
+    return;
+  }
+
+  /* ---------- PRICE ---------- */
+  const priceNumber = Number(price);
+
+  if (!Number.isFinite(priceNumber)) {
+    setError("Price must be a valid number.");
+    return;
+  }
+
+  if (priceNumber <= 0) {
+    setError("Price must be greater than 0.");
+    return;
+  }
+
+  if (priceNumber > 1_000_000) {
+    setError("Price is unrealistically high.");
+    return;
+  }
+
+  /* ---------- TAXES ---------- */
+  if (!Array.isArray(selectedTaxIds) || selectedTaxIds.length === 0) {
+    setError("At least one tax must be selected.");
+    return;
+  }
+
+  const validTaxIds = new Set(taxes.map(t => t.id.toString()));
+  if (!selectedTaxIds.every(id => validTaxIds.has(id))) {
+    setError("Invalid tax selection.");
+    return;
+  }
+
+  /* ---------- DISCOUNT ---------- */
+  if (
+    selectedDiscountId &&
+    !discounts.some(d => d.id.toString() === selectedDiscountId)
+  ) {
+    setError("Invalid discount selected.");
+    return;
+  }
 
     onUpdate({
       ...service,

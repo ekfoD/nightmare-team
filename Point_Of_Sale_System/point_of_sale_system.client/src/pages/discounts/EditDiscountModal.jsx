@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
 
+const todayStr = new Date().toISOString().split("T")[0];
+
+const isPastDate = (dateStr) => {
+  return new Date(dateStr) < new Date(todayStr);
+};
+
 export default function EditDiscountModal({
   show,
   onClose,
@@ -44,36 +50,74 @@ export default function EditDiscountModal({
   };
 
   const handleUpdate = () => {
-    setError("");
+  setError("");
 
-    if (!amount || !applicableTo || !validFrom || !validUntil) {
-      setError("All fields are required.");
-      return;
-    }
+  /* ===== Required ===== */
+  if (!name.trim()) {
+    setError("Discount name is required.");
+    return;
+  }
 
-    const amountNumber = Number(amount);
-    if (isNaN(amountNumber) || amountNumber <= 0) {
-      setError("Amount must be greater than 0.");
-      return;
-    }
+  if (!amount || !applicableTo || !validFrom || !validUntil) {
+    setError("All fields are required.");
+    return;
+  }
 
-    if (new Date(validUntil) < new Date(validFrom)) {
-      setError("Valid Until must be after Valid From.");
-      return;
-    }
+  /* ===== Amount ===== */
+  const amountNumber = Number(amount);
 
-    onUpdate({
-      ...discount,
-      name,
-      amount: amountNumber,
-      applicableTo,
-      validFrom,
-      validUntil,
-      status,
-    });
+  if (isNaN(amountNumber)) {
+    setError("Amount must be a number.");
+    return;
+  }
 
-    onClose();
-  };
+  if (amountNumber <= 0) {
+    setError("Amount must be greater than 0.");
+    return;
+  }
+
+  if (amountNumber > 100) {
+    setError("Discount amount is unrealistically large.");
+    return;
+  }
+
+  /* ===== Applicability ===== */
+  if (!["order", "item"].includes(applicableTo)) {
+    setError("Invalid discount type.");
+    return;
+  }
+
+  /* ===== Dates ===== */
+  if (isPastDate(validFrom)) {
+    setError("Valid From date cannot be in the past.");
+    return;
+  }
+
+  if (new Date(validUntil) < new Date(validFrom)) {
+    setError("Valid Until must be after Valid From.");
+    return;
+  }
+
+  /* ===== Status logic ===== */
+  if (status === "active" && isPastDate(validUntil)) {
+    setError("An active discount cannot already be expired.");
+    return;
+  }
+
+  /* ===== Update ===== */
+  onUpdate({
+    ...discount,
+    name: name.trim(),
+    amount: amountNumber,
+    applicableTo,
+    validFrom,
+    validUntil,
+    status,
+  });
+
+  onClose();
+};
+
 
   return (
     <Modal show={show} onHide={handleClose} centered>
@@ -95,10 +139,12 @@ export default function EditDiscountModal({
             </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Amount</Form.Label>
+            <Form.Label>Amount (%)</Form.Label>
             <Form.Control
               type="number"
               step="0.01"
+              min="0.01"
+              max="100"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
             />
@@ -120,6 +166,7 @@ export default function EditDiscountModal({
             <Form.Label>Valid From</Form.Label>
             <Form.Control
               type="date"
+              min={todayStr}
               value={validFrom}
               onChange={(e) => setValidFrom(e.target.value)}
             />
@@ -129,6 +176,7 @@ export default function EditDiscountModal({
             <Form.Label>Valid Until</Form.Label>
             <Form.Control
               type="date"
+              min={validFrom || todayStr}
               value={validUntil}
               onChange={(e) => setValidUntil(e.target.value)}
             />
@@ -151,7 +199,17 @@ export default function EditDiscountModal({
         <Button variant="secondary" onClick={handleClose}>
           Cancel
         </Button>
-        <Button variant="primary" onClick={handleUpdate}>
+        <Button
+          variant="primary"
+          onClick={handleUpdate}
+          disabled={
+            !name.trim() ||
+            !amount ||
+            !applicableTo ||
+            !validFrom ||
+            !validUntil
+          }
+        >
           Update
         </Button>
       </Modal.Footer>

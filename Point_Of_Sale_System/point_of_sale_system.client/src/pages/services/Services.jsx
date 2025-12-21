@@ -62,7 +62,7 @@ export default function Services() {
       setLoading(false);
     };
     load();
-  },);
+  },[organizationId]);
 
   /* ------------------ CRUD ------------------ */
 

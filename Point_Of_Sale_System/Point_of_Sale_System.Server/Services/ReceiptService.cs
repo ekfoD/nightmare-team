@@ -102,6 +102,20 @@ public class ReceiptService : IReceiptService
         _db.AppointmentReceipts.Add(receipt);
         await _db.SaveChangesAsync();
     }
+    public async Task<AppointmentReceipt?> RefundReceiptAsync(Guid receiptId)
+    {
+        var receipt = await _db.AppointmentReceipts.FindAsync(receiptId);
+        if (receipt == null)
+            return null;
+
+        if (receipt.PaymentStatus != PaymentEnum.succeeded)
+            throw new InvalidOperationException("Only succeeded payments can be refunded.");
+
+        receipt.PaymentStatus = PaymentEnum.refunded;
+        await _db.SaveChangesAsync();
+
+        return receipt;
+    }
 
 
 }

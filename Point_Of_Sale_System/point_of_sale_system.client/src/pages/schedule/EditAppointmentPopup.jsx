@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import api from '../../api/axios.js';
-import { workStart, workEnd, isWithinWorkHours, parseDurationToMinutes, doesOverlap } from './utils/ScheduleHelpers';
+import { workStart, workEnd, isWithinWorkHours, parseDurationToMinutes, doesOverlap, isPastDate, isPastDateTime } from './utils/ScheduleHelpers';
 
 const EditAppointmentPopup = ({
   show,
@@ -91,50 +91,99 @@ const EditAppointmentPopup = ({
   const handleChange = key => e => setForm(f => ({ ...f, [key]: e.target.value }));
 
   const handleSave = async () => {
-    const { service, employeeId, date, time, customerName, customerPhone, extraInfo } = form;
-    if (!service || !employeeId || !time || !customerName || !date) {
-      return alert("Fill required fields.");
-    }
+  const {
+    service,
+    employeeId,
+    date,
+    time,
+    customerName,
+    customerPhone,
+    extraInfo
+  } = form;
 
-    const start = new Date(`${date}T${time}:00`);
-    if (isNaN(start)) return alert("Invalid date or time.");
+  /* ===== Required fields ===== */
+  if (!service || !employeeId || !date || !time || !customerName.trim()) {
+    return alert("Please fill all required fields.");
+  }
 
-    const end = new Date(start.getTime() + parseDurationToMinutes(service.duration) * 60000);
+  /* ===== Past date ===== */
+  if (isPastDate(date)) {
+    return alert("You cannot move an appointment to a past date.");
+  }
 
-    if (!isWithinWorkHours(time)) {
-      return alert(`Time must be between ${workStart} and ${workEnd}.`);
-    }
+  /* ===== Past time today ===== */
+  if (isPastDateTime(date, time)) {
+    return alert("You cannot move an appointment to the past.");
+  }
 
-    if (doesOverlap(start, end, employeeId, allAppointments, appointment?.id)) {
-      return alert("This appointment overlaps with an existing appointment for this employee.");
-    }
+  /* ===== Duration ===== */
+  const durationMinutes = parseDurationToMinutes(service.duration);
+  if (!durationMinutes || durationMinutes <= 0) {
+    return alert("Invalid service duration.");
+  }
 
-    try {
-      const startStr = `${date}T${time}`;
-      const endStr = `${date}T${form.endTime}`;
+  const start = new Date(`${date}T${time}:00`);
+  if (isNaN(start)) {
+    return alert("Invalid date or time.");
+  }
 
-      await api.put(
-        `https://localhost:7079/api/appointments/${appointment.id}/edit`,
-        {
-          employeeId,
-          employeeName: workers.find(w => w.id === employeeId)?.name,
-          serviceName: service.name,
-          startTime: startStr,
-          endTime: endStr,
-          customerName,
-          customerPhone,
-          extraInfo,
-          organizationId
-        }
-      );
+  const end = new Date(start.getTime() + durationMinutes * 60000);
+  const endTimeStr = end.toTimeString().substring(0, 5);
 
-      onSuccess && onSuccess("Appointment updated");
-      handleClose();
-    } catch (err) {
-      console.error(err);
-      alert(err?.response?.data?.error || "Failed to update appointment");
-    }
-  };
+  /* ===== Work hours ===== */
+  if (!isWithinWorkHours(time)) {
+    return alert(`Start time must be between ${workStart} and ${workEnd}.`);
+  }
+
+  if (!isWithinWorkHours(endTimeStr)) {
+    return alert("Appointment ends outside of working hours.");
+  }
+
+  /* ===== Overlap (ignore self) ===== */
+  if (
+    doesOverlap(
+      start,
+      end,
+      employeeId,
+      allAppointments,
+      appointment?.id
+    )
+  ) {
+    return alert(
+      "This appointment overlaps with an existing appointment for this employee."
+    );
+  }
+
+  /* ===== Employee sanity ===== */
+  const employee = workers.find(w => String(w.id) === String(employeeId));
+  if (!employee) {
+    return alert("Please select a valid employee.");
+  }
+
+  /* ===== API ===== */
+  try {
+    await api.put(
+      `https://localhost:7079/api/appointments/${appointment.id}/edit`,
+      {
+        employeeId: employee.id,
+        employeeName: employee.name,
+        serviceName: service.name,
+        startTime: `${date}T${time}`,
+        endTime: `${date}T${endTimeStr}`,
+        customerName,
+        customerPhone,
+        extraInfo,
+        organizationId
+      }
+    );
+
+    onSuccess?.("Appointment updated");
+    handleClose();
+  } catch (err) {
+    console.error(err);
+    alert(err?.response?.data?.error || "Failed to update appointment");
+  }
+};
 
   const handleDelete = async () => {
     if (!appointment || !confirm("Delete this appointment?")) return;
@@ -177,7 +226,7 @@ const EditAppointmentPopup = ({
         <Form.Group className="mb-3">
           <Form.Label>Date & Time *</Form.Label>
           <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-            <Form.Control type="date" value={form.date} onChange={handleChange("date")} style={{flex:1}} />
+            <Form.Control type="date" value={form.date} min={new Date().toISOString().split("T")[0]} onChange={handleChange("date")} style={{flex:1}} />
             <Form.Control type="time" value={form.time} onChange={handleChange("time")} style={{flex:1}} />
             <Form.Control
               type="text"
