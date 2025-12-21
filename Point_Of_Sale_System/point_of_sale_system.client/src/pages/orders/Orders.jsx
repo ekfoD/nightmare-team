@@ -1,134 +1,187 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { Container, Row, Col, Spinner, Alert } from 'react-bootstrap';
 import MenuGrid from '../Menu/MenuGrid';
 import OrderPanel from './OrderPanel';
+import api from '../../api/axios.js';
+import useAuth from '../../hooks/useAuth.jsx';
 
 const Orders = () => {
+  const { auth } = useAuth();
   const [categories, setCategories] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
-  const [activeTab, setActiveTab] = useState('starters');
-  const [orderId] = useState('2563');
+  const [activeTab, setActiveTab] = useState('');
   const [orderItems, setOrderItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  // API: Fetch menu data
   useEffect(() => {
     fetchMenuData();
   }, []);
 
   const fetchMenuData = async () => {
+    const organizationId = auth.businessId;
+    setLoading(true);
+    setError('');
+
     try {
-      // TODO: Replace with actual API call
-      const mockCategories = [
-        { id: 'starters', name: 'Starters' },
-        { id: 'mains', name: 'Mains' },
-        { id: 'desserts', name: 'Desserts' },
-        { id: 'beverages', name: 'Beverages' },
-        { id: 'snacks', name: 'Snacks' },
+      const response = await api.get(
+        `MenuBusiness/${organizationId}/GetMenuItems`
+      );
+
+      const data = response.data;
+
+      // Build categories from backend data
+      const uniqueCategories = [
+        ...new Map(
+          data.map((item) => [
+            item.category,
+            {
+              id: item.category,
+              name:
+                item.category.charAt(0).toUpperCase() + item.category.slice(1),
+            },
+          ])
+        ).values(),
       ];
 
-      const mockItems = [
-        { id: 1, name: 'Caesar Salad', price: 12.99, category: 'starters' },
-        { id: 2, name: 'Bruschetta', price: 8.99, category: 'starters' },
-        { id: 3, name: 'Grilled Salmon', price: 24.99, category: 'mains' },
-        { id: 4, name: 'Steak', price: 29.99, category: 'mains' },
-        { id: 5, name: 'Chocolate Cake', price: 7.99, category: 'desserts' },
-        { id: 6, name: 'Ice Cream', price: 5.99, category: 'desserts' },
-        { id: 7, name: 'Coffee', price: 3.99, category: 'beverages' },
-        { id: 8, name: 'Orange Juice', price: 4.99, category: 'beverages' },
-      ];
+      setCategories(uniqueCategories);
 
-      setCategories(mockCategories);
-      setMenuItems(mockItems);
-    } catch (error) {
-      console.error('Error fetching menu:', error);
+      // Fetch variations per menu item
+      await Promise.all(
+        data.map(async (item) => {
+          const variationResponse = await api.get(
+            `MenuBusiness/${item.id}/GetVariations`
+          );
+          item.variations = variationResponse.data;
+        })
+      );
+
+      setMenuItems(data);
+
+      console.log('categories: ', uniqueCategories);
+      console.log('menuItems: ', data);
+      // Default active tab
+      if (uniqueCategories.length > 0) {
+        setActiveTab(uniqueCategories[0].id);
+      }
+    } catch (err) {
+      console.error('Error fetching menu data:', err);
+      setError('Failed to load menu items');
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleToggleVariation = (orderItemId, variation) => {
+    setOrderItems((items) =>
+      items.map((item) => {
+        if (item.id !== orderItemId) return item;
+
+        const exists = item.selectedVariations.some(
+          (v) => v.id === variation.id
+        );
+
+        return {
+          ...item,
+          selectedVariations: exists
+            ? item.selectedVariations.filter((v) => v.id !== variation.id)
+            : [...item.selectedVariations, variation],
+        };
+      })
+    );
+  };
+
+  // Add item to order
   const handleAddItemToOrder = (menuItem) => {
-    const existingItem = orderItems.find(item => item.menuItemId === menuItem.id);
-    
+    const existingItem = orderItems.find(
+      (item) => item.menuItemId === menuItem.id
+    );
+
     if (existingItem) {
-      setOrderItems(orderItems.map(item =>
-        item.menuItemId === menuItem.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ));
+      setOrderItems((items) =>
+        items.map((item) =>
+          item.menuItemId === menuItem.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      );
     } else {
-      const newOrderItem = {
-        id: Math.max(...orderItems.map(i => i.id), 0) + 1,
-        menuItemId: menuItem.id,
-        name: menuItem.name,
-        price: menuItem.price,
-        quantity: 1,
-        expanded: false
-      };
-      setOrderItems([...orderItems, newOrderItem]);
+      setOrderItems((items) => [
+        ...items,
+        {
+          id: crypto.randomUUID(),
+          menuItemId: menuItem.id,
+          name: menuItem.name,
+          basePrice: menuItem.price,
+          quantity: 1,
+          expanded: true,
+          variations: menuItem.variations ?? [],
+          selectedVariations: [],
+        },
+      ]);
     }
   };
 
-  const handleUpdateQuantity = (id, newQuantity) => {
-    const qty = parseInt(newQuantity) || 1;
-    setOrderItems(orderItems.map(item => 
-      item.id === id ? { ...item, quantity: Math.max(1, qty) } : item
-    ));
+  const handleUpdateQuantity = (id, newQty) => {
+    const qty = Math.max(1, parseInt(newQty) || 1);
+    setOrderItems(
+      orderItems.map((item) =>
+        item.id === id ? { ...item, quantity: qty } : item
+      )
+    );
   };
 
   const handleRemoveItem = (id) => {
-    setOrderItems(orderItems.filter(item => item.id !== id));
+    setOrderItems(orderItems.filter((item) => item.id !== id));
   };
 
-  // API: Submit order
-  const handleProceed = async () => {
-    try {
-      // TODO: Replace with actual API call
-      // await fetch('/api/orders', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ orderId, items: orderItems })
-      // });
-
-      console.log('Order submitted:', { orderId, items: orderItems });
-      alert('Order submitted successfully!');
-      // After successful submission, clear order
-      setOrderItems([]);
-    } catch (error) {
-      console.error('Error submitting order:', error);
-      alert('Error submitting order. Please try again.');
-    }
+  const handleProceed = () => {
+    console.log('Submitting order:', orderItems);
+    alert('Order submitted');
+    setOrderItems([]);
   };
 
   const handleCancelOrder = () => {
-    if (window.confirm('Are you sure you want to cancel this order?')) {
+    if (window.confirm('Cancel this order?')) {
       setOrderItems([]);
     }
   };
 
   return (
-    <Container fluid className="p-4" style={{ minHeight: '100vh' }}>
-      <Row>
-        <Col lg={8} md={7}>
-          <MenuGrid 
-            categories={categories}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            menuItems={menuItems}
-            onItemClick={handleAddItemToOrder}
-            showAddItem={false}
-          />
-        </Col>
+    <Container fluid className='p-4' style={{ minHeight: '100vh' }}>
+      {loading && (
+        <div className='text-center my-5'>
+          <Spinner animation='border' />
+        </div>
+      )}
 
-        <Col lg={4} md={5}>
-          <OrderPanel 
-            orderId={orderId}
-            orderItems={orderItems}
-            onUpdateQuantity={handleUpdateQuantity}
-            onRemoveItem={handleRemoveItem}
-            onProceed={handleProceed}
-            onCancelOrder={handleCancelOrder}
-          />
-        </Col>
-      </Row>
+      {error && <Alert variant='danger'>{error}</Alert>}
+
+      {!loading && !error && (
+        <Row>
+          <Col lg={8} md={7}>
+            <MenuGrid
+              categories={categories}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              menuItems={menuItems}
+              onItemClick={handleAddItemToOrder}
+              showAddItem={false}
+            />
+          </Col>
+
+          <Col lg={4} md={5}>
+            <OrderPanel
+              orderItems={orderItems}
+              onUpdateQuantity={handleUpdateQuantity}
+              onRemoveItem={handleRemoveItem}
+              onToggleVariation={handleToggleVariation}
+              onProceed={handleProceed}
+              onCancelOrder={handleCancelOrder}
+            />
+          </Col>
+        </Row>
+      )}
     </Container>
   );
 };
