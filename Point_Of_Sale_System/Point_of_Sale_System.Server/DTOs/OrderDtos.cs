@@ -41,7 +41,7 @@ namespace Point_of_Sale_System.Server.DTOs
     public class OrderItemDto
     {
         public Guid Id { get; set; }
-        public Guid MenuItemId { get; set; }
+        public Guid MenuItemId { get; set; }   
         public Guid? VariationId { get; set; }
         public string MenuItemName { get; set; } = string.Empty;
         public string VariationName { get; set; } = string.Empty;

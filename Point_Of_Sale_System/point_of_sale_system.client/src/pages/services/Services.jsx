@@ -4,7 +4,9 @@ import CreateServiceModal from "./CreateServiceModal";
 import EditServiceModal from "./EditServiceModal";
 import SuccessNotifier from "../../utilities/SuccessNotifier";
 import useAuth from "../../hooks/useAuth";
-import api from '../../api/axios.js';
+import api from "../../api/axios.js";
+
+/* ------------------ HELPERS ------------------ */
 
 function formatDuration(minutes) {
   const h = Math.floor(minutes / 60).toString().padStart(2, "0");
@@ -12,12 +14,15 @@ function formatDuration(minutes) {
   return `${h}:${m}`;
 }
 
+/* ------------------ COMPONENT ------------------ */
+
 export default function Services() {
   const { auth } = useAuth();
   const organizationId = auth.businessId;
 
   const [services, setServices] = useState([]);
   const [taxes, setTaxes] = useState([]);
+  const [discounts, setDiscounts] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,97 +32,102 @@ export default function Services() {
   const [showNotifier, setShowNotifier] = useState(false);
   const [notifierMessage, setNotifierMessage] = useState("");
 
+  /* ------------------ FETCHING ------------------ */
 
   const fetchServices = async () => {
-    try {
-      const res = await api.get(`/services/full/${organizationId}`);
-      setServices(res.data);
-      setSelected(res.data.length ? res.data[0] : null);
-    } catch (err) {
-      console.error("Failed to fetch services:", err);
-    }
+    const res = await api.get(`/services/full/${organizationId}`);
+    setServices(res.data);
+    setSelected(res.data.length ? res.data[0] : null);
   };
 
   const fetchTaxes = async () => {
-    try {
-      const res = await api.get(`/Tax/Organization/${organizationId}`);
-      setTaxes(res.data);
-    } catch (err) {
-      console.error("Failed to fetch taxes:", err);
-    }
+    const res = await api.get(`/Tax/Organization/${organizationId}`);
+    setTaxes(res.data);
+  };
+
+  const fetchDiscounts = async () => {
+    const res = await api.get(
+      `/discount/organization/${organizationId}`
+    );
+    const itemDiscounts = res.data.filter(
+      d => d.applicableTo === "item" && d.status === "active"
+);
+    setDiscounts(itemDiscounts);
   };
 
   useEffect(() => {
-    
     const load = async () => {
       setLoading(true);
-      await Promise.all([fetchServices(), fetchTaxes()]);
+      await Promise.all([fetchServices(), fetchTaxes(), fetchDiscounts()]);
       setLoading(false);
     };
     load();
-  }, []);
+  },);
+
+  /* ------------------ CRUD ------------------ */
 
   const handleCreateService = async (service) => {
-    try {
-      const payload = {
-        name: service.name,
-        duration: service.durationMinutes,
-        price: service.price,
-        description: service.description,
-        status: service.status,
-        organizationId: organizationId,
-        taxIds: service.taxIds
-      };
+    await api.post("/services", {
+      name: service.name,
+      duration: service.durationMinutes,
+      price: service.price,
+      description: service.description,
+      status: service.status,
+      organizationId,
+      taxIds: service.taxIds,
+      discountId: service.discountId || null,
+    });
 
-      await api.post("/services", payload);
-      await fetchServices();
-
-      setShowCreateModal(false);
-      setNotifierMessage(`Service "${service.name}" created successfully!`);
-      setShowNotifier(true);
-    } catch (err) {
-      console.error("Failed to create service:", err);
-    }
+    await fetchServices();
+    setShowCreateModal(false);
+    setNotifierMessage(`Service "${service.name}" created successfully!`);
+    setShowNotifier(true);
   };
 
   const handleUpdateService = async (service) => {
-    try {
-      const payload = {
-        name: service.name,
-        duration: service.duration,
-        price: service.price,
-        description: service.description,
-        status: service.status,
-        organizationId: organizationId,
-        taxIds: service.taxIds
-      };
+    await api.put(`/services/${service.id}`, {
+      name: service.name,
+      duration: service.duration,
+      price: service.price,
+      description: service.description,
+      status: service.status,
+      organizationId,
+      taxIds: service.taxIds,
+      discountId: service.discountId || null,
+    });
 
-      await api.put(`/services/${service.id}`, payload);
-      await fetchServices();
-
-      setShowEditModal(false);
-      setNotifierMessage(`Service "${service.name}" updated successfully!`);
-      setShowNotifier(true);
-    } catch (err) {
-      console.error("Failed to update service:", err);
-      alert("Failed to update service. See console for details.");
-    }
+    await fetchServices();
+    setShowEditModal(false);
+    setNotifierMessage(`Service "${service.name}" updated successfully!`);
+    setShowNotifier(true);
   };
-
 
   const handleDeleteService = async (service) => {
     if (!window.confirm(`Delete "${service.name}"?`)) return;
 
-    try {
-      await api.delete(`/services/${service.id}`);
-      setServices((prev) => prev.filter((s) => s.id !== service.id));
-      setSelected(null);
-      setNotifierMessage(`Service "${service.name}" deleted successfully!`);
-      setShowNotifier(true);
-    } catch (err) {
-      console.error("Failed to delete service:", err);
-    }
+    await api.delete(`/services/${service.id}`);
+
+    setServices((prev) => {
+      const updated = prev.filter((s) => s.id !== service.id);
+
+      setSelected(updated.length > 0 ? updated[0] : null);
+
+      return updated;
+    });
+
+    setNotifierMessage(`Service "${service.name}" deleted successfully!`);
+    setShowNotifier(true);
   };
+
+
+  /* ------------------ DERIVED DATA ------------------ */
+
+  const selectedDiscount =
+    selected?.discountId
+      ? discounts.find((d) => d.id === selected.discountId)
+      : null;
+
+  /* ------------------ RENDER ------------------ */
 
   if (loading) return <div>Loading...</div>;
 
@@ -126,26 +136,39 @@ export default function Services() {
       {/* LEFT */}
       <div className="services-list">
         <div className="services-list-header">Services</div>
+
         <div className="services-list-scroll">
           {services
             .slice()
             .sort((a, b) =>
               a.status === b.status ? 0 : a.status === "Active" ? -1 : 1
             )
-            .map((service) => (
-              <div
-                key={service.id}
-                onClick={() => setSelected(service)}
-                className={`service-item ${
-                  selected?.id === service.id ? "selected" : ""
-                } ${service.status.toLowerCase() === "inactive" ? "inactive" : ""}`}
-              >
-                <div className="service-name">{service.name}</div>
-                <div className="service-duration">
-                  {formatDuration(service.duration)}
+            .map((service) => {
+              const hasDiscount = !!service.discountId;
+
+              return (
+                <div
+                  key={service.id}
+                  onClick={() => setSelected(service)}
+                  className={`service-item ${
+                    selected?.id === service.id ? "selected" : ""
+                  } ${service.status === "Inactive" ? "inactive" : ""}`}
+                >
+                  <div className="service-name">
+                    {service.name}
+                    {hasDiscount && (
+                      <span className="badge bg-success ms-2">
+                        Discounted
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="service-duration">
+                    {formatDuration(service.duration)}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
         </div>
       </div>
 
@@ -154,7 +177,10 @@ export default function Services() {
         {!selected ? (
           <>
             <h2>No services yet</h2>
-            <button className="btn btn-success" onClick={() => setShowCreateModal(true)}>
+            <button
+              className="btn btn-success"
+              onClick={() => setShowCreateModal(true)}
+            >
               Create new
             </button>
           </>
@@ -164,9 +190,22 @@ export default function Services() {
 
             <div className="service-info">
               <p><strong>Description:</strong> {selected.description}</p>
-              <p><strong>Price:</strong> {selected.price} {selected.currency === "euro" ? "€" : "$"} </p>
               <p><strong>Duration:</strong> {formatDuration(selected.duration)}</p>
+
+              <p>
+                <strong>Price:</strong>{" "}
+                {selected.price} {selected.currency === "euro" ? "€" : "$"}
+              </p>
+
               <p><strong>Status:</strong> {selected.status}</p>
+              
+              {selectedDiscount && (
+                <p>
+                  <strong>Discount:</strong>{" "}
+                  {selectedDiscount.name}: {selectedDiscount.amount} %
+                </p>
+              )}
+
 
               {selected.taxes?.length > 0 && (
                 <div>
@@ -174,11 +213,9 @@ export default function Services() {
                   <ul>
                     {selected.taxes.map((t) => (
                       <li key={t.id}>
-                        {t.name} —{" "}
-                        {t.amount}
+                        {t.name} — {t.amount}
                         {t.numberType === "percentage" ? "%" : " (flat)"}
                       </li>
-
                     ))}
                   </ul>
                 </div>
@@ -186,14 +223,24 @@ export default function Services() {
             </div>
 
             <div className="bottom-buttons">
-              <button className="btn btn-success" onClick={() => setShowCreateModal(true)}>
+              <button
+                className="btn btn-success"
+                onClick={() => setShowCreateModal(true)}
+              >
                 Create new
               </button>
+
               <div>
-                <button className="btn btn-primary me-2" onClick={() => setShowEditModal(true)}>
+                <button
+                  className="btn btn-primary me-2"
+                  onClick={() => setShowEditModal(true)}
+                >
                   Edit
                 </button>
-                <button className="btn btn-danger" onClick={() => handleDeleteService(selected)}>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => handleDeleteService(selected)}
+                >
                   Delete
                 </button>
               </div>
@@ -208,6 +255,7 @@ export default function Services() {
           onCreate={handleCreateService}
           currency={selected?.currency}
           taxes={taxes}
+          discounts={discounts}
         />
 
         <EditServiceModal
@@ -216,6 +264,7 @@ export default function Services() {
           onUpdate={handleUpdateService}
           service={selected}
           taxes={taxes}
+          discounts={discounts}
         />
 
         <SuccessNotifier
