@@ -61,7 +61,10 @@ export default function AppointmentHistory() {
     });
 
   const calculateTotals = (receipt) => {
-    const taxTotal = receipt.taxes.reduce((sum, t) => sum + t.amount, 0);
+    const taxTotal = receipt.taxes.reduce(
+    (sum, t) => sum + t.affectedAmount,
+    0
+  );
     const discountTotal = receipt.discounts.reduce(
       (sum, d) => sum + d.affectedAmount,
       0
@@ -72,12 +75,25 @@ export default function AppointmentHistory() {
     return { taxTotal, discountTotal, total };
   };
 
-  const handleRefund = () => {
-    if (!selected) return;
+  const handleRefund = async () => {
+  if (!selected) return;
 
-    // later this will call backend refund endpoint
-    alert(`Refund initiated for receipt ${selected.id}`);
-  };
+  if (!window.confirm(`Are you sure you want to refund receipt ${selected.id}?`)) return;
+
+  try {
+    await api.put(`/Receipt/${selected.id}/refund`);
+    alert("Refund successful!");
+
+    // Update frontend
+    setReceipts(prev => prev.map(r => 
+      r.id === selected.id ? { ...r, paymentStatus: "refunded" } : r
+    ));
+    setSelected(prev => prev && prev.id === selected.id ? { ...prev, paymentStatus: "refunded" } : prev);
+  } catch (err) {
+    console.error(err);
+    alert(err?.response?.data?.error || "Refund failed");
+  }
+};
 
 
   if (loading) return <div>Loading receipts...</div>;
@@ -170,10 +186,14 @@ export default function AppointmentHistory() {
                   {selected.taxes.map((t) => (
                     <div className="price-row" key={t.id}>
                       <span className="price-label">
-                        + {t.name}
+                        + {t.name}{" "}
+                        {t.numberType === "percentage"
+                          ? `(${t.amount}%)`
+                          : "(flat)"}
                       </span>
+
                       <span className="price-value">
-                        {currencySymbol} {t.amount.toFixed(2)}
+                        {currencySymbol} +{t.affectedAmount.toFixed(2)}
                       </span>
                     </div>
                   ))}
@@ -184,7 +204,7 @@ export default function AppointmentHistory() {
                         - {d.name}
                       </span>
                       <span className="price-value">
-                        {currencySymbol} {d.affectedAmount.toFixed(2)}
+                        {currencySymbol} -{d.affectedAmount.toFixed(2)}
                       </span>
                     </div>
                   ))}
@@ -210,12 +230,12 @@ export default function AppointmentHistory() {
                     </div>
 
                     <button
-                      className="payment-primary"
-                      onClick={handleRefund}
-                      disabled={selected.paymentStatus !== "succeeded"}
-                    >
-                      Refund
-                    </button>
+                    className="payment-primary"
+                    onClick={handleRefund}
+                    disabled={selected.paymentStatus !== "succeeded"}
+                  >
+                    {selected.paymentStatus === "refunded" ? "Refunded" : "Refund"}
+                  </button>
                   </div>
                 </div>
               </div>
