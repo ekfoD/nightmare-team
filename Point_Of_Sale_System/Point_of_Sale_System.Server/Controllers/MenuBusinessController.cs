@@ -64,7 +64,7 @@ namespace Point_of_Sale_System.Server.Controllers
         {
             try
             {
-                if (await _menuRepository.UpdateMenuItemAsync(menuItem))
+                if (await _menuRepository.UpdateMenuItemAsync(menuItem) == false)
                 {
                     return BadRequest("No MenuItem found.");
                 }
