@@ -41,6 +41,12 @@ namespace Point_of_Sale_System.Server.Models.Data
             {
                 relationship.DeleteBehavior = DeleteBehavior.Restrict;
             }
+
+            modelBuilder.Entity<MenuItem>()
+                .HasOne(m => m.Organization)
+                .WithMany(o => o.MenuItems)
+                .HasForeignKey(m => m.OrganizationId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }
