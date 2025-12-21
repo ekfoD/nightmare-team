@@ -11,13 +11,14 @@ namespace Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
+        public required string Name { get; set; }
         public required decimal Amount { get; set; }
         public AppliedToEnum ApplicableTo { get; set; }
         public DateOnly ValidFrom { get; set; }
         public DateOnly ValidUntil { get; set; }
         public StatusEnum Status { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.Now;
-        
+
         //navigation to FK's
         public required Guid OrganizationId { get; set; }
 

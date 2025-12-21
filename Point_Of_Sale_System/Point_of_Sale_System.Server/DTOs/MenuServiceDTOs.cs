@@ -12,6 +12,7 @@ namespace Point_of_Sale_System.Server.DTOs
         public required string Description { get; set; }
         public StatusEnum Status { get; set; }
         public CurrencyEnum Currency { get; set; }
+        public Guid? DiscountId { get; set; }
         public List<TaxDTO> Taxes { get; set; } = new();
     }
 

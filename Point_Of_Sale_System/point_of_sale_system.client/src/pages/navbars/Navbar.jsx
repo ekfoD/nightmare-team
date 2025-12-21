@@ -56,6 +56,7 @@ function Navbar() {
                   <>
                     <Nav.Link as={NavLink} to="/employees">Employees</Nav.Link>
                     <Nav.Link as={NavLink} to="/settings">Settings</Nav.Link>
+                    <Nav.Link as={NavLink} to="/discounts">Discounts</Nav.Link>
                   </>
                 )}
 

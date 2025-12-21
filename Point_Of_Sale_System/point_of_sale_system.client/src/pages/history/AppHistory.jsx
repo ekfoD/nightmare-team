@@ -137,7 +137,7 @@ export default function AppointmentHistory() {
       <div className="order-details">
         {selected && (() => {
           const { total } = calculateTotals(selected);
-          const currencySymbol = "€";
+          const currencySymbol = (selected.currency === "euro" ? "€" : (selected.currency === "dollar" ? "$" : "currency"));
 
           return (
             <>

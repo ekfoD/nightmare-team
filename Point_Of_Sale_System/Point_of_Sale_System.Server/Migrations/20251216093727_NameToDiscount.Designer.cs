@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Point_of_Sale_System.Server.Models.Data;
 
@@ -11,9 +12,11 @@ using Point_of_Sale_System.Server.Models.Data;
 namespace Point_of_Sale_System.Server.Migrations
 {
     [DbContext(typeof(PoSDbContext))]
-    partial class PoSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251216093727_NameToDiscount")]
+    partial class NameToDiscount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -181,9 +184,8 @@ namespace Point_of_Sale_System.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
 
                     b.Property<Guid?>("DiscountId")
                         .HasColumnType("uniqueidentifier");
@@ -581,9 +583,6 @@ namespace Point_of_Sale_System.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Currency")
-                        .HasColumnType("int");
-
                     b.Property<string>("CustomerName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -740,7 +739,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.MenuBased.MenuItem", "MenuItem")
                         .WithMany("Variations")
                         .HasForeignKey("MenuItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("MenuItem");
@@ -814,7 +813,7 @@ namespace Point_of_Sale_System.Server.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.MenuBased.Variation", "Variation")
-                        .WithMany()
+                        .WithMany("OrderItems")
                         .HasForeignKey("VariationId")
                         .OnDelete(DeleteBehavior.Restrict);
 
@@ -960,6 +959,11 @@ namespace Point_of_Sale_System.Server.Migrations
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.MenuBased.MenuItem", b =>
                 {
                     b.Navigation("Variations");
+                });
+
+            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.MenuBased.Variation", b =>
+                {
+                    b.Navigation("OrderItems");
                 });
 
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Discount", b =>
