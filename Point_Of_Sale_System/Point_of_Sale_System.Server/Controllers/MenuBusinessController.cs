@@ -64,7 +64,10 @@ namespace Point_of_Sale_System.Server.Controllers
         {
             try
             {
-                await _menuRepository.UpdateMenuItemAsync(menuItem);
+                if (await _menuRepository.UpdateMenuItemAsync(menuItem) == false)
+                {
+                    return BadRequest("No MenuItem found.");
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -160,7 +163,7 @@ namespace Point_of_Sale_System.Server.Controllers
         }
 
         // Delete a variation
-        [HttpDelete("{id}/DeleteVariations")]
+        [HttpDelete("{id}/DeleteVariation")]
         public async Task<IActionResult> DeleteVariation(Guid id)
         {
             var exists = await _variationRepository.VariationExistsAsync(id);

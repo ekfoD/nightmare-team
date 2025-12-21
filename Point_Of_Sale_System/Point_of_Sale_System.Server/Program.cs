@@ -35,6 +35,13 @@ builder.Services.AddScoped<IReceiptService, ReceiptService>();
 builder.Services.AddScoped<IDiscountService, DiscountService>();
 
 
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = null;
+        options.JsonSerializerOptions.MaxDepth = 64; // optional
+    });
+
 
 // builder.Services.AddCors(options =>
 // {

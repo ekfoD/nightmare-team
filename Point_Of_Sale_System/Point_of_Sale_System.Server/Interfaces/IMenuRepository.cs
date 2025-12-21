@@ -7,7 +7,7 @@ namespace Point_of_Sale_System.Server.Interfaces
         Task<IEnumerable<MenuItem>> GetMenuItemsAsync(Guid organizationId);
         Task<MenuItem?> GetMenuItemAsync(Guid id);
         Task<MenuItem> AddMenuItemAsync(MenuItem menuItem);
-        Task UpdateMenuItemAsync(MenuItem menuItem);
+        Task<bool> UpdateMenuItemAsync(MenuItem menuItem);
         Task DeleteMenuItemAsync(Guid id);
         Task<bool> MenuItemExistsAsync(Guid id);
     }
