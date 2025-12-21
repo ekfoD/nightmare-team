@@ -1,134 +1,257 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { Container, Row, Col, Spinner, Alert } from 'react-bootstrap';
 import MenuGrid from '../Menu/MenuGrid';
 import OrderPanel from './OrderPanel';
+import api from '../../api/axios.js';
+import useAuth from '../../hooks/useAuth.jsx';
 
 const Orders = () => {
+  const { auth } = useAuth();
+
   const [categories, setCategories] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
-  const [activeTab, setActiveTab] = useState('starters');
-  const [orderId] = useState('2563');
+  const [activeTab, setActiveTab] = useState('');
   const [orderItems, setOrderItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  // API: Fetch menu data
   useEffect(() => {
     fetchMenuData();
   }, []);
 
+  /* ===================== MENU ===================== */
+
   const fetchMenuData = async () => {
+    const organizationId = auth.businessId;
+    setLoading(true);
+    setError('');
+
     try {
-      // TODO: Replace with actual API call
-      const mockCategories = [
-        { id: 'starters', name: 'Starters' },
-        { id: 'mains', name: 'Mains' },
-        { id: 'desserts', name: 'Desserts' },
-        { id: 'beverages', name: 'Beverages' },
-        { id: 'snacks', name: 'Snacks' },
+      const response = await api.get(
+        `MenuBusiness/${organizationId}/GetMenuItems`
+      );
+
+      const data = response.data;
+
+      const uniqueCategories = [
+        ...new Map(
+          data.map((item) => [
+            item.category,
+            {
+              id: item.category,
+              name:
+                item.category.charAt(0).toUpperCase() + item.category.slice(1),
+            },
+          ])
+        ).values(),
       ];
 
-      const mockItems = [
-        { id: 1, name: 'Caesar Salad', price: 12.99, category: 'starters' },
-        { id: 2, name: 'Bruschetta', price: 8.99, category: 'starters' },
-        { id: 3, name: 'Grilled Salmon', price: 24.99, category: 'mains' },
-        { id: 4, name: 'Steak', price: 29.99, category: 'mains' },
-        { id: 5, name: 'Chocolate Cake', price: 7.99, category: 'desserts' },
-        { id: 6, name: 'Ice Cream', price: 5.99, category: 'desserts' },
-        { id: 7, name: 'Coffee', price: 3.99, category: 'beverages' },
-        { id: 8, name: 'Orange Juice', price: 4.99, category: 'beverages' },
-      ];
+      setCategories(uniqueCategories);
 
-      setCategories(mockCategories);
-      setMenuItems(mockItems);
-    } catch (error) {
-      console.error('Error fetching menu:', error);
+      await Promise.all(
+        data.map(async (item) => {
+          const variationResponse = await api.get(
+            `MenuBusiness/${item.id}/GetVariations`
+          );
+          item.variations = variationResponse.data;
+        })
+      );
+
+      setMenuItems(data);
+
+      if (uniqueCategories.length > 0) {
+        setActiveTab(uniqueCategories[0].id);
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Failed to load menu items');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleAddItemToOrder = (menuItem) => {
-    const existingItem = orderItems.find(item => item.menuItemId === menuItem.id);
-    
+  /* ===================== HELPERS ===================== */
+
+  const areVariationsEqual = (a = [], b = []) => {
+    if (a.length !== b.length) return false;
+    return (
+      a
+        .map((v) => v.id)
+        .sort()
+        .join() ===
+      b
+        .map((v) => v.id)
+        .sort()
+        .join()
+    );
+  };
+
+  const buildAddItemsPayload = (orderId, orderItems) => {
+    const payloadItems = [];
+
+    orderItems.forEach((item) => {
+      // Parent
+      payloadItems.push({
+        menuItemId: item.menuItemId,
+        variationId: null,
+        quantity: item.quantity,
+        isParent: true,
+      });
+
+      // Variations
+      item.selectedVariations?.forEach((variation) => {
+        payloadItems.push({
+          menuItemId: item.menuItemId,
+          variationId: variation.id,
+          quantity: item.quantity,
+          isParent: false,
+        });
+      });
+    });
+
+    return {
+      orderId,
+      orderItems: payloadItems,
+    };
+  };
+
+  /* ===================== ORDER LOGIC ===================== */
+
+  const handleAddItemToOrder = (menuItem, selectedVariations = []) => {
+    const existingItem = orderItems.find(
+      (item) =>
+        item.menuItemId === menuItem.id &&
+        areVariationsEqual(item.selectedVariations, selectedVariations)
+    );
+
     if (existingItem) {
-      setOrderItems(orderItems.map(item =>
-        item.menuItemId === menuItem.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ));
+      setOrderItems((items) =>
+        items.map((item) =>
+          item.id === existingItem.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      );
     } else {
-      const newOrderItem = {
-        id: Math.max(...orderItems.map(i => i.id), 0) + 1,
-        menuItemId: menuItem.id,
-        name: menuItem.name,
-        price: menuItem.price,
-        quantity: 1,
-        expanded: false
-      };
-      setOrderItems([...orderItems, newOrderItem]);
+      setOrderItems((items) => [
+        ...items,
+        {
+          id: crypto.randomUUID(),
+          menuItemId: menuItem.id,
+          name: menuItem.name,
+          basePrice: menuItem.price,
+          quantity: 1,
+          expanded: true,
+          variations: menuItem.variations ?? [],
+          selectedVariations,
+        },
+      ]);
     }
   };
 
-  const handleUpdateQuantity = (id, newQuantity) => {
-    const qty = parseInt(newQuantity) || 1;
-    setOrderItems(orderItems.map(item => 
-      item.id === id ? { ...item, quantity: Math.max(1, qty) } : item
-    ));
+  const handleToggleVariation = (orderItemId, variation) => {
+    setOrderItems((items) =>
+      items.map((item) =>
+        item.id === orderItemId
+          ? {
+              ...item,
+              selectedVariations: item.selectedVariations.some(
+                (v) => v.id === variation.id
+              )
+                ? item.selectedVariations.filter((v) => v.id !== variation.id)
+                : [...item.selectedVariations, variation],
+            }
+          : item
+      )
+    );
+  };
+
+  const handleUpdateQuantity = (id, qty) => {
+    setOrderItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, quantity: Math.max(1, qty) } : item
+      )
+    );
   };
 
   const handleRemoveItem = (id) => {
-    setOrderItems(orderItems.filter(item => item.id !== id));
+    setOrderItems((items) => items.filter((item) => item.id !== id));
   };
 
-  // API: Submit order
-  const handleProceed = async () => {
-    try {
-      // TODO: Replace with actual API call
-      // await fetch('/api/orders', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ orderId, items: orderItems })
-      // });
+  /* ===================== API FLOW ===================== */
 
-      console.log('Order submitted:', { orderId, items: orderItems });
-      alert('Order submitted successfully!');
-      // After successful submission, clear order
+  const handleProceed = async () => {
+    if (orderItems.length === 0) return;
+
+    setLoading(true);
+    setError('');
+
+    try {
+      // 1️⃣ Create order
+      const createOrderRes = await api.post('Payment/CreateOrder', {
+        organizationId: auth.businessId,
+      });
+
+      const orderId = createOrderRes.data.id;
+
+      // 2️⃣ Add items
+      const payload = buildAddItemsPayload(orderId, orderItems);
+
+      await api.post(`Payment/${orderId}/AddItems`, payload);
+
+      alert('Order submitted successfully');
       setOrderItems([]);
-    } catch (error) {
-      console.error('Error submitting order:', error);
-      alert('Error submitting order. Please try again.');
+    } catch (err) {
+      console.error(err);
+      setError('Failed to submit order');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleCancelOrder = () => {
-    if (window.confirm('Are you sure you want to cancel this order?')) {
+    if (window.confirm('Cancel this order?')) {
       setOrderItems([]);
     }
   };
 
-  return (
-    <Container fluid className="p-4" style={{ minHeight: '100vh' }}>
-      <Row>
-        <Col lg={8} md={7}>
-          <MenuGrid 
-            categories={categories}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            menuItems={menuItems}
-            onItemClick={handleAddItemToOrder}
-            showAddItem={false}
-          />
-        </Col>
+  /* ===================== RENDER ===================== */
 
-        <Col lg={4} md={5}>
-          <OrderPanel 
-            orderId={orderId}
-            orderItems={orderItems}
-            onUpdateQuantity={handleUpdateQuantity}
-            onRemoveItem={handleRemoveItem}
-            onProceed={handleProceed}
-            onCancelOrder={handleCancelOrder}
-          />
-        </Col>
-      </Row>
+  return (
+    <Container fluid className='p-4' style={{ minHeight: '100vh' }}>
+      {loading && (
+        <div className='text-center my-5'>
+          <Spinner animation='border' />
+        </div>
+      )}
+
+      {error && <Alert variant='danger'>{error}</Alert>}
+
+      {!loading && !error && (
+        <Row>
+          <Col lg={8} md={7}>
+            <MenuGrid
+              categories={categories}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              menuItems={menuItems}
+              onItemClick={handleAddItemToOrder}
+              showAddItem={false}
+            />
+          </Col>
+
+          <Col lg={4} md={5}>
+            <OrderPanel
+              orderItems={orderItems}
+              onUpdateQuantity={handleUpdateQuantity}
+              onRemoveItem={handleRemoveItem}
+              onToggleVariation={handleToggleVariation}
+              onProceed={handleProceed}
+              onCancelOrder={handleCancelOrder}
+            />
+          </Col>
+        </Row>
+      )}
     </Container>
   );
 };
