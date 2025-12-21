@@ -716,7 +716,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany("MenuItems")
                         .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Tax", "Tax")
