@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import api from '../../api/axios.js';
-import { workStart, workEnd, isWithinWorkHours, parseDurationToMinutes, doesOverlap } from './utils/ScheduleHelpers';
+import { workStart, workEnd, isWithinWorkHours, parseDurationToMinutes, doesOverlap, isPastDate, isPastDateTime } from './utils/ScheduleHelpers';
 
 const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, selectedDate, allAppointments, organizationId }) => {
   const [form, setForm] = useState({
@@ -44,52 +44,84 @@ const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, 
   });
 
   const handleSave = async () => {
-    const { service, employeeId, date, time, customerName, customerPhone, extraInfo } = form;
-    if (!service || !employeeId || !time || !customerName || !date) {
-      return alert("Fill required fields.");
-    }
+  const {
+    service,
+    employeeId,
+    date,
+    time,
+    customerName,
+    customerPhone,
+    extraInfo
+  } = form;
 
-    const start = new Date(`${date}T${time}:00`);
-    const end = new Date(start.getTime() + parseDurationToMinutes(service.duration) * 60000);
+  /* ===== Required fields ===== */
+  if (!service || !employeeId || !date || !time || !customerName.trim()) {
+    return alert("Please fill all required fields.");
+  }
 
-    if (!isWithinWorkHours(time)) {
-      return alert(`Time must be between ${workStart} and ${workEnd}.`);
-    }
+  /* ===== Invalid date ===== */
+  if (isPastDate(date)) {
+    return alert("You cannot create an appointment before today.");
+  }
 
-    if (doesOverlap(start, end, employeeId, allAppointments)) {
-      return alert("This appointment overlaps with an existing appointment for this employee.");
-    }
+  /* ===== Invalid time today ===== */
+  if (isPastDateTime(date, time)) {
+    return alert("You cannot create an appointment in the past.");
+  }
 
-    try {
-      const employee = workers.find(w => String(w.id) === String(employeeId));
+  /* ===== Service duration ===== */
+  const durationMinutes = parseDurationToMinutes(service.duration);
+  if (!durationMinutes || durationMinutes <= 0) {
+    return alert("Invalid service duration.");
+  }
 
-      if (!employee) {
-        console.error("Employee lookup failed", { employeeId, workers });
-        alert("Please select a valid employee");
-        return;
-      }
-      const startStr = `${date}T${time}`;
+  const start = new Date(`${date}T${time}:00`);
+  const end = new Date(start.getTime() + durationMinutes * 60000);
 
-      await api.post("https://localhost:7079/api/appointments/create", {
-        employeeId: employee.id,
-        employeeName: employee.name,
-        serviceName: service.name,
-        startTime: startStr,
-        customerName,
-        customerPhone,
-        extraInfo,
-        organizationId
-      });
+  /* ===== Work hours ===== */
+  if (!isWithinWorkHours(time)) {
+    return alert(`Time must be between ${workStart} and ${workEnd}.`);
+  }
 
-      onSuccess && onSuccess("Appointment created");
-      resetForm();
-      handleClose();
+  const endTimeStr = end.toTimeString().substring(0, 5);
+  if (!isWithinWorkHours(endTimeStr)) {
+    return alert("Appointment ends outside of working hours.");
+  }
 
-    } catch (err) {
-      console.error(err);
-      alert(err?.response?.data?.error || "Failed to create appointment");
-    }
-  };
+  /* ===== Overlap ===== */
+  if (doesOverlap(start, end, employeeId, allAppointments)) {
+    return alert(
+      "This appointment overlaps with an existing appointment for this employee."
+    );
+  }
+
+  /* ===== Employee sanity ===== */
+  const employee = workers.find(w => String(w.id) === String(employeeId));
+  if (!employee) {
+    return alert("Please select a valid employee.");
+  }
+
+  /* ===== API ===== */
+  try {
+    await api.post("https://localhost:7079/api/appointments/create", {
+      employeeId: employee.id,
+      employeeName: employee.name,
+      serviceName: service.name,
+      startTime: `${date}T${time}`,
+      customerName,
+      customerPhone,
+      extraInfo,
+      organizationId
+    });
+
+    onSuccess?.("Appointment created");
+    resetForm();
+    handleClose();
+  } catch (err) {
+    console.error(err);
+    alert(err?.response?.data?.error || "Failed to create appointment");
+  }
+};
 
   return (
     <Modal show={show} onHide={() => { resetForm(); handleClose(); }} centered size="lg">
@@ -127,7 +159,7 @@ const NewAppointmentPopup = ({ show, handleClose, onSuccess, workers, services, 
         <Form.Group className="mb-3">
           <Form.Label>Date & Time *</Form.Label>
           <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-            <Form.Control type="date" value={form.date} onChange={handleChange("date")} style={{flex:1}} />
+            <Form.Control type="date" min={new Date().toISOString().split("T")[0]} value={form.date} onChange={handleChange("date")} style={{flex:1}} />
             <Form.Control type="time" value={form.time} onChange={handleChange("time")} style={{flex:1}} />
             <Form.Control type="text" value={computeEndTime()} readOnly placeholder="End time"
               style={{width:'90px', fontSize:'0.85rem', textAlign:'center', backgroundColor:'#f0f0f0'}}
