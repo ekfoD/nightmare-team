@@ -1,32 +1,39 @@
 import { useState, useEffect } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
 
-export default function EditServiceModal({ show, onClose, onUpdate, service }) {
-  // Always call hooks unconditionally
+export default function EditServiceModal({
+  show,
+  onClose,
+  onUpdate,
+  service,
+  taxes = [],
+  discounts = []
+}) {
   const [name, setName] = useState("");
-  const [duration, setDuration] = useState("00:00"); // "HH:MM"
+  const [duration, setDuration] = useState("00:00");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState("Active");
+  const [selectedTaxIds, setSelectedTaxIds] = useState([]);
+  const [selectedDiscountId, setSelectedDiscountId] = useState("");
   const [error, setError] = useState("");
 
-  // Reset / prefill form when service or show changes
+  // When service or show changes, populate the form
   useEffect(() => {
-    if (service) {
+    if (service && show) {
       setName(service.name || "");
-      const hours = Math.floor(service.duration / 60)
-        .toString()
-        .padStart(2, "0");
+      const hours = Math.floor(service.duration / 60).toString().padStart(2, "0");
       const minutes = (service.duration % 60).toString().padStart(2, "0");
       setDuration(`${hours}:${minutes}`);
       setPrice(service.price?.toString() || "");
       setDescription(service.description || "");
       setIsActive(service.status?.toLowerCase() === "inactive" ? "Inactive" : "Active");
+      setSelectedTaxIds(service.taxes?.map(t => t.id.toString()) || []);
+      setSelectedDiscountId(service.discountId ? service.discountId.toString() : "");
       setError("");
-    } else if (!show) {
-      // Only reset if modal is closed
-      resetForm();
     }
+
+    if (!show) resetForm();
   }, [service, show]);
 
   const resetForm = () => {
@@ -35,19 +42,28 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
     setPrice("");
     setDescription("");
     setIsActive("Active");
+    setSelectedTaxIds([]);
+    setSelectedDiscountId("");
     setError("");
   };
 
-  const currencySymbol = {
-    euro: "€",
-    dollar: "$",
-  }[service?.currency] || "$";
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
+  const currencySymbol = { euro: "€", dollar: "$" }[service?.currency] || "$";
 
   const handleUpdate = () => {
     setError("");
 
     if (!name || !duration || !price || !description) {
       setError("All fields are required.");
+      return;
+    }
+
+    if (selectedTaxIds.length === 0) {
+      setError("At least one tax must be selected.");
       return;
     }
 
@@ -82,12 +98,15 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
       price: priceNumber,
       description,
       status: isActive,
+      taxIds: selectedTaxIds,
+      discountId: selectedDiscountId || null
     });
+
     onClose();
   };
 
   return (
-    <Modal show={show} onHide={onClose} centered>
+    <Modal show={show} onHide={handleClose} centered>
       <Modal.Header closeButton>
         <Modal.Title>Edit Service</Modal.Title>
       </Modal.Header>
@@ -100,9 +119,7 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
             <Form.Label>Service Name</Form.Label>
             <Form.Control
               type="text"
-              placeholder="Enter service name"
               value={name}
-              required
               onChange={(e) => setName(e.target.value)}
             />
           </Form.Group>
@@ -111,8 +128,6 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
             <Form.Label>Duration (HH:MM)</Form.Label>
             <Form.Control
               type="text"
-              placeholder="00:30"
-              required
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
             />
@@ -122,9 +137,7 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
             <Form.Label>Price ({currencySymbol})</Form.Label>
             <Form.Control
               type="number"
-              placeholder="0.00"
               step="0.01"
-              required
               value={price}
               onChange={(e) => setPrice(e.target.value)}
             />
@@ -135,17 +148,47 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
             <Form.Control
               as="textarea"
               rows={3}
-              required
-              placeholder="Service description..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
           </Form.Group>
 
+          <Form.Group className="mb-3">
+            <Form.Label>Taxes *</Form.Label>
+            <Form.Control
+              as="select"
+              multiple
+              value={selectedTaxIds}
+              onChange={(e) =>
+                setSelectedTaxIds(Array.from(e.target.selectedOptions, opt => opt.value))
+              }
+            >
+              {taxes.map((tax) => (
+                <option key={tax.id} value={tax.id.toString()}>
+                  {tax.name} ({tax.amount?.parsedValue}{tax.numberType === "percentage" ? "%" : ""})
+                </option>
+              ))}
+            </Form.Control>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Discount</Form.Label>
+            <Form.Select
+              value={selectedDiscountId}
+              onChange={(e) => setSelectedDiscountId(e.target.value)}
+            >
+              <option value="">None</option>
+              {discounts.map((d) => (
+                <option key={d.id} value={d.id.toString()}>
+                  {d.name} — {d.amount}{d.applicableTo === "item" ? "%" : ""}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+
           <Form.Group>
             <Form.Label>Status</Form.Label>
             <Form.Select
-              required
               value={isActive}
               onChange={(e) => setIsActive(e.target.value)}
             >
@@ -157,8 +200,16 @@ export default function EditServiceModal({ show, onClose, onUpdate, service }) {
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={onClose}>Cancel</Button>
-        <Button variant="primary" onClick={handleUpdate}>Update</Button>
+        <Button variant="secondary" onClick={handleClose}>
+          Cancel
+        </Button>
+        <Button
+          variant="primary"
+          onClick={handleUpdate}
+          disabled={selectedTaxIds.length === 0}
+        >
+          Update
+        </Button>
       </Modal.Footer>
     </Modal>
   );

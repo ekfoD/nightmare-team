@@ -28,6 +28,10 @@ namespace Point_of_Sale_System.Server.Models.Data
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<Variation> Variations { get; set; }
         public DbSet<MenuService> MenuServices { get; set; }
+        public DbSet<AppointmentReceipt> AppointmentReceipts { get; set; }
+        public DbSet<TaxReceipt> TaxReceipts { get; set; }
+        public DbSet<DiscountReceipt> DiscountReceipts { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

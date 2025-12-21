@@ -4,6 +4,7 @@ using Point_of_Sale_System.Server.Interfaces;
 using Point_of_Sale_System.Server.Models.Entities.Business;
 using Point_of_Sale_System.Server.Models.Entities.ServiceBased;
 using Point_of_Sale_System.Server.Models.Data;
+using Point_of_Sale_System.Server.Enums;
 
 namespace Point_of_Sale_System.Server.Services
 {
@@ -16,6 +17,34 @@ namespace Point_of_Sale_System.Server.Services
             _db = db;
         }
 
+        public async Task<List<AppointmentDto>> GetPendingAppointmentsAsync(Guid organizationId)
+        {
+            var appts = await _db.Appointments
+                .AsNoTracking()
+                .Include(a => a.Employee)
+                .Include(a => a.MenuService)
+                .Where(a =>
+                    a.OrganizationId == organizationId &&
+                    a.PaymentStatus == PaymentEnum.pending)
+                .OrderBy(a => a.StartTime)
+                .ToListAsync();
+
+            return appts.Select(a => new AppointmentDto
+            {
+                Id = a.Id,
+                EmployeeId = a.EmployeeId,
+                EmployeeName = a.Employee.Username,
+                MenuServiceId = a.MenuServiceId,
+                ServiceName = a.MenuService.Name,
+                StartTime = a.StartTime,
+                EndTime = a.EndTime,
+                CustomerName = a.CustomerName,
+                CustomerPhone = a.CustomerPhone,
+                ExtraInfo = a.ExtraInfo,
+                OrganizationId = a.OrganizationId,
+                PaymentStatus = a.PaymentStatus
+            }).ToList();
+        }
         // -------------------------
         // GET APPOINTMENTS BY DATE
         // -------------------------
@@ -27,7 +56,8 @@ namespace Point_of_Sale_System.Server.Services
                 .Include(a => a.MenuService)
                 .Where(a =>
                     a.OrganizationId == organizationId &&
-                    a.StartTime.Date == date.Date)
+                    a.StartTime.Date == date.Date &&
+                    a.PaymentStatus == PaymentEnum.pending)
                 .ToListAsync();
 
             return appts.Select(a => new AppointmentDto
@@ -35,16 +65,15 @@ namespace Point_of_Sale_System.Server.Services
                 Id = a.Id,
                 EmployeeId = a.EmployeeId,
                 EmployeeName = a.Employee.Username,
-
                 MenuServiceId = a.MenuServiceId,
                 ServiceName = a.MenuService.Name,
-
                 StartTime = a.StartTime,
                 EndTime = a.EndTime,
-
                 CustomerName = a.CustomerName,
                 CustomerPhone = a.CustomerPhone,
-                ExtraInfo = a.ExtraInfo
+                ExtraInfo = a.ExtraInfo,
+                OrganizationId = a.OrganizationId,
+                PaymentStatus = a.PaymentStatus
             }).ToList();
         }
 
@@ -80,7 +109,8 @@ namespace Point_of_Sale_System.Server.Services
                 Timestamp = DateTime.UtcNow,
                 Employee = emp,
                 MenuService = svc,
-                Organization = org!
+                Organization = org!,
+                PaymentStatus = PaymentEnum.pending
             };
 
             _db.Appointments.Add(appt);
@@ -97,7 +127,9 @@ namespace Point_of_Sale_System.Server.Services
                 EndTime = appt.EndTime,
                 CustomerName = appt.CustomerName,
                 CustomerPhone = appt.CustomerPhone,
-                ExtraInfo = appt.ExtraInfo
+                ExtraInfo = appt.ExtraInfo,
+                OrganizationId = appt.OrganizationId,
+                PaymentStatus = PaymentEnum.pending
             };
         }
         public async Task<AppointmentDto> UpdateAsync(Guid id, CreateAppointmentDto dto)

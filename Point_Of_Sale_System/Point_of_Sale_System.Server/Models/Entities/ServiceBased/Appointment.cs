@@ -16,6 +16,7 @@ namespace Point_of_Sale_System.Server.Models.Entities.ServiceBased
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.Now;
+        public PaymentEnum PaymentStatus { get; set; }
 
         //navigation to FK's
         public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();

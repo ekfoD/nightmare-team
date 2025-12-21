@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Point_of_Sale_System.Server.Models.Data;
 using Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments;
 using Point_of_Sale_System.Server.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 
 [ApiController]
@@ -21,6 +22,7 @@ public class GiftcardController : ControllerBase
     // =========================
     // GET ALL BY ORGANIZATION
     // =========================
+    [Authorize(Roles = "admin,owner")]
     [HttpGet("organization/{organizationId:guid}")]
     public async Task<ActionResult<IEnumerable<GiftcardDTO>>> GetByOrganization(Guid organizationId)
     {
@@ -40,6 +42,7 @@ public class GiftcardController : ControllerBase
     // =========================
     // GET SINGLE
     // =========================
+    [Authorize(Roles = "admin,owner,manager,employee")]
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<GiftcardDTO>> Get(Guid id)
     {
@@ -58,6 +61,7 @@ public class GiftcardController : ControllerBase
     // =========================
     // CREATE
     // =========================
+    [Authorize(Roles = "admin,owner")]
     [HttpPost("organization/{organizationId:guid}")]
     public async Task<ActionResult<GiftcardDTO>> Create(
         Guid organizationId,
@@ -82,6 +86,7 @@ public class GiftcardController : ControllerBase
     // =========================
     // UPDATE
     // =========================
+    [Authorize(Roles = "admin,owner")]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] GiftcardDTO dto)
     {
@@ -99,6 +104,7 @@ public class GiftcardController : ControllerBase
     // =========================
     // DELETE
     // =========================
+    [Authorize(Roles = "admin,owner,manager,employee")]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {

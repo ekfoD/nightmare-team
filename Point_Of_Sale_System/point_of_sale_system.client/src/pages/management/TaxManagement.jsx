@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form, Container, Table } from "react-bootstrap";
 import TaxModal from './TaxModal'
-import axios from 'axios';
-
+import useAuth from "../../hooks/useAuth";
+import api from '../../api/axios.js';
 const TaxManagement = () => {
+
+    const { auth } = useAuth();
+    const organizationId = auth.businessId;
 
     const NUMBER_TYPE = {
         FLAT: 1,
@@ -22,7 +25,6 @@ const TaxManagement = () => {
     const [error, setError] = useState(null);
 
     const API_BASE_URL = "https://localhost:7079/api";
-    const ORGANIZATION_ID = "8bbb7afb-d664-492a-bcd2-d29953ab924e";
 
     // -----------------------------
     // LOAD TAXES
@@ -30,8 +32,8 @@ const TaxManagement = () => {
     useEffect(() => {
         const fetchTaxes = async () => {
             try {
-                const response = await axios.get(
-                    `/api/Tax/Organization/${ORGANIZATION_ID}`
+                const response = await api.get(
+                    `/Tax/Organization/${organizationId}`
                 );
 
                 setTaxes(response.data);
@@ -44,13 +46,13 @@ const TaxManagement = () => {
         };
 
         fetchTaxes();
-    }, [ORGANIZATION_ID]);
+    }, [organizationId]);
 
 
     const loadTaxes = async () => {
         try {
-            const res = await axios.get(
-                `${API_BASE_URL}/Tax/Organization/${ORGANIZATION_ID}`
+            const res = await api.get(
+                `${API_BASE_URL}/Tax/Organization/${organizationId}`
             );
             setTaxes(res.data);
         } catch (err) {
@@ -83,7 +85,7 @@ const TaxManagement = () => {
         if (!window.confirm("Delete this tax?")) return;
 
         try {
-            await axios.delete(`${API_BASE_URL}/Tax/${id}`);
+            await api.delete(`${API_BASE_URL}/Tax/${id}`);
             setTaxes(taxes.filter(t => t.id !== id));
         } catch (err) {
             console.error("Delete failed", err);
@@ -97,7 +99,7 @@ const TaxManagement = () => {
         try {
             if (tax.id) {
                 // UPDATE
-                const res = await axios.put(
+                const res = await api.put(
                     `${API_BASE_URL}/Tax/${tax.id}`,
                     tax
                 );
@@ -105,8 +107,8 @@ const TaxManagement = () => {
                 setTaxes(taxes.map(t => t.id === tax.id ? res.data : t));
             } else {
                 // CREATE
-                const res = await axios.post(
-                    `${API_BASE_URL}/Tax/organization/${ORGANIZATION_ID}`,
+                const res = await api.post(
+                    `${API_BASE_URL}/Tax/organization/${organizationId}`,
                     tax
                 );
 
