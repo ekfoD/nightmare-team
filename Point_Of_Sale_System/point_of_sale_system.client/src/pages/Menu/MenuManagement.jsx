@@ -21,6 +21,7 @@ const MenuManagement = () => {
     const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
     const [loading, setLoading] = useState(false);
     const [taxes, setTaxes] = useState([]);
+    const [discounts, setDiscounts] = useState([]);
 
     const organizationId = auth.businessId;
 
@@ -28,6 +29,7 @@ const MenuManagement = () => {
     useEffect(() => {
         fetchMenuData();
         fetchTaxes();
+        fetchDiscounts();
     }, []);
 
     const fetchTaxes = async () => {
@@ -37,7 +39,15 @@ const MenuManagement = () => {
         } catch (error) {
             console.error('Error fetching menu data:', error);
         }
+    }
 
+    const fetchDiscounts = async () => {
+        try {
+            const response = await api.get("Discount/Organization/" + organizationId)
+            setDiscounts(response.data);
+        } catch (error) {
+            console.error('Error fetching menu data:', error);
+        }
     }
 
     const fetchMenuData = async () => {
@@ -158,7 +168,9 @@ const MenuManagement = () => {
                 selectedItem={selectedItem}
                 handleSave={handleSave}
                 taxes={taxes}
-                organizationId={organizationId }
+                organizationId={organizationId}
+                discounts={discounts}
+
             />
 
             <AddItemModal
@@ -168,7 +180,6 @@ const MenuManagement = () => {
                 categories={categories}
                 taxes={taxes}
                 handleAddItem={handleAddItem}
-
             />
 
             <AddCategoryModal

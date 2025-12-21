@@ -11,6 +11,7 @@ const MenuManagementModal = ({
     selectedItem,
     handleSave,
     taxes,
+    discounts
 }) => {
     const [activeTab, setActiveTab] = useState('editItem');
     const [editedItem, setEditedItem] = useState(null);
@@ -84,10 +85,6 @@ const MenuManagementModal = ({
             </Modal.Header>
 
             <Modal.Body>
-                <Nav variant="tabs" activeKey={activeTab} onSelect={setActiveTab} className="mb-4">
-                    <Nav.Item><Nav.Link eventKey="editItem">Edit Item</Nav.Link></Nav.Item>
-                    <Nav.Item><Nav.Link eventKey="categories">Categories</Nav.Link></Nav.Item>
-                </Nav>
                 <Container className="bg-light rounded p-2 w-100">
                     <Form.Group className="mb-2">
                         <Form.Label>Name</Form.Label>
@@ -123,42 +120,51 @@ const MenuManagementModal = ({
                     </Form.Group>
 
                     {/* Variations */}
-                    <Form.Label>Variations</Form.Label>
-                    {editedItem.variations.map((v, idx) => (
-                        <Row key={v.id || v.tempId} className="mb-2 align-items-center">
-                            <Col>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Name"
-                                    value={v.name}
-                                    onChange={(e) => handleVariationChange(idx, 'name', e.target.value)}
-                                />
-                            </Col>
-                            <Col>
-                                <Form.Control
-                                    type="number"
-                                    step="0.01"
-                                    placeholder="Price"
-                                    value={v.price}
-                                    onChange={(e) => handleVariationChange(idx, 'price', parseFloat(e.target.value) || 0)}
-                                />
-                            </Col>
-                            <Col>
-                                <Form.Select
-                                    value={v.status}
-                                    onChange={(e) => handleVariationChange(idx, 'status', e.target.value)}
-                                >
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                </Form.Select>
-                            </Col>
-                            <Col xs="auto">
-                                <Button variant="danger" onClick={() => removeVariation(idx)}>Remove</Button>
-                            </Col>
-                        </Row>
-                    ))}
-                    <Button size="sm" variant="success" onClick={() => addVariation(false)}>+ Add Variation</Button>
-
+                    <Form.Group>
+                        <Form.Label>Variations</Form.Label>
+                        {editedItem.variations.map((v, idx) => (
+                            <Row key={v.id || v.tempId} className="mb-2 align-items-center">
+                                <Col>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Name"
+                                        value={v.name}
+                                        onChange={(e) => handleVariationChange(idx, 'name', e.target.value)}
+                                    />
+                                </Col>
+                                <Col>
+                                    <Form.Control
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="Price"
+                                        value={v.price}
+                                        onChange={(e) => handleVariationChange(idx, 'price', parseFloat(e.target.value) || 0)}
+                                    />
+                                </Col>
+                                <Col>
+                                    <Form.Select
+                                        value={v.status}
+                                        onChange={(e) => handleVariationChange(idx, 'status', e.target.value)}
+                                    >
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </Form.Select>
+                                </Col>
+                                <Col xs="auto">
+                                    <Button variant="danger" onClick={() => removeVariation(idx)}>Remove</Button>
+                                </Col>
+                            </Row>
+                        ))}
+                        <Button size="sm" variant="success" onClick={() => addVariation(false)}>+ Add Variation</Button>
+                    </Form.Group>
+                    <Form.Group>
+                        <Form.Label>Discounts</Form.Label>
+                        <Form.Select>
+                            {discounts.map(discount => 
+                                <option key={discount.id} value={discount.id}>{discount.name}</option>
+                            )}
+                        </Form.Select>
+                    </Form.Group>
 
                 </Container>
             </Modal.Body>
