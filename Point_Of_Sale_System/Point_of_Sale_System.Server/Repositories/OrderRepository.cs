@@ -39,6 +39,7 @@ namespace Point_of_Sale_System.Server.Repositories
             {
                 var menuItem = await _context.MenuItems
                     .Include(m => m.Tax)
+                    .Include(m => m.Discount)
                     .FirstOrDefaultAsync(m => m.Id == item.MenuItemId);
                 
                 if (menuItem == null) return false;
@@ -70,6 +71,7 @@ namespace Point_of_Sale_System.Server.Repositories
                 {
                     item.Name = menuItem.Name;
                     item.Price = menuItem.Price;
+                    item.Discount = menuItem.Discount?.Amount;
                     if (menuItem?.Tax != null)
                     {
                         item.TaxName = menuItem.Tax.Name;
@@ -107,6 +109,47 @@ namespace Point_of_Sale_System.Server.Repositories
             
             var variationExists = await _context.Variations.AnyAsync(v => v.Id == variationId && v.MenuItemId == menuItemId);
             return variationExists;
+        }
+
+        public async Task<bool> CancelOrderAsync(Guid orderId)
+        {
+            var order = await _context.Orders
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+            if (order == null) return false;
+
+            var orderItems = await _context.OrderItems
+                .Where(oi => oi.OrderId == orderId)
+                .ToListAsync();
+            
+            _context.OrderItems.RemoveRange(orderItems);
+            _context.Orders.Remove(order);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> OrderFailedAsync(Guid orderId)
+        {
+            var order = await _context.Orders
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+            if (order == null) return false;
+
+            order.PaymentStatus = PaymentEnum.failed;
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> OrderPendingAsync(Guid orderId)
+        {
+            var order = await _context.Orders
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+            if (order == null) return false;
+
+            order.PaymentStatus = PaymentEnum.pending;
+            await _context.SaveChangesAsync();
+
+            return true;
         }
     }
 }

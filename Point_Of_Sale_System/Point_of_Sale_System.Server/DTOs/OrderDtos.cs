@@ -56,8 +56,6 @@ namespace Point_of_Sale_System.Server.DTOs
         public decimal Amount { get; set; }
         public decimal Tip { get; set; }
         public CurrencyEnum Currency { get; set; }
-        public PaymentEnum PaymentStatus { get; set; }
-        public RefundEnum RefundStatus { get; set; }
         public DateTime Timestamp { get; set; }
         public Guid? OrderId { get; set; }
     }

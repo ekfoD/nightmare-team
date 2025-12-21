@@ -6,8 +6,8 @@ namespace Point_of_Sale_System.Server.Interfaces
     public interface IPaymentRepository
     {
         Task<Payment> CreatePaymentAsync(Payment payment);
-        Task<IEnumerable<Order>> GetClosedOrdersAsync(Guid organizationId);
+        Task<IEnumerable<Order>> GetAllOrdersAsync(Guid organizationId);
         Task<Payment?> GetPaymentAsync(Guid id);
-        Task<bool> RefundPaymentAsync(Guid paymentId, decimal amount, RefundEnum refundStatus);
+        Task<bool> RefundPaymentAsync(Guid paymentId);
     }
 }
