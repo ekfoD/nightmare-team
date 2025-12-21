@@ -5,7 +5,7 @@
 namespace Point_of_Sale_System.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class FixedDb1 : Migration
+    public partial class InitialCreate1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

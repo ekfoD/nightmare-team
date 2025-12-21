@@ -12,8 +12,8 @@ using Point_of_Sale_System.Server.Models.Data;
 namespace Point_of_Sale_System.Server.Migrations
 {
     [DbContext(typeof(PoSDbContext))]
-    [Migration("20251221193530_AddNewProperty2")]
-    partial class AddNewProperty2
+    [Migration("20251221195128_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

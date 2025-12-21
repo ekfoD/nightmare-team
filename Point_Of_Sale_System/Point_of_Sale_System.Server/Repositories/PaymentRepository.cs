@@ -25,10 +25,6 @@ namespace Point_of_Sale_System.Server.Repositories
         public async Task<IEnumerable<Order>> GetAllOrdersAsync(Guid organizationId)
         {
             return await _context.Orders
-                .Include(o => o.OrderItems)
-                    .ThenInclude(oi => oi.MenuItem)
-                .Include(o => o.OrderItems)
-                    .ThenInclude(oi => oi.Variation)
                 .Where(o => o.OrganizationId == organizationId)
                 .ToListAsync();
         }
