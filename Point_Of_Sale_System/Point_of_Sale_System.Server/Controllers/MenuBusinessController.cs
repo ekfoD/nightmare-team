@@ -46,7 +46,7 @@ namespace Point_of_Sale_System.Server.Controllers
 
         // Create a new menu item
         [HttpPost("PostMenuItem")]
-        public async Task<ActionResult<MenuItem>> PostMenuItem([FromBody] MenuItem menuItem)
+        public async Task<ActionResult<MenuItem>> PostMenuItem(MenuItem menuItem)
         {
             if (!ModelState.IsValid)
             {
@@ -60,11 +60,14 @@ namespace Point_of_Sale_System.Server.Controllers
 
         // Update a menu item
         [HttpPut("PutMenuItem")]
-        public async Task<IActionResult> PutMenuItem([FromBody] MenuItem menuItem)
+        public async Task<IActionResult> PutMenuItem(MenuItem menuItem)
         {
             try
             {
-                await _menuRepository.UpdateMenuItemAsync(menuItem);
+                if (await _menuRepository.UpdateMenuItemAsync(menuItem))
+                {
+                    return BadRequest("No MenuItem found.");
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -90,10 +93,6 @@ namespace Point_of_Sale_System.Server.Controllers
             {
                 return NotFound();
             }
-
-            //var variationsExist = await _variationRepository.GetVariationsAsync(id);
-            //if (variationsExist.Count() != 0)
-            //    return BadRequest("Variations still exist.");
 
             await _menuRepository.DeleteMenuItemAsync(id);
 

@@ -58,8 +58,8 @@ namespace Point_of_Sale_System.Server.Controllers
                 Id = Guid.NewGuid(),
                 Name = dto.Name,
                 Amount = dto.Amount,
-                NumberType = (NumberTypeEnum) dto.NumberType,
-                Status = (StatusEnum) dto.Status,
+                NumberType = dto.NumberType,
+                Status = dto.Status,
                 OrganizationId = organizationId
             };
             tax.Timestamp = DateTime.UtcNow;
@@ -88,8 +88,8 @@ namespace Point_of_Sale_System.Server.Controllers
 
             existing.Name = dto.Name;
             existing.Amount = dto.Amount;
-            existing.NumberType = (NumberTypeEnum) dto.NumberType;
-            existing.Status = (StatusEnum) dto.Status;
+            existing.NumberType = dto.NumberType;
+            existing.Status = dto.Status;
 
             await _context.SaveChangesAsync();
 

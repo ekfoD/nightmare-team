@@ -34,14 +34,14 @@ namespace Point_of_Sale_System.Server.Repositories
             return menuItem;
         }
 
-        public async Task UpdateMenuItemAsync(MenuItem menuItem)
+        public async Task<bool> UpdateMenuItemAsync(MenuItem menuItem)
         {
             var existingMenuItem = await _context.MenuItems
                 .Include(m => m.Variations)
                 .FirstOrDefaultAsync(m => m.Id == menuItem.Id);
 
             if (existingMenuItem == null)
-                throw new Exception("Menu item not found");
+                return false;
 
             _context.Entry(existingMenuItem).CurrentValues.SetValues(menuItem);
 
@@ -58,7 +58,7 @@ namespace Point_of_Sale_System.Server.Repositories
                 {
                     variation.MenuItemId = existingMenuItem.Id;
 
-                    _context.Variations.Add(variation); 
+                    _context.Variations.Add(variation);
                 }
             }
 
@@ -71,9 +71,8 @@ namespace Point_of_Sale_System.Server.Repositories
             }
 
             await _context.SaveChangesAsync();
+            return true;
         }
-
-
 
         public async Task DeleteMenuItemAsync(Guid id)
         {

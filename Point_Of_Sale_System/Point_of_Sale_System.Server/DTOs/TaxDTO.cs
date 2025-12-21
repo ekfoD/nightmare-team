@@ -7,6 +7,6 @@ public class TaxDTO
     public Guid? Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public decimal Amount { get; set; }
-    public int NumberType { get; set; }
-    public int Status { get; set; }
+    public NumberTypeEnum NumberType { get; set; }
+    public StatusEnum Status { get; set; }
 }

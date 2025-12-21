@@ -26,7 +26,6 @@ const MenuManagementModal = ({
     if (!editedItem) return null;
 
     const handleItemChange = (field, value) => setEditedItem(prev => ({ ...prev, [field]: value }));
-    const handleIngredientsChange = (ingredients) => setEditedItem(prev => ({ ...prev, ingredients }));
 
     const handleVariationChange = (index, field, value, isNewItem = false) => {
         if (isNewItem) {
@@ -114,11 +113,6 @@ const MenuManagementModal = ({
                             <option value={"inactive"}>Inactive</option>
                             <option value={"unavailable"}>Unavailable</option>
                         </Form.Select>
-                    </Form.Group>
-
-                    <Form.Group className="mb-2">
-                        <Form.Label>Ingredients</Form.Label>
-                        <IngredientsEditor ingredients={editedItem.ingredients} onChange={handleIngredientsChange} />
                     </Form.Group>
                     {/* Taxes */}
                     <Form.Group className="mb-2">
