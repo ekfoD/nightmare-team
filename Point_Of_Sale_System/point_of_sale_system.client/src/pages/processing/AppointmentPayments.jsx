@@ -245,7 +245,7 @@ const formatTime = (date) =>
   if (!confirmed) return;
 
   try {
-    await api.delete(`/Appointments/cancel/${selected.id}`);
+    await api.delete(`/Appointments/${selected.id}/delete`);
 
     setAppointments(prev =>
       prev.filter(a => a.id !== selected.id)

@@ -211,7 +211,6 @@ function Superadmin() {
                                 <option value="">Select type...</option>
                                 <option value="1">Order Based</option>
                                 <option value="2">Service Based</option>
-                                <option value="3">Order and Service Based</option>
                             </Form.Select>
                         </Form.Group>
 
