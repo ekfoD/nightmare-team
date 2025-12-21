@@ -48,7 +48,7 @@ function Superadmin() {
             const data = response.data;
 
             setOrganizations(data.items);
-            setCurrentPage(data.currentPage); // backend is 1-indexed
+            setCurrentPage(data.currentPage);
             setTotalPages(data.totalPages);
         } catch (e) {
             console.log(e.message);
