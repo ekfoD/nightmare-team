@@ -22,17 +22,14 @@ namespace Point_of_Sale_System.Server.Repositories
             return payment;
         }
 
-        public async Task<IEnumerable<Order>> GetClosedOrdersAsync(Guid organizationId)
+        public async Task<IEnumerable<Order>> GetAllOrdersAsync(Guid organizationId)
         {
-            // Orders are considered closed if they have at least one successful payment
-             return await _context.Orders
-                .Include(o => o.Payments)
+            return await _context.Orders
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.MenuItem)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Variation)
-                .Where(o => o.OrganizationId == organizationId && 
-                            o.Payments.Any(p => p.PaymentStatus == PaymentEnum.succeeded))
+                .Where(o => o.OrganizationId == organizationId)
                 .ToListAsync();
         }
 
@@ -41,22 +38,10 @@ namespace Point_of_Sale_System.Server.Repositories
             return await _context.Payments.FindAsync(id);
         }
 
-        public async Task<bool> RefundPaymentAsync(Guid paymentId, decimal amount, RefundEnum refundStatus)
+        public async Task<bool> RefundPaymentAsync(Guid paymentId)
         {
             var payment = await _context.Payments.FindAsync(paymentId);
             if (payment == null) return false;
-
-            payment.RefundStatus = refundStatus;
-            // Potentially we could track partial refunds or update amount, 
-            // but usually we just mark status or create a new refund record.
-            // Requirement says "updates order information with a 'refunded' status" 
-            // or "mark order as refunded". 
-            // Since status is on Payment, we update Payment.
-
-            if (refundStatus == RefundEnum.succeeded)
-            {
-                 payment.PaymentStatus = PaymentEnum.refunded;
-            }
 
             _context.Payments.Update(payment);
             await _context.SaveChangesAsync();

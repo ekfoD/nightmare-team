@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Point_of_Sale_System.Server.Models.Data;
 
@@ -11,9 +12,11 @@ using Point_of_Sale_System.Server.Models.Data;
 namespace Point_of_Sale_System.Server.Migrations
 {
     [DbContext(typeof(PoSDbContext))]
-    partial class PoSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251220104409_AddedOnDeleteCascadeFix")]
+    partial class AddedOnDeleteCascadeFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -346,9 +349,6 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("PaymentStatus")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
@@ -434,6 +434,12 @@ namespace Point_of_Sale_System.Server.Migrations
 
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("PaymentStatus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RefundStatus")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("StripePaymentId")
                         .HasColumnType("uniqueidentifier");
@@ -662,13 +668,13 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Employee", null)
                         .WithMany()
                         .HasForeignKey("EmployeesId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", null)
                         .WithMany()
                         .HasForeignKey("OrganizationsId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
                 });
 
@@ -677,13 +683,13 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.ServiceBased.MenuService", null)
                         .WithMany()
                         .HasForeignKey("MenuServicesId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Tax", null)
                         .WithMany()
                         .HasForeignKey("TaxesId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
                 });
 
@@ -692,7 +698,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany("InventoryItems")
                         .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Organization");
@@ -703,18 +709,18 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Discount", "Discount")
                         .WithMany("MenuItems")
                         .HasForeignKey("DiscountId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.ClientCascade);
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany("MenuItems")
                         .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Tax", "Tax")
                         .WithMany("MenuItems")
                         .HasForeignKey("TaxId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Discount");
@@ -729,7 +735,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.MenuBased.MenuItem", "MenuItem")
                         .WithMany("Variations")
                         .HasForeignKey("MenuItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("MenuItem");
@@ -740,7 +746,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany()
                         .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Organization");
@@ -751,7 +757,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.ServiceBased.AppointmentReceipt", "Receipt")
                         .WithMany("Discounts")
                         .HasForeignKey("ReceiptId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Receipt");
@@ -762,7 +768,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany()
                         .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Organization");
@@ -773,12 +779,12 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Discount", null)
                         .WithMany("Orders")
                         .HasForeignKey("DiscountId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.ClientCascade);
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany("Orders")
                         .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Organization");
@@ -789,23 +795,23 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.MenuBased.MenuItem", "MenuItem")
                         .WithMany()
                         .HasForeignKey("MenuItemId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.ClientCascade);
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Order", "Order")
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.OrderItem", "ParentOrderItem")
                         .WithMany("ChildOrderItems")
                         .HasForeignKey("ParentOrderItemId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.ClientCascade);
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.MenuBased.Variation", "Variation")
                         .WithMany("OrderItems")
                         .HasForeignKey("VariationId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.ClientCascade);
 
                     b.Navigation("MenuItem");
 
@@ -821,22 +827,22 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.ServiceBased.Appointment", "Appointment")
                         .WithMany("Payments")
                         .HasForeignKey("AppointmentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.ClientCascade);
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Giftcard", "Giftcard")
                         .WithMany("Payments")
                         .HasForeignKey("GiftcardId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.ClientCascade);
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Order", "Order")
                         .WithMany("Payments")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.ClientCascade);
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany("Payments")
                         .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Appointment");
@@ -853,7 +859,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany()
                         .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Organization");
@@ -864,7 +870,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.ServiceBased.AppointmentReceipt", "Receipt")
                         .WithMany("Taxes")
                         .HasForeignKey("ReceiptId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Receipt");
@@ -875,19 +881,19 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Employee", "Employee")
                         .WithMany("Appointments")
                         .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.ServiceBased.MenuService", "MenuService")
                         .WithMany("Appointments")
                         .HasForeignKey("MenuServiceId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany("Appointments")
                         .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Employee");
@@ -902,7 +908,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Payment", "Payment")
                         .WithMany()
                         .HasForeignKey("PaymentId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Payment");
@@ -913,12 +919,12 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Discount", "Discount")
                         .WithMany("MenuServices")
                         .HasForeignKey("DiscountId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.ClientCascade);
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.Business.Organization", "Organization")
                         .WithMany("MenuServices")
                         .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Discount");

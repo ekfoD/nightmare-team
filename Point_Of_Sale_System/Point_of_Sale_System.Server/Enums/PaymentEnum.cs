@@ -2,6 +2,7 @@
 {
     public enum PaymentEnum
     {
+        created = 0,
         pending = 1,
         succeeded = 2,
         failed = 3,

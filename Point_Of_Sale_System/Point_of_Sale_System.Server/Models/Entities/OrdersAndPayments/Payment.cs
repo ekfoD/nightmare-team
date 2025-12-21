@@ -13,8 +13,6 @@ namespace Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments
         public required decimal Tip { get; set; }
         public required decimal Amount { get; set; }
         public CurrencyEnum Currency { get; set; }
-        public PaymentEnum PaymentStatus { get; set; }
-        public RefundEnum RefundStatus { get; set; }
         public Guid StripePaymentId { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.Now;
 

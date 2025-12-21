@@ -1,4 +1,5 @@
 ﻿using Point_of_Sale_System.Server.Models.Entities.Business;
+using Point_of_Sale_System.Server.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -9,7 +10,8 @@ namespace Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
         public DateTime Timestamp { get; set; } = DateTime.Now;
-
+        public PaymentEnum PaymentStatus { get; set; } = PaymentEnum.created;
+        
         //navigation to FK's
         public virtual ICollection<Payment> Payments { get; set; }
         public virtual ICollection<OrderItem> OrderItems { get; set; }
