@@ -112,103 +112,29 @@ namespace Point_of_Sale_System.Server.Controllers
             return Ok(orders);
         }
 
-        // [HttpPost("ConfirmOrder/{orderId}")]
-        // public async Task<ActionResult<PaymentDto>> ConfirmOrder(Guid orderId)
-        // {
-        //     var order = await _orderRepository.GetOrderAsync(orderId);
-        //     if (order == null) return NotFound("Order not found");
+        [HttpGet("{orderId}/GetOrderDetails")]
+        public async Task<ActionResult<OrderDetailsResponseDto>> GetOrderDetails(Guid orderId)
+        {
+            var orderDetailsDto = await _paymentRepository.GetOrderDetailsAsync(orderId);
+            if (orderDetailsDto == null) return NotFound("Order details not found");
 
-        //     // Calculate total amount from items (assuming Variation relates to price - simplified here)
-        //     // In a real app we need to fetch variations to sum prices.
-        //     // For now, let's assume 0 or we need to fetch items with details.
-        //     // The GetOrderAsync does include OrderItems -> Variation.
-            
-        //     decimal totalAmount = order.OrderItems?.Sum(i => ((i.Variation != null ? i.Variation.Price : i.MenuItem?.Price) ?? 0) * i.Quantity) ?? 0;
+            return Ok(orderDetailsDto);
+        }
 
-        //     var payment = new Models.Entities.OrdersAndPayments.Payment
-        //     {
-        //         OrderId = orderId,
-        //         OrganizationId = order.OrganizationId,
-        //         Amount = totalAmount,
-        //         Currency = CurrencyEnum.dollar, // Default
-        //         PaymentStatus = PaymentEnum.pending,
-        //         RefundStatus = RefundEnum.unfunded,
-        //         Tip = 0
-        //     };
+        [HttpPost("{orderId}/PayOrder")]
+        public async Task<IActionResult> PayOrder(Guid orderId, [FromBody] PaymentDto dto)
+        {
+            if (!(await _paymentRepository.PayOrderAsync(orderId, dto))) return NotFound("Order not paid");
 
-        //     var createdPayment = await _paymentRepository.CreatePaymentAsync(payment);
+            return Ok("Order paid");
+        }
 
-        //     return Ok(new PaymentDto
-        //     {
-        //         Id = createdPayment.Id,
-        //         Amount = createdPayment.Amount,
-        //         PaymentStatus = createdPayment.PaymentStatus,
-        //         Timestamp = createdPayment.Timestamp
-        //     });
-        // }
-        
-        // [HttpGet("ClosedOrders/{organizationId}")]
-        // public async Task<ActionResult<IEnumerable<OrderDto>>> GetClosedOrders(Guid organizationId)
-        // {
-        //     var orders = await _paymentRepository.GetClosedOrdersAsync(organizationId);
-            
-        //     var dtos = orders.Select(o => new OrderDto
-        //     {
-        //         Id = o.Id,
-        //         OrganizationId = o.OrganizationId,
-        //         Timestamp = o.Timestamp,
-        //         TotalAmount = o.Payments.Where(p => p.PaymentStatus == PaymentEnum.succeeded).Sum(p => p.Amount),
-        //         Payments = o.Payments.Select(p => new PaymentDto
-        //         {
-        //             Id = p.Id,
-        //             Amount = p.Amount,
-        //             PaymentStatus = p.PaymentStatus,
-        //             RefundStatus = p.RefundStatus,
-        //             Currency = p.Currency,
-        //             Timestamp = p.Timestamp
-        //         }).ToList(),
-        //         Items = o.OrderItems.Select(i => new OrderItemDto
-        //         {
-        //             Id = i.Id,
-        //             MenuItemId = i.MenuItemId ?? Guid.Empty,
-        //             VariationId = i.VariationId ?? Guid.Empty,
-        //             MenuItemName = i.MenuItem?.Name ?? "",
-        //             VariationName = i.Variation?.Name ?? "", 
-        //             Quantity = i.Quantity,
-        //             UnitPrice = (i.Variation != null ? i.Variation.Price : i.MenuItem?.Price) ?? 0,
-        //             TotalPrice = ((i.Variation != null ? i.Variation.Price : i.MenuItem?.Price) ?? 0) * i.Quantity
-        //         }).ToList()
-        //     });
+        [HttpPost("{orderId}/RefundPayment")]
+        public async Task<IActionResult> RefundPayment(Guid orderId)
+        {
+            if (!(await _paymentRepository.RefundPaymentAsync(orderId))) return NotFound("Order not refunded");
 
-        //     return Ok(dtos);
-        // }
-
-        // [HttpPost("Refund")]
-        // public async Task<IActionResult> Refund([FromBody] RefundDto dto)
-        // {
-        //     var payment = await _paymentRepository.GetPaymentAsync(dto.PaymentId);
-        //     if (payment == null) return NotFound("Payment not found");
-
-        //     // Stripe Refund Logic
-        //     // In a real scenario we would use payment.StripePaymentId
-        //     // var refundService = new RefundService();
-        //     // var refundOptions = new RefundCreateOptions
-        //     // {
-        //     //     PaymentIntent = "pi_...", // we need to store this on payment
-        //     //     Amount = (long?)((dto.Amount ?? payment.Amount) * 100), // Stripe uses cents
-        //     // };
-        //     // var refund = await refundService.CreateAsync(refundOptions);
-            
-        //     // Mocking success for now as we don't have real IDs
-        //     bool stripeSuccess = true; 
-            
-        //     if (stripeSuccess)
-        //     {
-        //         await _paymentRepository.RefundPaymentAsync(payment.Id, dto.Amount ?? payment.Amount, RefundEnum.succeeded);
-        //         return Ok("Refund processed successfully");
-        //     }
-            
-        //     return BadRequest("Refund failed");
-        // }
+            return Ok("Order refunded");
+        }
     }
 }
