@@ -7,6 +7,7 @@ import useAuth from '../../hooks/useAuth.jsx';
 
 const Orders = () => {
   const { auth } = useAuth();
+
   const [categories, setCategories] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
   const [activeTab, setActiveTab] = useState('');
@@ -17,6 +18,8 @@ const Orders = () => {
   useEffect(() => {
     fetchMenuData();
   }, []);
+
+  /* ===================== MENU ===================== */
 
   const fetchMenuData = async () => {
     const organizationId = auth.businessId;
@@ -30,7 +33,6 @@ const Orders = () => {
 
       const data = response.data;
 
-      // Build categories from backend data
       const uniqueCategories = [
         ...new Map(
           data.map((item) => [
@@ -46,7 +48,6 @@ const Orders = () => {
 
       setCategories(uniqueCategories);
 
-      // Fetch variations per menu item
       await Promise.all(
         data.map(async (item) => {
           const variationResponse = await api.get(
@@ -58,49 +59,75 @@ const Orders = () => {
 
       setMenuItems(data);
 
-      console.log('categories: ', uniqueCategories);
-      console.log('menuItems: ', data);
-      // Default active tab
       if (uniqueCategories.length > 0) {
         setActiveTab(uniqueCategories[0].id);
       }
     } catch (err) {
-      console.error('Error fetching menu data:', err);
+      console.error(err);
       setError('Failed to load menu items');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleToggleVariation = (orderItemId, variation) => {
-    setOrderItems((items) =>
-      items.map((item) => {
-        if (item.id !== orderItemId) return item;
+  /* ===================== HELPERS ===================== */
 
-        const exists = item.selectedVariations.some(
-          (v) => v.id === variation.id
-        );
-
-        return {
-          ...item,
-          selectedVariations: exists
-            ? item.selectedVariations.filter((v) => v.id !== variation.id)
-            : [...item.selectedVariations, variation],
-        };
-      })
+  const areVariationsEqual = (a = [], b = []) => {
+    if (a.length !== b.length) return false;
+    return (
+      a
+        .map((v) => v.id)
+        .sort()
+        .join() ===
+      b
+        .map((v) => v.id)
+        .sort()
+        .join()
     );
   };
 
-  // Add item to order
-  const handleAddItemToOrder = (menuItem) => {
+  const buildAddItemsPayload = (orderId, orderItems) => {
+    const payloadItems = [];
+
+    orderItems.forEach((item) => {
+      // Parent
+      payloadItems.push({
+        menuItemId: item.menuItemId,
+        variationId: null,
+        quantity: item.quantity,
+        isParent: true,
+      });
+
+      // Variations
+      item.selectedVariations?.forEach((variation) => {
+        payloadItems.push({
+          menuItemId: item.menuItemId,
+          variationId: variation.id,
+          quantity: item.quantity,
+          isParent: false,
+        });
+      });
+    });
+
+    return {
+      orderId,
+      orderItems: payloadItems,
+    };
+  };
+
+  /* ===================== ORDER LOGIC ===================== */
+
+  const handleAddItemToOrder = (menuItem, selectedVariations = []) => {
     const existingItem = orderItems.find(
-      (item) => item.menuItemId === menuItem.id
+      (item) =>
+        item.menuItemId === menuItem.id &&
+        areVariationsEqual(item.selectedVariations, selectedVariations)
     );
 
     if (existingItem) {
       setOrderItems((items) =>
         items.map((item) =>
-          item.menuItemId === menuItem.id
+          item.id === existingItem.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         )
@@ -116,29 +143,70 @@ const Orders = () => {
           quantity: 1,
           expanded: true,
           variations: menuItem.variations ?? [],
-          selectedVariations: [],
+          selectedVariations,
         },
       ]);
     }
   };
 
-  const handleUpdateQuantity = (id, newQty) => {
-    const qty = Math.max(1, parseInt(newQty) || 1);
-    setOrderItems(
-      orderItems.map((item) =>
-        item.id === id ? { ...item, quantity: qty } : item
+  const handleToggleVariation = (orderItemId, variation) => {
+    setOrderItems((items) =>
+      items.map((item) =>
+        item.id === orderItemId
+          ? {
+              ...item,
+              selectedVariations: item.selectedVariations.some(
+                (v) => v.id === variation.id
+              )
+                ? item.selectedVariations.filter((v) => v.id !== variation.id)
+                : [...item.selectedVariations, variation],
+            }
+          : item
+      )
+    );
+  };
+
+  const handleUpdateQuantity = (id, qty) => {
+    setOrderItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, quantity: Math.max(1, qty) } : item
       )
     );
   };
 
   const handleRemoveItem = (id) => {
-    setOrderItems(orderItems.filter((item) => item.id !== id));
+    setOrderItems((items) => items.filter((item) => item.id !== id));
   };
 
-  const handleProceed = () => {
-    console.log('Submitting order:', orderItems);
-    alert('Order submitted');
-    setOrderItems([]);
+  /* ===================== API FLOW ===================== */
+
+  const handleProceed = async () => {
+    if (orderItems.length === 0) return;
+
+    setLoading(true);
+    setError('');
+
+    try {
+      // 1️⃣ Create order
+      const createOrderRes = await api.post('Payment/CreateOrder', {
+        organizationId: auth.businessId,
+      });
+
+      const orderId = createOrderRes.data.id;
+
+      // 2️⃣ Add items
+      const payload = buildAddItemsPayload(orderId, orderItems);
+
+      await api.post(`Payment/${orderId}/AddItems`, payload);
+
+      alert('Order submitted successfully');
+      setOrderItems([]);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to submit order');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancelOrder = () => {
@@ -146,6 +214,8 @@ const Orders = () => {
       setOrderItems([]);
     }
   };
+
+  /* ===================== RENDER ===================== */
 
   return (
     <Container fluid className='p-4' style={{ minHeight: '100vh' }}>
