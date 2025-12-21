@@ -1,4 +1,4 @@
-using Point_of_Sale_System.Server.Enums;
+﻿using Point_of_Sale_System.Server.Enums;
 
 namespace Point_of_Sale_System.Server.DTOs
 {
