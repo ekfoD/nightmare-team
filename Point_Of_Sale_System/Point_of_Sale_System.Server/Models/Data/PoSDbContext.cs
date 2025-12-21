@@ -24,7 +24,7 @@ namespace Point_of_Sale_System.Server.Models.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Tax> Taxes { get; set; }
-        public DbSet<InventoryItem> InventoryItems { get; set; }    
+        public DbSet<InventoryItem> InventoryItems { get; set; }
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<Variation> Variations { get; set; }
         public DbSet<MenuService> MenuServices { get; set; }
@@ -37,16 +37,17 @@ namespace Point_of_Sale_System.Server.Models.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+            foreach (var relationship in modelBuilder.Model.GetEntityTypes()
+                .SelectMany(e => e.GetForeignKeys()))
             {
                 relationship.DeleteBehavior = DeleteBehavior.Restrict;
             }
 
-            modelBuilder.Entity<MenuItem>()
-                .HasOne(m => m.Organization)
-                .WithMany(o => o.MenuItems)
-                .HasForeignKey(m => m.OrganizationId)
-                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Variation>()
+                .HasOne(v => v.MenuItem)
+                .WithMany(m => m.Variations)
+                .HasForeignKey(v => v.MenuItemId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
