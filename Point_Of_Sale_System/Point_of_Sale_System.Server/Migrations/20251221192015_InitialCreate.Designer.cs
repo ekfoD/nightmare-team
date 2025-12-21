@@ -12,7 +12,11 @@ using Point_of_Sale_System.Server.Models.Data;
 namespace Point_of_Sale_System.Server.Migrations
 {
     [DbContext(typeof(PoSDbContext))]
+<<<<<<<< HEAD:Point_Of_Sale_System/Point_of_Sale_System.Server/Migrations/20251221192015_InitialCreate.Designer.cs
     [Migration("20251221192015_InitialCreate")]
+========
+    [Migration("20251221115857_InitialCreate")]
+>>>>>>>> main:Point_Of_Sale_System/Point_of_Sale_System.Server/Migrations/20251221115857_InitialCreate.Designer.cs
     partial class InitialCreate
     {
         /// <inheritdoc />
