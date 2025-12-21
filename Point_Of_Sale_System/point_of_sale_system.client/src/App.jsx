@@ -20,6 +20,7 @@ import Settings from "./pages/settings/Settings.jsx";
 import AppHistory from "./pages/history/AppHistory.jsx";
 import Services from "./pages/services/Services.jsx";
 import AppointmentPayments from "./pages/processing/AppointmentPayments.jsx";
+import Discounts from "./pages/discounts/Discounts.jsx";
 
 import { ROLES, BUSINESS_TYPES } from "./config/access.js";
 
@@ -53,6 +54,7 @@ function App() {
             <Route element={<RequireAuth minRole={ROLES.MANAGER} business={[BUSINESS_TYPES.ORDER, BUSINESS_TYPES.SERVICE]} />}>
                 <Route path="/employees" element={<Employees />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/discounts" element={<Discounts />} />
             </Route>
 
             <Route element={<RequireAuth minRole={ROLES.MANAGER} business={[BUSINESS_TYPES.ORDER]} />}>

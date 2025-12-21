@@ -16,6 +16,7 @@ namespace Point_of_Sale_System.Server.Models.Entities.ServiceBased
         public PaymentEnum PaymentStatus { get; set; }
         public required string ServiceName { get; set; }
         public required decimal ServicePrice { get; set; }
+        public required CurrencyEnum Currency {get; set; }
         public Guid EmployeeId { get; set; }
         public required string EmployeeName { get; set; }
         public required Guid OrganizationId { get; set; }
