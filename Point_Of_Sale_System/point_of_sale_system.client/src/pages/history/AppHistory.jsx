@@ -78,7 +78,7 @@ export default function AppointmentHistory() {
   const handleRefund = async () => {
   if (!selected) return;
 
-  if (!window.confirm(`Are you sure you want to refund receipt ${selected.id}?`)) return;
+  if (!window.confirm(`Are you sure you want to refund this payment?`)) return;
 
   try {
     await api.put(`/Receipt/${selected.id}/refund`);
