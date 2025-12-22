@@ -159,7 +159,8 @@ const MenuManagementModal = ({
                     </Form.Group>
                     <Form.Group>
                         <Form.Label>Discounts</Form.Label>
-                        <Form.Select>
+                        <Form.Select value={editedItem.discountId} onChange={e => handleItemChange('discountId', e.target.value)}>
+                            <option value={""}>Select option..</option>
                             {discounts.map(discount => 
                                 <option key={discount.id} value={discount.id}>{discount.name}</option>
                             )}
