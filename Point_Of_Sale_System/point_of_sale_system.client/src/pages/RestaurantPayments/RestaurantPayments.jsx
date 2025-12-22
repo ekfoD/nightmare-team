@@ -5,272 +5,342 @@ import "../../styles/History.css";
 import DiscountModal from "../processing/DiscountModal";
 
 export default function RestaurantOrdersPayments() {
-  const { auth } = useAuth();
-  const organizationId = auth.businessId;
+    const { auth } = useAuth();
+    const organizationId = auth.businessId;
 
-  /* ================= STATE ================= */
-  const [orders, setOrders] = useState([]);
-  const [selectedOrder, setSelectedOrder] = useState(null);
+    /* ================= STATE ================= */
+    const [allOrders, setAllOrders] = useState([]);
+    const [selectedOrder, setSelectedOrder] = useState(null);
 
-  const [discounts, setDiscounts] = useState([]);
-  const [orderDiscountId, setOrderDiscountId] = useState(null);
+    const [discounts, setDiscounts] = useState([]);
+    const [orderDiscountId, setOrderDiscountId] = useState(null);
 
-  // itemId -> [discountIds]
-  const [itemDiscounts, setItemDiscounts] = useState({});
+    const [variations, setVariations] = useState([]);
+    const [taxes, setTaxes] = useState([]);
 
-  const [loading, setLoading] = useState(true);
-  const [showDiscountModal, setShowDiscountModal] = useState(false);
-  const [activeItemId, setActiveItemId] = useState(null);
+    // itemId -> [discountIds]
+    const [itemDiscounts, setItemDiscounts] = useState({});
 
-
-  const [giftcards, setGiftcards] = useState([]);
-  const [appliedGiftcards, setAppliedGiftcards] = useState([]);
-
-  /* ================= FETCH ================= */
-  useEffect(() => {
-    setLoading(true);
-
-    Promise.all([
-      api.get(`/Orders/pending/${organizationId}`),
-      api.get(`/Discount/organization/${organizationId}`),
-      api.get(`/Giftcard/organization/${organizationId}`)
-    ])
-      .then(([ordersRes, discountRes, giftcardRes]) => {
-        setOrders(ordersRes.data);
-        setSelectedOrder(ordersRes.data[0] ?? null);
-        setDiscounts(discountRes.data);
-        setGiftcards(giftcardRes.data);
-      })
-      .finally(() => setLoading(false));
-  }, [organizationId]);
-
-  /* ================= DISCOUNTS ================= */
-  const orderDiscounts = useMemo(
-    () => discounts.filter(d => d.applicableTo === "order" && d.status === "active"),
-    [discounts]
-  );
-
-  const itemDiscountsList = useMemo(
-    () => discounts.filter(d => d.applicableTo === "item" && d.status === "active"),
-    [discounts]
-  );
-
-  const getDiscountById = id => discounts.find(d => d.id === id);
-
-  /* ================= CALCULATIONS ================= */
-  const calculateItemBase = item => {
-    let price = item.TotalPrice;
-
-    const applied = itemDiscounts[item.Id] || [];
-    applied.forEach(id => {
-      const d = getDiscountById(id);
-      if (d) price *= 1 - d.amount / 100;
-    });
-
-    return price;
-  };
-
-  const calculateOrderSubtotal = () => {
-    if (!selectedOrder) return 0;
-    return selectedOrder.Items.reduce(
-      (sum, item) => sum + calculateItemBase(item),
-      0
-    );
-  };
-
-  const calculateGiftcardTotal = () => {
-  return appliedGiftcards.reduce((sum, g) => sum + g.balance, 0);
-};
+    const [loading, setLoading] = useState(true);
+    const [showDiscountModal, setShowDiscountModal] = useState(false);
+    const [activeItemId, setActiveItemId] = useState(null);
 
 
-    const calculateFinalTotal = () => {
-    let total = calculateOrderSubtotal();
+    const [giftcard, setGiftcard] = useState(null);
+    const [appliedGiftcards, setAppliedGiftcards] = useState([]);
 
-    const orderDiscount = getDiscountById(orderDiscountId);
-    if (orderDiscount) {
-        total *= 1 - orderDiscount.amount / 100;
+    /* ================= FETCH ================= */
+    useEffect(() => {
+        setLoading(true);
+
+        fetchInformation();
+
+        setLoading(false);
+    }, [organizationId]);
+
+    const fetchInformation = async () => {
+        try {
+            const responseAllOrders = await api.get("Payment/" + organizationId + "/GetAllOrders");
+            const responseAllTaxes = await api.get("Tax/Organization/" + organizationId);
+            const responseAllDiscounts = await api.get("Discount/organization/" + organizationId);
+
+            setDiscounts(responseAllDiscounts);
+            setTaxes(responseAllTaxes.data);
+            setAllOrders(responseAllOrders.data);
+        } catch (error) {
+            console.error('Error fetching menu data:', error);
+        }
+
     }
 
-    const giftcardTotal = calculateGiftcardTotal();
+    const selectItem = async (order) => {
+        if (selectedOrder != null && order.id === selectedOrder.id)
+            return;
 
-    return Math.max(0, total - giftcardTotal).toFixed(2);
+        try {
+            const responseOrderDetailed = await api.get(
+                "Payment/" + order.id + "/GetOrderDetails"
+            );
+
+            const detailedOrder = responseOrderDetailed.data;
+
+
+            const itemMap = {};
+            detailedOrder.items.forEach(item => {
+                itemMap[item.id] = { ...item };
+            });
+
+            // this shit merges the parent thing that you guys made, like end me please
+            detailedOrder.items.forEach(item => {
+                if (item.parentOrderItemId && item.parentOrderItemId !== "00000000-0000-0000-0000-000000000000") {
+                    const parent = itemMap[item.parentOrderItemId];
+                    if (parent) {
+                        parent.variationId = item.variationId;
+                        parent.price += item.price;
+                        parent.variationName = item.itemName;
+                    }
+                }
+            });
+
+            const mergedItems = Object.values(itemMap).filter(
+                item => !item.parentOrderItemId || item.parentOrderItemId === "00000000-0000-0000-0000-000000000000"
+            );
+
+            setSelectedOrder({
+                ...detailedOrder,
+                items: mergedItems
+            })
+        } catch (error) {
+            console.error("Error fetching order details:", error);
+        }
     };
 
 
-  /* ================= ACTIONS ================= */
-  const applyItemDiscount = discountId => {
-    if (!activeItemId) return;
-
-    setItemDiscounts(prev => ({
-      ...prev,
-      [activeItemId]: [...(prev[activeItemId] || []), discountId]
-    }));
-
-    setShowDiscountModal(false);
-    setActiveItemId(null);
-  };
-
-  const cancelOrder = async () => {
-    if (!selectedOrder) return;
-
-    await api.delete(`/Payment/CancelOrder/${selectedOrder.Id}`);
-    setOrders(o => o.filter(x => x.Id !== selectedOrder.Id));
-    setSelectedOrder(null);
-  };
-
-  const confirmAndPay = async () => {
-    if (!selectedOrder) return;
-
-    await api.post(`/Payment/ConfirmOrder/${selectedOrder.Id}`);
-    alert("Order paid successfully");
-
-    setOrders(o => o.filter(x => x.Id !== selectedOrder.Id));
-    setSelectedOrder(null);
-    setItemDiscounts({});
-    setOrderDiscountId(null);
-    setAppliedGiftcards([]);
-  };
-
-  if (loading) return <div>Loading orders...</div>;
 
 
-  /* ================= GIFT CARDS ================= */
-  const applyGiftcard = () => {
-  const inputId = prompt("Enter Giftcard ID:");
-  if (!inputId) return;
+    /* ================= DISCOUNTS ================= */
+    //const orderDiscounts = useMemo(
+    //    () => discounts.filter(d => d.applicableTo === "order" && d.status === "active"),
+    //    [discounts]
+    //);
 
-  const giftcard = giftcards.find(g => g.id === inputId);
-  if (!giftcard) return;
-  if (appliedGiftcards.some(g => g.id === giftcard.id)) return;
-  if (new Date(giftcard.validUntil) < new Date()) return;
+    //const itemDiscountsList = useMemo(
+    //    () => discounts.filter(d => d.applicableTo === "item" && d.status === "active"),
+    //    [discounts]
+    //);
 
-  setAppliedGiftcards(prev => [...prev, giftcard]);
-};
+    //const getDiscountById = id => discounts.find(d => d.id === id);
 
-  /* ================= RENDER ================= */
-  return (
-    <div className="order-history-container">
-      {/* ================= ORDER LIST ================= */}
-      <div className="order-list">
-        <div className="list-header">Pending Orders</div>
+    /* ================= CALCULATIONS ================= */
+    const calculateItemBase = item => {
+        let price = item.price;
 
-        <div className="list-scroll">
-          {orders.map(order => (
-            <div
-              key={order.Id}
-              className={`list-item ${selectedOrder?.Id === order.Id ? "selected" : ""}`}
-              onClick={() => {
-                setSelectedOrder(order);
-                setItemDiscounts({});
-                setOrderDiscountId(null);
-                setAppliedGiftcards([]);
-              }}
-            >
-              <div>#{order.Id.slice(0, 6)}</div>
-              <div>{new Date(order.Timestamp).toLocaleTimeString()}</div>
-              <div>{order.Items.length} items</div>
+        const applied = item.discount;
+        if (applied) price *= 1 - applied / 100;
+
+        return price;
+    };
+
+    const calculateOrderSubtotal = () => {
+        if (!selectedOrder) return 0;
+        var orderSubtotal = 0;
+        selectedOrder.items.map(item => {
+            orderSubtotal += item.price * item.quantity;
+        })
+
+        return orderSubtotal;
+    };
+
+    const calculateGiftcardTotal = () => {
+        return giftcard.balance;
+    };
+
+
+    const calculateFinalTotal = () => {
+        let total = selectedOrder.totalAmount;
+
+        //const orderDiscount = getDiscountById(orderDiscountId);
+        //if (orderDiscount) {
+        //    total *= 1 - orderDiscount.amount / 100;
+        //}
+        if (giftcard != null) {
+            const giftcardTotal = calculateGiftcardTotal();
+            total -= giftcardTotal;
+        }
+
+        return Math.max(0, total).toFixed(2);
+    };
+
+
+    /* ================= ACTIONS ================= */
+    //const applyItemDiscount = discountId => {
+    //    if (!activeItemId) return;
+
+    //    setItemDiscounts(prev => ({
+    //        ...prev,
+    //        [activeItemId]: [...(prev[activeItemId] || []), discountId]
+    //    }));
+
+    //    setShowDiscountModal(false);
+    //    setActiveItemId(null);
+    //};
+
+    const cancelOrder = async () => {
+        if (!selectedOrder) return;
+        try {
+            await api.delete("Payment/" + selectedOrder.orderId + "/CancelOrder");
+            fetchInformation();
+        } catch (error) {
+            console.log(error.message);
+        }
+        setSelectedOrder(null);
+    };
+
+    const confirmAndPay = async () => {
+        if (!selectedOrder) return;
+        try {
+            await api.post("Payment/" + selectedOrder.orderId + "/PayOrder", {
+                totalAmount: calculateFinalTotal(),
+                tip: 0,
+                paymentSplit: 1,
+                currency: "dollar",
+                "isPaid": true,
+                giftcardId: giftcard?.id ?? null,
+                organizationId: organizationId
+            });
+            alert("Order paid successfully");
+
+            setSelectedOrder(null);
+            setAppliedGiftcards(null);
+            fetchInformation();
+
+        } catch (error) {
+            console.log(error.message);
+        }
+    };
+
+    if (loading) return <div>Loading orders...</div>;
+
+
+    /* ================= GIFT CARDS ================= */
+    const applyGiftcard = async () => {
+        const inputId = prompt("Enter Giftcard ID:");
+        if (!inputId) return;
+
+        try {
+            const responseGiftcard = await api.get("Giftcard/" + inputId);
+
+            if (appliedGiftcards.some(g => g.id === responseGiftcard.id)) return;
+            if (new Date(appliedGiftcards.validUntil) < new Date()) return;
+
+            setAppliedGiftcards(prev => [...prev, responseGiftcard]);
+        } catch (error) {
+            if (error.response.status == 404) {
+                alert("No such giftcard");
+            }
+            console.log(error.message);
+        }
+    };
+
+    /* ================= RENDER ================= */
+    return (
+        <div className="order-history-container">
+            {/* ================= ORDER LIST ================= */}
+            <div className="order-list">
+                <div className="list-header">Pending Orders</div>
+
+                <div className="list-scroll">
+                    {allOrders.map(order => (
+                        <div
+                            key={order.id}
+                            className={`list-item ${selectedOrder?.id === order.id ? "selected" : ""}`}
+                            onClick={() => {
+                                selectItem(order);
+                            }}
+                        >
+                            <div>#{order.id.slice(0, 6)}</div>
+                            <div>{new Date(order.timestamp).toLocaleTimeString()}</div>
+                        </div>
+                    ))}
+                </div>
             </div>
-          ))}
+
+            {/* ================= ORDER DETAILS ================= */}
+            <div className="order-details">
+                {selectedOrder && (
+                    <>
+                        <div className="details-title">
+                            Order #{selectedOrder.orderId.slice(0, 6)}
+                        </div>
+
+                        <div className="details-scroll">
+                            {selectedOrder.items.map(item => (
+                                    <div key={item.id}>
+                                        <div className="price-row">
+                                            <span>
+                                                {item.itemName} {item.variationName} × {item.quantity}
+                                            </span>
+
+                                            {/*<button*/}
+                                            {/*    className="secondary-action"*/}
+                                            {/*    onClick={() => {*/}
+                                            {/*        setActiveItemId(item.Id);*/}
+                                            {/*        setShowDiscountModal(true);*/}
+                                            {/*    }}*/}
+                                            {/*>*/}
+                                            {/*    Add Item Discount*/}
+                                            {/*</button>*/}
+                                            <span>${calculateItemBase(item).toFixed(2)}</span>
+                                        </div>
+                                        <div className="tax-row">
+                                            <span> {item.taxName}</span>
+                                            <span> ${item.tax} </span>
+                                        </div>
+                                    </div>
+                            ))}
+                        </div>
+
+                        <div className="order-summary">
+                            <div className="price-row">
+                                <strong>Subtotal</strong>
+                                <strong>${calculateOrderSubtotal().toFixed(2)}</strong>
+                            </div>
+
+                            {/*{orderDiscountId && (*/}
+                            {/*    <div className="price-row">*/}
+                            {/*        <span>Order Discount</span>*/}
+                            {/*        <span>-{getDiscountById(orderDiscountId)?.amount}%</span>*/}
+                            {/*    </div>*/}
+                            {/*)}*/}
+                            {/*Whole orders can't have discounts sadly*/}
+
+                            {giftcard && (
+                                <div className="price-row">
+                                    <span>Giftcard ({giftcard.id})</span>
+                                    <span>- ${giftcard.balance.toFixed(2)}</span>
+                                </div>
+                            )}
+
+                            <div className="price-row final-price">
+                                <strong>Total</strong>
+                                <strong>${calculateFinalTotal()}</strong>
+                            </div>
+                        </div>
+
+                        <div className="payment-actions">
+                            <div>
+                                {/*<button*/}
+                                {/*    className="secondary-action"*/}
+                                {/*    onClick={() => setShowDiscountModal(true)}*/}
+                                {/*>*/}
+                                {/*    Apply Order Discount*/}
+                                {/*</button>*/}
+
+                                <button
+                                    className="secondary-action"
+                                    onClick={applyGiftcard}
+                                >
+                                    Use Giftcard
+                                </button>
+
+                                <button
+                                    className="secondary-action danger"
+                                    onClick={() => { cancelOrder() } }
+                                >
+                                    Cancel Order
+                                </button>
+                            </div>
+
+                            <button
+                                className="payment-primary"
+                                onClick={confirmAndPay}
+                            >
+                                Proceed & Pay
+                            </button>
+                        </div>
+                    </>
+                )}
+            </div>
         </div>
-      </div>
-
-      {/* ================= ORDER DETAILS ================= */}
-      <div className="order-details">
-        {selectedOrder && (
-          <>
-            <div className="details-title">
-              Order #{selectedOrder.Id.slice(0, 6)}
-            </div>
-
-            <div className="details-scroll">
-              {selectedOrder.Items.map(item => (
-                <div key={item.Id} className="price-row">
-                  <span>
-                    {item.MenuItemName} {item.VariationName} × {item.Quantity}
-                  </span>
-                  <span>${calculateItemBase(item).toFixed(2)}</span>
-
-                  <button
-                    className="secondary-action"
-                    onClick={() => {
-                      setActiveItemId(item.Id);
-                      setShowDiscountModal(true);
-                    }}
-                  >
-                    Add Item Discount
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <div className="order-summary">
-              <div className="price-row">
-                <strong>Subtotal</strong>
-                <strong>${calculateOrderSubtotal().toFixed(2)}</strong>
-              </div>
-
-              {orderDiscountId && (
-                <div className="price-row">
-                  <span>Order Discount</span>
-                  <span>-{getDiscountById(orderDiscountId)?.amount}%</span>
-                </div>
-              )}
-
-            {appliedGiftcards.map(gc => (
-                <div className="price-row" key={gc.id}>
-                    <span>Giftcard ({gc.id})</span>
-                    <span>- ${gc.balance.toFixed(2)}</span>
-                </div>
-                ))}
-
-              <div className="price-row final-price">
-                <strong>Total</strong>
-                <strong>${calculateFinalTotal()}</strong>
-              </div>
-            </div>
-
-           <div className="payment-actions">
-                <div>
-                    <button
-                    className="secondary-action"
-                    onClick={() => setShowDiscountModal(true)}
-                    >
-                    Apply Order Discount
-                    </button>
-
-                    <button
-                    className="secondary-action"
-                    onClick={applyGiftcard}
-                    >
-                    Use Giftcard
-                    </button>
-
-                    <button
-                    className="secondary-action danger"
-                    onClick={cancelOrder}
-                    >
-                    Cancel Order
-                    </button>
-                </div>
-
-                <button className="payment-primary" onClick={confirmAndPay}>
-                    Proceed & Pay
-                </button>
-                </div>
-
-
-            <DiscountModal
-              show={showDiscountModal}
-              discounts={activeItemId ? itemDiscountsList : orderDiscounts}
-              onSelect={id => {
-                activeItemId ? applyItemDiscount(id) : setOrderDiscountId(id);
-                setShowDiscountModal(false);
-              }}
-              onClose={() => setShowDiscountModal(false)}
-            />
-          </>
-        )}
-      </div>
-    </div>
-  );
+    );
 }

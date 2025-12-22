@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Point_of_Sale_System.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class initialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -214,6 +214,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
                     PaymentStatus = table.Column<int>(type: "int", nullable: false),
+                    Discount = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     OrganizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DiscountId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
@@ -365,7 +366,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     Tip = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Currency = table.Column<int>(type: "int", nullable: false),
-                    StripePaymentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StripePaymentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
                     OrganizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),

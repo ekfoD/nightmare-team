@@ -12,8 +12,8 @@ using Point_of_Sale_System.Server.Models.Data;
 namespace Point_of_Sale_System.Server.Migrations
 {
     [DbContext(typeof(PoSDbContext))]
-    [Migration("20251221215308_AddNewProperty")]
-    partial class AddNewProperty
+    [Migration("20251222001913_initialCreate")]
+    partial class initialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -446,7 +446,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("StripePaymentId")
+                    b.Property<Guid?>("StripePaymentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("Timestamp")
