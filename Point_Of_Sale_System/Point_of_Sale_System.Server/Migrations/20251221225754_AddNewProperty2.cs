@@ -6,37 +6,26 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Point_of_Sale_System.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class Bullcrap : Migration
+    public partial class AddNewProperty2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<Guid>(
-                name: "DiscountId",
-                table: "MenuItems",
+                name: "StripePaymentId",
+                table: "Payments",
                 type: "uniqueidentifier",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "uniqueidentifier");
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "Price",
-                table: "MenuItems",
-                type: "decimal(18,2)",
-                nullable: false,
-                defaultValue: 0m);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Price",
-                table: "MenuItems");
-
             migrationBuilder.AlterColumn<Guid>(
-                name: "DiscountId",
-                table: "MenuItems",
+                name: "StripePaymentId",
+                table: "Payments",
                 type: "uniqueidentifier",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),

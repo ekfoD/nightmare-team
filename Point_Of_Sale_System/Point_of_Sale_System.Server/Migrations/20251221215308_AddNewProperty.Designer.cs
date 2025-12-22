@@ -12,8 +12,8 @@ using Point_of_Sale_System.Server.Models.Data;
 namespace Point_of_Sale_System.Server.Migrations
 {
     [DbContext(typeof(PoSDbContext))]
-    [Migration("20251216081237_ChangeDiscount")]
-    partial class ChangeDiscount
+    [Migration("20251221215308_AddNewProperty")]
+    partial class AddNewProperty
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -184,8 +184,9 @@ namespace Point_of_Sale_System.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Category")
-                        .HasColumnType("int");
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("DiscountId")
                         .HasColumnType("uniqueidentifier");
@@ -263,6 +264,10 @@ namespace Point_of_Sale_System.Server.Migrations
 
                     b.Property<int>("ApplicableTo")
                         .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
@@ -343,11 +348,17 @@ namespace Point_of_Sale_System.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal?>("Discount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<Guid?>("DiscountId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("PaymentStatus")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
@@ -434,12 +445,6 @@ namespace Point_of_Sale_System.Server.Migrations
 
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("PaymentStatus")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RefundStatus")
-                        .HasColumnType("int");
 
                     b.Property<Guid>("StripePaymentId")
                         .HasColumnType("uniqueidentifier");
@@ -578,6 +583,9 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Currency")
+                        .HasColumnType("int");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
@@ -735,7 +743,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.MenuBased.MenuItem", "MenuItem")
                         .WithMany("Variations")
                         .HasForeignKey("MenuItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("MenuItem");
@@ -809,7 +817,7 @@ namespace Point_of_Sale_System.Server.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Point_of_Sale_System.Server.Models.Entities.MenuBased.Variation", "Variation")
-                        .WithMany("OrderItems")
+                        .WithMany()
                         .HasForeignKey("VariationId")
                         .OnDelete(DeleteBehavior.Restrict);
 
@@ -955,11 +963,6 @@ namespace Point_of_Sale_System.Server.Migrations
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.MenuBased.MenuItem", b =>
                 {
                     b.Navigation("Variations");
-                });
-
-            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.MenuBased.Variation", b =>
-                {
-                    b.Navigation("OrderItems");
                 });
 
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Discount", b =>

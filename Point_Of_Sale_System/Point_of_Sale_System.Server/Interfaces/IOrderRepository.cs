@@ -8,5 +8,8 @@ namespace Point_of_Sale_System.Server.Interfaces
         Task<Order?> GetOrderAsync(Guid id);
         Task<bool> AddItemsToOrderAsync(List<OrderItem> items);
         Task<bool> CheckMenuItemOrVariationExistsAsync(Guid menuItemId, Guid? variationId, Guid orderId, bool isParent);
+        Task<bool> CancelOrderAsync(Guid orderId);
+        Task<bool> OrderFailedAsync(Guid orderId);
+        Task<bool> OrderPendingAsync(Guid orderId);
     }
 }

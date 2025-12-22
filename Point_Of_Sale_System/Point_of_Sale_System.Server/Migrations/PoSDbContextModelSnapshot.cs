@@ -345,11 +345,17 @@ namespace Point_of_Sale_System.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal?>("Discount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<Guid?>("DiscountId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("PaymentStatus")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
@@ -437,13 +443,7 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("PaymentStatus")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RefundStatus")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("StripePaymentId")
+                    b.Property<Guid?>("StripePaymentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("Timestamp")
