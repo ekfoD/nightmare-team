@@ -39,7 +39,7 @@ public class ReceiptService : IReceiptService
             Currency = r.Currency,
             EmployeeId = r.EmployeeId,
             EmployeeName = r.EmployeeName,
-            PaymentId = r.PaymentId,
+            Giftcards = r.Giftcards,
             Taxes = r.Taxes.Select(t => new TaxReceiptDto
             {
                 Id = t.Id,
@@ -62,14 +62,6 @@ public class ReceiptService : IReceiptService
 
     public async Task CreateApptReceipt(CreateApptReceiptDto dto)
     {
-        var payment = new Payment
-        {
-            Id = Guid.NewGuid(),
-            OrganizationId = dto.OrganizationId,
-            Tip = 0,
-            Amount = dto.ServicePrice,
-        };
-
         var receipt = new AppointmentReceipt
         {   
             OrganizationId = dto.OrganizationId,
@@ -82,8 +74,7 @@ public class ReceiptService : IReceiptService
             Currency = dto.Currency,
             EmployeeId = dto.EmployeeId,
             EmployeeName = dto.EmployeeName,
-            PaymentId = payment.Id,
-            Payment = payment,
+            Giftcards = dto.Giftcards,
             Taxes = dto.Taxes.Select(t => new TaxReceipt
             {
                 Name = t.Name,

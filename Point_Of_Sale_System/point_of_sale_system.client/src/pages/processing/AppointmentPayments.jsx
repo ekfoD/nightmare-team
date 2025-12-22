@@ -221,7 +221,8 @@ export default function AppointmentPayments() {
           numberType: t.numberType
         })),
 
-        discounts: discountReceipts
+        discounts: discountReceipts,
+        giftcards: appliedGiftcards.map(g => g.balance)
       });
 
       await api.delete(`/Appointments/${selected.id}/delete`);
