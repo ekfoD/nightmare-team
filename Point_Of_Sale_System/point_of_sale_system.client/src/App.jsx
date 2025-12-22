@@ -20,6 +20,7 @@ import Settings from "./pages/settings/Settings.jsx";
 import AppHistory from "./pages/history/AppHistory.jsx";
 import Services from "./pages/services/Services.jsx";
 import AppointmentPayments from "./pages/processing/AppointmentPayments.jsx";
+import RestaurantPayments from "./pages/RestaurantPayments/RestaurantPayments.jsx";
 import Discounts from "./pages/discounts/Discounts.jsx";
 
 import { ROLES, BUSINESS_TYPES } from "./config/access.js";
@@ -77,6 +78,10 @@ function App() {
             <Route element={<RequireAuth minRole={ROLES.EMPLOYEE} business={[BUSINESS_TYPES.SERVICE]} />}>
                 <Route path="/schedule" element={<Schedule />} />
                 <Route path="/appointmentPayment" element={<AppointmentPayments />} />
+            </Route>
+
+            <Route element={<RequireAuth minRole={ROLES.EMPLOYEE} business={[BUSINESS_TYPES.ORDER]} />}>
+                <Route path="/restaurantPayments" element={<RestaurantPayments />} />
             </Route>
 
         </Route>

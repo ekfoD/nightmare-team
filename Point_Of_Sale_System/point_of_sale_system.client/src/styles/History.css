@@ -129,6 +129,14 @@
   justify-content: space-between;
 }
 
+.tax-row {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: solid 1px black;
+    margin-bottom: 10px;
+}
+
+
 .price-label {
   flex: 1;
 }

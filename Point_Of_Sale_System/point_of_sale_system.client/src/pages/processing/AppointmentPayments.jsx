@@ -133,11 +133,15 @@ export default function AppointmentPayments() {
 };
 
 
-  const formatTime = date =>
-    new Date(date).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit"
-    });
+const formatTime = (date) =>
+  new Date(date).toLocaleString([], {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+
 
   const calculateDiscountedBase = service => {
     let price = service.price;
@@ -257,6 +261,30 @@ export default function AppointmentPayments() {
       alert("Payment failed.");
     }
   };
+
+  const cancelAppointment = async () => {
+  if (!selected) return;
+
+  const confirmed = window.confirm("Cancel this appointment?");
+  if (!confirmed) return;
+
+  try {
+    await api.delete(`/Appointments/${selected.id}/delete`);
+
+    setAppointments(prev =>
+      prev.filter(a => a.id !== selected.id)
+    );
+
+    setSelected(null);
+    setAppliedGiftcards([]);
+    setSelectedDiscountId(null);
+
+    alert("Appointment cancelled.");
+  } catch (err) {
+    console.error(err);
+    alert("Failed to cancel appointment.");
+  }
+};
 
 
   if (loading) return <div>Loading appointments...</div>;
@@ -401,6 +429,13 @@ export default function AppointmentPayments() {
                 >
                   Use Giftcard
                 </button>
+
+                <button
+      className="secondary-action"
+      onClick={cancelAppointment}
+    >
+      Cancel Appointment
+    </button>
               </div>
 
               <button
