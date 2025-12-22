@@ -228,6 +228,17 @@ const formatTime = (date) =>
         discounts: discountReceipts
       });
 
+      await api.delete(`/Appointments/${selected.id}/delete`);
+
+      setAppointments(prev =>
+        prev.filter(a => a.id !== selected.id)
+      );
+
+      setSelected(prev => {
+        const remaining = appointments.filter(a => a.id !== prev.id);
+        return remaining[0] ?? null;
+      });
+
       setSelected(null);
       setAppliedGiftcards([]);
       setSelectedDiscountId(null);

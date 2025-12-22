@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
 
+const todayStr = new Date().toISOString().split("T")[0];
+
+const isPastDate = (dateStr) => {
+  return new Date(dateStr) < new Date(todayStr);
+};
+
 export default function CreateDiscountModal({
   show,
   onClose,
@@ -28,37 +34,75 @@ export default function CreateDiscountModal({
     if (!show) resetForm();
   }, [show]);
 
-  const handleCreate = () => {
-    setError("");
+const handleCreate = () => {
+  setError("");
 
-    if (!amount || !applicableTo || !validFrom || !validUntil) {
-      setError("All fields are required.");
-      return;
-    }
+  /* ===== Required fields ===== */
+  if (!name.trim()) {
+    setError("Discount name is required.");
+    return;
+  }
 
-    const amountNumber = Number(amount);
-    if (isNaN(amountNumber) || amountNumber <= 0) {
-      setError("Amount must be greater than 0.");
-      return;
-    }
+  if (!amount || !applicableTo || !validFrom || !validUntil) {
+    setError("All fields are required.");
+    return;
+  }
 
-    if (new Date(validUntil) < new Date(validFrom)) {
-      setError("Valid Until must be after Valid From.");
-      return;
-    }
+  /* ===== Amount ===== */
+  const amountNumber = Number(amount);
 
-    onCreate({
-      name,
-      amount: amountNumber,
-      applicableTo,
-      validFrom,
-      validUntil,
-      status,
-    });
+  if (isNaN(amountNumber)) {
+    setError("Amount must be a number.");
+    return;
+  }
 
-    resetForm();
-    onClose();
-  };
+  if (amountNumber <= 0) {
+    setError("Discount amount must be greater than 0.");
+    return;
+  }
+
+  // Optional upper bound safety (adjust if needed)
+  if (amountNumber >= 100) {
+    setError("Discount amount is unrealistically large.");
+    return;
+  }
+
+  /* ===== Applicable to ===== */
+  if (!["order", "item"].includes(applicableTo)) {
+    setError("Invalid discount type.");
+    return;
+  }
+
+  /* ===== Dates ===== */
+  if (isPastDate(validFrom)) {
+    setError("Valid From date cannot be in the past.");
+    return;
+  }
+
+  if (new Date(validUntil) < new Date(validFrom)) {
+    setError("Valid Until must be after Valid From.");
+    return;
+  }
+
+  /* ===== Status consistency ===== */
+  if (status === "active" && isPastDate(validUntil)) {
+    setError("An active discount cannot already be expired.");
+    return;
+  }
+
+  /* ===== Create ===== */
+  onCreate({
+    name: name.trim(),
+    amount: amountNumber,
+    applicableTo,
+    validFrom,
+    validUntil,
+    status,
+  });
+
+  resetForm();
+  onClose();
+};
 
   return (
     <Modal show={show} onHide={onClose} centered>
@@ -80,10 +124,12 @@ export default function CreateDiscountModal({
             </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Amount</Form.Label>
+            <Form.Label>Amount (%)</Form.Label>
             <Form.Control
               type="number"
               step="0.01"
+              min="0.01"
+              max="100"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
             />
@@ -105,6 +151,7 @@ export default function CreateDiscountModal({
             <Form.Label>Valid From</Form.Label>
             <Form.Control
               type="date"
+              min={todayStr}
               value={validFrom}
               onChange={(e) => setValidFrom(e.target.value)}
             />
@@ -114,6 +161,7 @@ export default function CreateDiscountModal({
             <Form.Label>Valid Until</Form.Label>
             <Form.Control
               type="date"
+              min={validFrom || todayStr}
               value={validUntil}
               onChange={(e) => setValidUntil(e.target.value)}
             />

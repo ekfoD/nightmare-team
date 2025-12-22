@@ -8,6 +8,17 @@
 - One Tax can be applied to a lot of Menu items
 - One Tax can be applied to a lot of Menu services
 - TAXES ARE MENDATORY, I'LL REPORT THE GUYS WHO TRY TO AVOID IT (-1 million social points)
-
+- Now orders and appointments are the main tables, they have their own statuses that show if they are completed or refunded
+- Menu items have Price
+- Discounts now have name
+- New table DiscountReceipts
+- Order has a saved discount for the whole order discount
+- To OrderItem added: Name, Price, TaxName, Tax and Discount
+- Removed from payment paymentStatus and refundStatus
 - Added OrganizationId key to tax and giftcard table
+- New table TaxReceipt
+- Added new columns to Appointment: ExtraInfo, StartTime, EndTime and PaymentStatus
+- Created AppointmentReceipt table
+- Removed category from MenuService
+- Tom MenuService added to: Duration
 - Removed currency enum from giftcard

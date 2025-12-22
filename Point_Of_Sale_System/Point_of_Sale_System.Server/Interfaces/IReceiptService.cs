@@ -7,6 +7,7 @@ namespace Point_of_Sale_System.Server.Interfaces
     {
         Task<IEnumerable<AppointmentReceiptDto>> GetAllApptsReceiptsAsync(Guid organizationId);
         Task CreateApptReceipt(CreateApptReceiptDto dto);
+        Task<AppointmentReceipt?> RefundReceiptAsync(Guid receiptId);
 
     }
 }

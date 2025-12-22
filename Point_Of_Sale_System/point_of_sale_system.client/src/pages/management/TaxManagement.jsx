@@ -48,20 +48,6 @@ const TaxManagement = () => {
         fetchTaxes();
     }, [organizationId]);
 
-
-    const loadTaxes = async () => {
-        try {
-            const res = await api.get(
-                `${API_BASE_URL}/Tax/Organization/${organizationId}`
-            );
-            setTaxes(res.data);
-        } catch (err) {
-            console.error("Failed to load taxes", err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     // -----------------------------
     // ADD
     // -----------------------------
@@ -181,14 +167,14 @@ const TaxManagement = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {taxes.map((t, index) => (
+                                    {taxes.map((t) => (
                                         <tr key={t.id}>
                                             <td>{t.name}</td>
                                             <td>{t.amount}</td>
-                                            <td>{t.numberType === 1 ? "Flat" : "Percentage"}</td>
+                                            <td>{t.numberType === "flat" ? "Flat" : "Percentage"}</td>
                                             <td>
-                                                {t.status === 1 ? "Active" :
-                                                    t.status === 2 ? "Inactive" : "Unavailable"}
+                                                {t.status === "active" ? "Active" :
+                                                    t.status === "inactive" ? "Inactive" : "Unavailable"}
                                             </td>
                                             <td>
                                                 <Button

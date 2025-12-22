@@ -85,3 +85,17 @@ export const parseDurationToMinutes = (duration) => {
   const parts = duration.split(":").map(Number);
   return parts.length >= 2 ? parts[0] * 60 + parts[1] : parseInt(duration, 10) || 30;
 };
+
+export const isPastDate = (dateStr) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const date = new Date(dateStr);
+  return date < today;
+};
+
+export const isPastDateTime = (dateStr, timeStr) => {
+  const now = new Date();
+  const selected = new Date(`${dateStr}T${timeStr}:00`);
+  return selected < now;
+};

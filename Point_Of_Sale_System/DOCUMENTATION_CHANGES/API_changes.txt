@@ -1,1 +1,8 @@
 1. When Organization you can no longer change bussines type
+2. /PutMenuItem, we have combined most of they're menu posts into one api that just updates the row for simplicity.
+3. We did not use /menuItem/{menuItemId}/image API's, because we didn't need to
+4. /orders/{orderId} also sends the total amount of the order
+5. {orderId}/AddItems created a separate API to add items to the order
+6. PUT /orders/{orderId} we made so you can not update an existing order
+7. GET /orders/{orderId}/payments was removed, because we changed the logic so orders and appointments are at the top.
+8. DELETE /orders/{orderId}/payments it's not logical to delete a payment

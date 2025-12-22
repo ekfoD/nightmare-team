@@ -11,7 +11,8 @@ namespace Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments
         public Guid Id { get; set; } = Guid.NewGuid();
         public DateTime Timestamp { get; set; } = DateTime.Now;
         public PaymentEnum PaymentStatus { get; set; } = PaymentEnum.created;
-        
+        public decimal? Discount { get; set; }
+
         //navigation to FK's
         public virtual ICollection<Payment> Payments { get; set; }
         public virtual ICollection<OrderItem> OrderItems { get; set; }

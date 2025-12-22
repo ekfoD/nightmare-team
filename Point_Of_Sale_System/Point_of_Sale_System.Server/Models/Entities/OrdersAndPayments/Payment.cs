@@ -10,10 +10,10 @@ namespace Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
-        public required decimal Tip { get; set; }
-        public required decimal Amount { get; set; }
+        public decimal Tip { get; set; }
+        public decimal Amount { get; set; }
         public CurrencyEnum Currency { get; set; }
-        public Guid StripePaymentId { get; set; }
+        public Guid? StripePaymentId { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.Now;
 
         // foreign key to Organization
