@@ -85,7 +85,7 @@ export default function AppointmentPayments() {
     if (appliedGiftcards.length === 0) return;
 
     await Promise.all(
-      appliedGiftcards.map(g =>Ks
+      appliedGiftcards.map(g =>
         api.delete(`/Giftcard/${g.id}`)
       )
     );
