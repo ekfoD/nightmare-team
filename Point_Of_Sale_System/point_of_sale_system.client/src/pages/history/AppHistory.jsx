@@ -62,19 +62,22 @@ export default function AppointmentHistory() {
 
   const calculateTotals = (receipt) => {
     const taxTotal = receipt.taxes.reduce(
-    (sum, t) => sum + t.affectedAmount,
-    0
-  );
+      (sum, t) => sum + t.affectedAmount,
+      0
+    );
     const discountTotal = receipt.discounts.reduce(
       (sum, d) => sum + d.affectedAmount,
       0
     );
+    const giftcardTotal = receipt.giftcards?.reduce(
+      (sum, g) => sum + g,
+      0
+    ) ?? 0;
 
-    const total = receipt.servicePrice + taxTotal - discountTotal;
+    const total = receipt.servicePrice + taxTotal - discountTotal - giftcardTotal;
 
-    return { taxTotal, discountTotal, total };
+    return { taxTotal, discountTotal, giftcardTotal, total };
   };
-
   const handleRefund = async () => {
   if (!selected) return;
 
@@ -208,6 +211,17 @@ export default function AppointmentHistory() {
                       </span>
                     </div>
                   ))}
+
+                  {/* Giftcards applied */}
+                  {selected.giftcards && selected.giftcards.length > 0 && (
+                    <div className="price-row">
+                      <span className="price-label">Giftcards Applied:</span>
+                      <span className="price-value">
+                        {currencySymbol} -{selected.giftcards.reduce((sum, g) => sum + g, 0).toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+
 
                   <div className="price-row final-price">
                     <span className="price-label">

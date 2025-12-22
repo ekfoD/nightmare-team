@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Point_of_Sale_System.Server.Models.Data;
 
@@ -11,9 +12,11 @@ using Point_of_Sale_System.Server.Models.Data;
 namespace Point_of_Sale_System.Server.Migrations
 {
     [DbContext(typeof(PoSDbContext))]
-    partial class PoSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251221225333_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -345,17 +348,11 @@ namespace Point_of_Sale_System.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal?>("Discount")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<Guid?>("DiscountId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("PaymentStatus")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
@@ -443,7 +440,13 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("StripePaymentId")
+                    b.Property<int>("PaymentStatus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RefundStatus")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("StripePaymentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("Timestamp")
@@ -598,10 +601,10 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Giftcards")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PaymentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("PaymentStatus")
@@ -621,6 +624,8 @@ namespace Point_of_Sale_System.Server.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PaymentId");
 
                     b.ToTable("AppointmentReceipts");
                 });
@@ -904,6 +909,17 @@ namespace Point_of_Sale_System.Server.Migrations
                     b.Navigation("MenuService");
 
                     b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.ServiceBased.AppointmentReceipt", b =>
+                {
+                    b.HasOne("Point_of_Sale_System.Server.Models.Entities.OrdersAndPayments.Payment", "Payment")
+                        .WithMany()
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("Point_of_Sale_System.Server.Models.Entities.ServiceBased.MenuService", b =>

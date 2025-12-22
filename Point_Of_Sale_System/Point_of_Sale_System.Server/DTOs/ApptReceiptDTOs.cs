@@ -15,11 +15,9 @@ namespace Point_of_Sale_System.Server.DTOs
         public CurrencyEnum Currency { get; set; }
         public Guid EmployeeId { get; set; }
         public string EmployeeName { get; set; } = string.Empty;
-
-        public Guid PaymentId { get; set; }
-
         public ICollection<TaxReceiptDto> Taxes { get; set; } = new List<TaxReceiptDto>();
         public ICollection<DiscountReceiptDto> Discounts { get; set; } = new List<DiscountReceiptDto>();
+        public List<decimal>? Giftcards { get; set; }
     }
 
     public class AppointmentReceiptDto
@@ -31,7 +29,6 @@ namespace Point_of_Sale_System.Server.DTOs
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public Guid EmployeeId { get; set; }
-        public Guid PaymentId { get; set; }
         public CurrencyEnum Currency { get; set; }
         public required string PaymentStatus { get; set; }
         public required string ServiceName { get; set; }
@@ -39,6 +36,7 @@ namespace Point_of_Sale_System.Server.DTOs
         public required string EmployeeName { get; set; }
         public List<TaxReceiptDto> Taxes { get; set; } = new();
         public List<DiscountReceiptDto> Discounts { get; set; } = new();
+        public List<decimal>? Giftcards { get; set; }
     }
 
 

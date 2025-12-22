@@ -81,6 +81,16 @@ export default function AppointmentPayments() {
   }, [appointments]);
 
   /* ================= HELPERS ================= */
+  const deleteUsedGiftcards = async () => {
+    if (appliedGiftcards.length === 0) return;
+
+    await Promise.all(
+      appliedGiftcards.map(g =>
+        api.delete(`/Giftcard/${g.id}`)
+      )
+    );
+  };
+
   const buildDiscountReceipts = (service) => {
   const discountsApplied = [];
 
@@ -225,10 +235,13 @@ const formatTime = (date) =>
           numberType: t.numberType
         })),
 
-        discounts: discountReceipts
+        discounts: discountReceipts,
+        giftcards: appliedGiftcards.map(g => g.balance)
       });
 
       await api.delete(`/Appointments/${selected.id}/delete`);
+      
+      await deleteUsedGiftcards();
 
       setAppointments(prev =>
         prev.filter(a => a.id !== selected.id)
@@ -382,6 +395,16 @@ const formatTime = (date) =>
                 <div className="price-row" key={t.id}>
                   <span>+ {t.name} {t.amount} {t.numberType === "flat" ? "(flat)" : "%"}</span>
                   <span>{service.currency === "euro" ? "€" : "$"}{" "} +{t.appliedAmount}</span>
+                </div>
+              ))}
+
+              {appliedGiftcards.map((g, i) => (
+                <div className="price-row" key={g.id ?? i}>
+                  <span>- Giftcard</span>
+                  <span>
+                    {service.currency === "euro" ? "€" : "$"}{" "}
+                    -{g.balance.toFixed(2)}
+                  </span>
                 </div>
               ))}
 
