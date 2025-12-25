@@ -1,0 +1,10 @@
+1. DOWNLOAD THIS:
+https://learn.microsoft.com/en-us/azure-data-studio/download-azure-data-studio?tabs=win-install%2Cwin-user-install%2Credhat-install%2Cwindows-uninstall%2Credhat-uninstall
+2. Now write in the cmd: dotnet ef database update. Let it run
+3. Open the software.
+4. Press button saying "CREATE CONNECTION".
+5. Write in the SERVER: (localdb)\mssqllocaldb.
+6. Choose from the Database PointOfSaleDB.
+
+That's it!
+
